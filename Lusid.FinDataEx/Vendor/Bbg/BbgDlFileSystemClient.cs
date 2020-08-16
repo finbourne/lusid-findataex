@@ -21,7 +21,7 @@ namespace Lusid.FinDataEx.Vendor.Bbg
         public BbgFtpResponse Submit(BbgFtpRequest submitGetDataRequest)
         {
             string requestFileUrl = submitGetDataRequest.RequestFileUrl;
-            string responseFileUrl = requestFileUrl.Replace(".req", ".out");
+            string responseFileUrl = requestFileUrl.Replace(".req", ".out.txt");
             return new BbgFtpResponse(responseFileUrl);
         }
     }

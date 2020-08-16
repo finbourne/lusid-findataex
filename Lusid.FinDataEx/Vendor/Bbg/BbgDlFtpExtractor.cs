@@ -25,10 +25,10 @@ namespace Lusid.FinDataEx.Vendor.Bbg.Ftp
         protected override BbgFtpRequest ToVendorRequest(FdeRequest request)
         {
             return new BbgFtpRequest(
-                request.ConnectorConfig.url,
-                request.ConnectorConfig.url,
-                request.ConnectorConfig.url,
-                request.RequestBody.sourceData
+                request.ConnectorConfig.url.Value,
+                request.ConnectorConfig.user.Value,
+                request.ConnectorConfig.password.Value,
+                request.RequestBody.sourceData.Value
                 );
         }
 
@@ -46,6 +46,11 @@ namespace Lusid.FinDataEx.Vendor.Bbg.Ftp
             foreach (var entry in entries)
             {
                 processingTag = UpdateProcessingTag(processingTag, entry);
+                // all tag lines should be skipped
+                if (entry == processingTag)
+                {
+                    continue;
+                }
                 switch (processingTag)
                 {
                     // start tag of vendor response should be ignored as contains no required data
@@ -57,7 +62,7 @@ namespace Lusid.FinDataEx.Vendor.Bbg.Ftp
                         break;
                     // data tag contains the extracted data formatted as per vendor standards and the fields requested
                     case (RespTagStartOfData):
-                        ProcessDataEntry(entry);
+                        finData.Add(ProcessDataEntry(entry));
                         break;
                 }
             }
