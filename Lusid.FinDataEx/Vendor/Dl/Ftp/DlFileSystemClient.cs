@@ -1,12 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using Lusid.FinDataEx.Core;
+using Lusid.FinDataEx.Vendor.Bbg.Ftp;
 
-namespace Lusid.FinDataEx.Vendor.Bbg.Ftp
+namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
-    public class BbgDlFtpExtractor : FdeBaseExtractor<BbgFtpRequest, BbgFtpResponse>
+    /// <summary>
+    ///
+    /// A client that extracts a preexisting response for fin data from BBG.
+    ///
+    /// Not intended for production use.
+    /// 
+    /// </summary>
+    public class DlFileSystemClient : IVendorClient<DlFtpRequest, DlFtpResponse>
     {
-        
         public const string RespTagNone = "NONE";
         public const string RespTagStartOfFile = "START-OF-FILE"; 
         public const string RespTagStartOfFields = "START-OF-FIELDS"; 
@@ -17,22 +24,21 @@ namespace Lusid.FinDataEx.Vendor.Bbg.Ftp
         private const int RespIdColumns = 3;
         private const char RespDataDelimiter = '|';
 
-
-        public BbgDlFtpExtractor(IVendorClient<BbgFtpRequest, BbgFtpResponse> vendorClient) : base(vendorClient)
+        /// <summary>
+        ///  Extracts a preexisting response with the same name and locations as the URL except
+        /// with a .out extension.
+        /// </summary>
+        /// <param name="submitGetDataRequest"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public DlFtpResponse Submit(DlFtpRequest submitGetDataRequest)
         {
+            string requestFileUrl = submitGetDataRequest.RequestFileUrl;
+            string responseFileUrl = requestFileUrl.Replace(".req", ".out.txt");
+            return ToVendorResponse(responseFileUrl);
         }
 
-        protected override BbgFtpRequest ToVendorRequest(FdeRequest request)
-        {
-            return new BbgFtpRequest(
-                request.ConnectorConfig.url.Value,
-                request.ConnectorConfig.user.Value,
-                request.ConnectorConfig.password.Value,
-                request.RequestBody.sourceData.Value
-                );
-        }
-
-        protected override FdeResponse ToFdeResponse(BbgFtpResponse response)
+        private DlFtpResponse ToVendorResponse(string responseFileUrl)
         {
             // setup our response lists to populate and return
             List<string> finDataHeaders = new List<string>();
@@ -42,7 +48,7 @@ namespace Lusid.FinDataEx.Vendor.Bbg.Ftp
             
             // iterate over vendor responses ensuring we apply right logic for different stages of the file
             string processingTag = RespTagNone;
-            string[] entries = File.ReadAllLines(response.ResponseFileUrl);
+            string[] entries = File.ReadAllLines(responseFileUrl);
             foreach (var entry in entries)
             {
                 processingTag = UpdateProcessingTag(processingTag, entry);
@@ -67,7 +73,7 @@ namespace Lusid.FinDataEx.Vendor.Bbg.Ftp
                 }
             }
             
-            FdeResponse fdeResponse = new FdeResponse(finData);
+            DlFtpResponse fdeResponse = new DlFtpResponse(finData);
             return fdeResponse;
         }
 

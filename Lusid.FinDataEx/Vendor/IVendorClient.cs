@@ -3,7 +3,7 @@
 namespace Lusid.FinDataEx.Vendor
 {
     /// <summary>
-    ///  Connects to BBG DL and returns financial data synchronoulsy
+    ///  Client to submit requests for FinData to.
     ///
     ///  Impls to start FTP/SoapWebService/Mock
     /// </summary>

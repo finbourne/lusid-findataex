@@ -1,5 +1,6 @@
 ﻿using System;
 using Lusid.FinDataEx.Core;
+using Lusid.FinDataEx.Vendor;
 
 namespace Lusid.FinDataEx
 {
@@ -7,21 +8,23 @@ namespace Lusid.FinDataEx
     {
         private readonly FdeRequestBuilder _fdeRequestBuilder;
         private readonly VendorExtractorBuilder _vendorExtractorBuilder;
-        private readonly IFdeResponseProcessor _fdeResponseProcessor;
+        private readonly FdeResponseProcessorBuilder _fdeResponseProcessorBuilder;
 
-        public FinDataEx(FdeRequestBuilder fdeRequestBuilder, VendorExtractorBuilder vendorExtractorBuilder, IFdeResponseProcessor fdeResponseProcessor)
+        public FinDataEx(FdeRequestBuilder fdeRequestBuilder, VendorExtractorBuilder vendorExtractorBuilder, FdeResponseProcessorBuilder fdeResponseProcessorBuilder)
         {
             _fdeRequestBuilder = fdeRequestBuilder;
             _vendorExtractorBuilder = vendorExtractorBuilder;
-            _fdeResponseProcessor = fdeResponseProcessor;
+            _fdeResponseProcessorBuilder = fdeResponseProcessorBuilder;
         }
 
-        public void processJson(String fdeJsonRequest)
+        public void process(String fdeJsonRequest)
         {
-            FdeRequest fdeRequest =  _fdeRequestBuilder.LoadFromJson(fdeJsonRequest);
-            IFdeExtractor ifdExtractor = _vendorExtractorBuilder.createFDEExtractor(fdeRequest);
-            FdeResponse fdeResponse = ifdExtractor.Extract(fdeRequest);
-            _fdeResponseProcessor.ProcessResponse(fdeResponse);
+            FdeRequest fdeRequest =  _fdeRequestBuilder.LoadFromFile(fdeJsonRequest);
+            IFdeExtractor ifdExtractor = _vendorExtractorBuilder.CreateFdeExtractor(fdeRequest);
+            IVendorResponseProcessor vendorResponseProcessor = _fdeResponseProcessorBuilder.CreateFdeResponseProcessor(fdeRequest);
+            
+            IVendorResponse vendorResponse = ifdExtractor.Extract(fdeRequest);
+            vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
         }
         
     }

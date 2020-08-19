@@ -1,4 +1,4 @@
-﻿namespace Lusid.FinDataEx.Vendor.Bbg
+﻿namespace Lusid.FinDataEx.Vendor
 {
     /// <summary>
     ///  External request call to any BBG DL supported connectors (e.g. FTP, SOAP WebServices, etc...))

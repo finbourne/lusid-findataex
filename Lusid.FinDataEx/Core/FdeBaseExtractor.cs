@@ -1,5 +1,4 @@
 ﻿using Lusid.FinDataEx.Vendor;
-using Lusid.FinDataEx.Vendor.Bbg;
 
 namespace Lusid.FinDataEx.Core
 {
@@ -7,6 +6,7 @@ namespace Lusid.FinDataEx.Core
         where TReq : IVendorRequest
         where TResp : IVendorResponse 
     {
+
         private IVendorClient<TReq, TResp> VendorClient { get; }
 
         protected FdeBaseExtractor(IVendorClient<TReq, TResp> vendorClient)
@@ -14,17 +14,14 @@ namespace Lusid.FinDataEx.Core
             VendorClient = vendorClient;
         }
 
-        public FdeResponse Extract(FdeRequest request)
+        public IVendorResponse Extract(FdeRequest request)
         {
-            TReq wsSubmitGetDataRequest = ToVendorRequest(request);
-            TResp wsRetrieveGetDataResponse =  VendorClient.Submit(wsSubmitGetDataRequest);
-            FdeResponse fdeResponse = ToFdeResponse(wsRetrieveGetDataResponse);
-            return fdeResponse;
+            TReq vendorRequest = ToVendorRequest(request);
+            TResp vendorResponse =  VendorClient.Submit(vendorRequest);
+            return vendorResponse;
         }
 
         protected abstract TReq ToVendorRequest(FdeRequest request);
-
-        protected abstract FdeResponse ToFdeResponse(TResp response);
         
 
     }

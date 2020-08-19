@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
+﻿using Lusid.FinDataEx.Vendor;
 
 namespace Lusid.FinDataEx.Core
 {
     public interface IFdeExtractor
     { 
-        FdeResponse Extract(FdeRequest request);
+        IVendorResponse Extract(FdeRequest request);
     }
     
 }

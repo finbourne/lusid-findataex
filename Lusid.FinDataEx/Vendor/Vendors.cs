@@ -2,6 +2,6 @@
 {
     public static class Vendors
     {
-        public const string BBG = "BBG";
+        public const string DL = "DL";
     }
 }
