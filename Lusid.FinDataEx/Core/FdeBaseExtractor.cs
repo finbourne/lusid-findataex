@@ -21,7 +21,7 @@ namespace Lusid.FinDataEx.Core
             return vendorResponse;
         }
 
-        protected abstract TReq ToVendorRequest(FdeRequest request);
+        public abstract TReq ToVendorRequest(FdeRequest request);
         
 
     }

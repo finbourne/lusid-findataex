@@ -4,14 +4,14 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
     public class DlFtpResponse : IVendorResponse
     {
-        private readonly List<List<string>> _finData;
+        private readonly Dictionary<string,List<List<string>>> _finData;
 
-        public DlFtpResponse(List<List<string>> finData)
+        public DlFtpResponse(Dictionary<string,List<List<string>>> finData)
         {
             _finData = finData;
         }
 
-        public List<List<string>> GetFinData()
+        public Dictionary<string,List<List<string>>> GetFinData()
         {
             return _finData;
         }

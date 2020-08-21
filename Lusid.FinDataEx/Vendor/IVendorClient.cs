@@ -1,4 +1,4 @@
-﻿using Lusid.FinDataEx.Vendor.Bbg;
+﻿using Lusid.FinDataEx.Vendor.Dl;
 
 namespace Lusid.FinDataEx.Vendor
 {

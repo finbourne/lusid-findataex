@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using Lusid.FinDataEx.Core;
+﻿using Lusid.FinDataEx.Core;
 using static Lusid.FinDataEx.Util.FdeRequestUtils;
-using Lusid.FinDataEx.Vendor.Bbg.Ftp;
 
 namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
@@ -13,13 +10,14 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         {
         }
 
-        protected override DlFtpRequest ToVendorRequest(FdeRequest request)
+        public override DlFtpRequest ToVendorRequest(FdeRequest request)
         {
             return new DlFtpRequest(
                 GetConnectorConfigParameter(request.ConnectorConfig, ConUrl),
                 GetConnectorConfigParameter(request.ConnectorConfig, ConUser),
                 GetConnectorConfigParameter(request.ConnectorConfig, ConPass),
-                GetRequestBodyParameter(request.RequestBody, ReqSourceData)
+                GetRequestBodyParameter<string>(request.RequestBody, ReqSourceData),
+            GetRequestBodyParameter<DlRequestType>(request.RequestBody, ReqRequestType)
                 );
         }
 

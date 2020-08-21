@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using Lusid.FinDataEx.Vendor.Dl;
 
 namespace Lusid.FinDataEx.Util
 {
@@ -11,7 +13,8 @@ namespace Lusid.FinDataEx.Util
         public const string ConPass = "password";
         public const string ConType = "type";
         public const string ReqSourceData = "sourceData";
-        
+        public const string ReqRequestType = "requestType";
+
         public static string GetConnectorConfigParameter(Dictionary<string, object> connectorConfig, string parameterType)
         {
             if (connectorConfig.TryGetValue(parameterType, out object configParameter))
@@ -21,11 +24,15 @@ namespace Lusid.FinDataEx.Util
             throw new InvalidDataException($"Dl request connector configuration has no \"{parameterType}\" defined");
         }
         
-        public static string GetRequestBodyParameter(Dictionary<string, object> requestBody, string parameterType)
+        public static T GetRequestBodyParameter<T>(Dictionary<string, object> requestBody, string parameterType)
         {
             if (requestBody.TryGetValue(parameterType, out object requestBodyParameter))
             {
-                return (string) requestBodyParameter;
+                if (parameterType == ReqRequestType)
+                {
+                    return (T) Enum.Parse(typeof(DlRequestType), (string) requestBodyParameter);
+                }
+                return (T) requestBodyParameter;
             }
             throw new InvalidDataException($"Dl request request body has no \"{parameterType}\" defined");
         }

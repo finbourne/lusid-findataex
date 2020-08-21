@@ -8,9 +8,7 @@ namespace Lusid.FinDataEx.Vendor
     public interface IVendorResponse
     {
 
-        List<List<string>> GetFinData();
+        Dictionary<string,List<List<string>>> GetFinData();
         
-        //TODO look at adding output formats e.g. DataFrame
-
     }
 }

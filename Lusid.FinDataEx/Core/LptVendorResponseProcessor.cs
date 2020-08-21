@@ -16,12 +16,17 @@ namespace Lusid.FinDataEx.Core
 
         public void ProcessResponse(FdeRequest fdeRequest, IVendorResponse vendorResponse)
         {
-            List<List<string>> finData = vendorResponse.GetFinData();
-            List<string> toWrite = finData.ConvertAll(
-                e => string.Join("|", e));
-            File.WriteAllLines(
-                _outputDir + Path.DirectorySeparatorChar + fdeRequest.Uid + ".csv",
-                toWrite);
+            Dictionary<string, List<List<string>>> finData = vendorResponse.GetFinData();
+
+            foreach (var finDataEntrySet in finData)
+            {
+                List<string> toWrite = finDataEntrySet.Value.ConvertAll(
+                    e => string.Join("|", e));
+                File.WriteAllLines(
+                    _outputDir + Path.DirectorySeparatorChar + fdeRequest.Uid + "_" + finDataEntrySet.Key + "_" + ".csv",
+                    toWrite);
+            }
+            
         }
     }
 }

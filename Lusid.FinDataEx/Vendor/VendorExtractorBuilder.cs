@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using Lusid.FinDataEx.Core;
-using Lusid.FinDataEx.Vendor.Bbg.Ftp;
 using Lusid.FinDataEx.Vendor.Dl.Ftp;
 using static Lusid.FinDataEx.Util.FdeRequestUtils;
 
@@ -30,7 +29,7 @@ namespace Lusid.FinDataEx.Vendor
             //if (HasProperty(config, "type") && config.type == "ftp")
             if (connectorType == "ftp")
             {
-                IVendorClient<DlFtpRequest, DlFtpResponse> bbgClient = new DlFileSystemClient();
+                IVendorClient<DlFtpRequest, DlFtpResponse> bbgClient = new DlFileSystemClient(new DlFtpResponseBuilder());
                 DlFtpExtractor dlFtpExtractor = new DlFtpExtractor(bbgClient);
                 Console.WriteLine("Using Bbg ftp file based extractor");
                 return dlFtpExtractor;
