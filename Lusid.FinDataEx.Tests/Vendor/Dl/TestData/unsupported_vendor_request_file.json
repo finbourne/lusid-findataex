@@ -1,0 +1,22 @@
+﻿{
+  "id" : "VendorABC_123456",
+  "callerId" : "client_scheduler_uat_01",
+  "vendor" : "VendorABC",
+  "connectorConfig" : {
+    "type" : "webservice_json",
+    "url" : "http://vendorabc.somedomain.net",
+    "user" : "user_1",
+    "password" : "pass_1"
+  },
+  "requestBody" : {
+    "source" : "json",
+    "sourceData" : {
+      "reqCode" :"SomeJsonRequest"
+    }
+  },
+  "outputConfig" : {
+    "format" : "lusidtools",
+    "url" : "./",
+    "lusidToolsConfig" : "./LusidToolsConfig/lusidtools_instructions.json"
+  }
+}

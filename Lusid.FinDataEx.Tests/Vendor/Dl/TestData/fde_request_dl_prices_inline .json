@@ -1,0 +1,65 @@
+﻿{
+  "uid" : "DL06082020070039",
+  "callerId" : "client_scheduler_uat_01",
+  "vendor" : "DL",
+  "output" : "lusidtools",
+  "connectorConfig" : {
+    "type" : "ftp",
+    "url" : "sftp://dl_ftp.com:22",
+    "user" : "user_1",
+    "password" : "pass_1"
+  },
+  "requestBody" : {
+    "source" : "inline",
+    "sourceData" : {
+      "START-OF-FILE" : [
+        "CLOSINGVALUES=yes",
+        "COLUMNHEADER=no",
+        "DELIMITER=|",
+        "DERIVED=no",
+        "DIFFFLAG=no",
+        "HISTORICAL=no",
+        "OUTPUTFORMAT=variable",
+        "SECDESLENGTH=32",
+        "SECMASTER=yes",
+        "ESTIMATES=no",
+        "CREDITRISK=no",
+        "FUNDAMENTALS=no",
+        "SPECIALCHAR=decimal",
+        "COMPRESS=no",
+        "DATEFORMAT=mmddyyyy",
+        "FILETYPE=pc",
+        "FIRMNAME=dl787176",
+        "HEADER=yes",
+        "PROGRAMFLAG=oneshot",
+        "PROGRAMNAME=getdata",
+        "REPORT=no"
+      ],
+      "START-OF-FIELDS" : [
+        "PX_ASK",
+        "PX_LAST",
+        "NoMapping"
+      ],
+      "START-OF-DATA" : [
+        "HFRXCOM Index|Ticker|",
+        "TRLIB1M Equity|Ticker|",
+        "TRLIBON Equity|Ticker|",
+        "NGOMOB 11/08/18 Govt|Ticker|",
+        "RABOBK 0 02/28/35 Corp|Ticker|",
+        "USGG2YR Index|Ticker|",
+        "USGG7YR Index|Ticker|",
+        "CDX EM CDSI GEN 5Y PRC Corp|Ticker|",
+        "DAX Index|Ticker|",
+        "HFRXGL Index|Ticker|",
+        "DJITR Index|Ticker|",
+        "XNDX Index|Ticker|",
+        "USGG10YR Index|Ticker|"
+      ]
+    }
+  },
+  "outputConfig" : {
+    "format" : "lusidtools",
+    "url" : "./",
+    "lusidToolsConfig" : "./LusidToolsConfig/dl_all_lusidtools_instructions.json"
+  }
+}

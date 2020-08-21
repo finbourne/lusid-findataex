@@ -1,0 +1,16 @@
+﻿{
+  "Quotes" : {
+    "Ask" : {
+      "required": {
+        "quote_id.quote_series_id.instrument_id_type": "$ClientInternal",
+        "quote_id.effective_at": "FDE_timestamp",
+        "quote_id.quote_series_id.provider": "$DataProvider",
+        "quote_id.quote_series_id.field": "$ask",
+        "quote_id.quote_series_id.quote_type": "$Price",
+        "quote_id.quote_series_id.instrument_id": "REQ_TICKER",
+        "metric_value.unit": "$USD",
+        "metric_value.value": "PX_ASK"
+      }
+    }
+  }
+}

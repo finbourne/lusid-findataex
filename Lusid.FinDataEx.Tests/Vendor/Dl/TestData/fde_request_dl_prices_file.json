@@ -1,0 +1,22 @@
+﻿{
+  "uid" : "DL12345",
+  "callerId" : "client_scheduler_uat_01",
+  "vendor" : "DL",
+  "output" : "lusidtools",
+  "connectorConfig" : {
+    "type" : "ftp",
+    "url" : "sftp://dl_ftp.com:22",
+    "user" : "user_1",
+    "password" : "pass_1"
+  },
+  "requestBody" : {
+    "source" : "file",
+    "sourceData" : "Vendor/Dl/TestData/DlRequests/DL12345.req",
+    "requestType" : "Prices" 
+  },
+  "outputConfig" : {
+    "format" : "lusidtools",
+    "url" : "./",
+    "lusidToolsConfig" : "./LusidToolsConfig/dl_all_lusidtools_instructions.json"
+  }
+}
