@@ -40,7 +40,7 @@ namespace Lusid.FinDataEx.Tests.Vendor
             string fde_valid_request = "Vendor\\Dl\\TestData\\fde_request_dl_prices_file.json";
 
             //execute
-            _finDataEx.process(fde_valid_request);
+            _finDataEx.Process(fde_valid_request);
 
             //verify
             string outputFile = _tempOutputDir + Path.DirectorySeparatorChar + "DL12345_Prices.csv";
@@ -80,7 +80,7 @@ namespace Lusid.FinDataEx.Tests.Vendor
             //execute
             try
             {
-                _finDataEx.process(unsupported_vendor_fde_request);
+                _finDataEx.Process(unsupported_vendor_fde_request);
                 Assert.Fail("Should have thrown an invalid data exception due to unknown vendor");
             }
             catch (InvalidDataException e) {}

@@ -6,9 +6,17 @@ using Lusid.FinDataEx.Util;
 
 namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
+    /// <summary>
+    /// Loads in and parses DL files output from DL ftp server after a request
+    /// has been processed.
+    ///
+    /// Currently supports price, instrument reference, and corporate action data retrieval.
+    /// 
+    /// </summary>
     public class DlFtpResponseBuilder
     {
 
+        /* Tags required to correctly identify data for parsing from BBG files*/
         private const string RespTagNone = "NONE";
         private const string RespTagStartOfFile = "START-OF-FILE";
         private const string RespTagStartOfFields = "START-OF-FIELDS"; 

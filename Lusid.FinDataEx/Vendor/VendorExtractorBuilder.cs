@@ -7,9 +7,20 @@ using static Lusid.FinDataEx.Util.FdeRequestUtils;
 
 namespace Lusid.FinDataEx.Vendor
 {
+    /// <summary>
+    /// Builder for all currently supported vendors for financial data extraction.
+    /// 
+    /// </summary>
     public class VendorExtractorBuilder
     {
         
+        /// <summary>
+        /// Create an extractor based on the parameters supplied by an FdeRequest
+        /// 
+        /// </summary>
+        /// <param name="fdeRequest"> request for vendor data</param>
+        /// <returns> an extractor for a specific vendor and connection flow (e.g. DL FTP)</returns>
+        /// <exception cref="InvalidDataException"></exception>
         public IFdeExtractor CreateFdeExtractor(FdeRequest fdeRequest)
         {
             switch (fdeRequest.Vendor)

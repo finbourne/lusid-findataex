@@ -4,6 +4,9 @@ using Lusid.FinDataEx.Vendor;
 
 namespace Lusid.FinDataEx
 {
+    /// <summary>
+    ///  Wrapper class for the FinDataEx workflow
+    /// </summary>
     public class FinDataEx
     {
         private readonly FdeRequestBuilder _fdeRequestBuilder;
@@ -17,7 +20,14 @@ namespace Lusid.FinDataEx
             _fdeResponseProcessorBuilder = fdeResponseProcessorBuilder;
         }
 
-        public void process(String fdeJsonRequest)
+        /// <summary>
+        /// Processes an FdeRequest provided by the caller. Loads the provided request and retrieve the financial data
+        /// using the vendor and connector flow (e.g. DL via FTP) included in the request. The financial data is then processed
+        /// based on the behaviour defined in the request (e.g. lusidtools which outputs to .csv)
+        /// 
+        /// </summary>
+        /// <param name="fdeJsonRequest"></param>
+        public void Process(String fdeJsonRequest)
         {
             FdeRequest fdeRequest =  _fdeRequestBuilder.LoadFromFile(fdeJsonRequest);
             IFdeExtractor ifdExtractor = _vendorExtractorBuilder.CreateFdeExtractor(fdeRequest);

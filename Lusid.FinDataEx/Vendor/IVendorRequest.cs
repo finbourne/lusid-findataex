@@ -1,7 +1,7 @@
 ﻿namespace Lusid.FinDataEx.Vendor
 {
     /// <summary>
-    ///  External request call to any DL supported connectors (e.g. FTP, SOAP WebServices, etc...))
+    ///  Request call for financial data supported by any external vendor
     /// </summary>
     public interface IVendorRequest
     {

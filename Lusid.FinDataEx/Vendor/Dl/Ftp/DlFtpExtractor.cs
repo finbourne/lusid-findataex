@@ -3,6 +3,10 @@ using static Lusid.FinDataEx.Util.FdeRequestUtils;
 
 namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
+    /// <summary>
+    /// Extractor implementation for the DL vendor.
+    /// 
+    /// </summary>
     public class DlFtpExtractor : FdeBaseExtractor<DlFtpRequest, DlFtpResponse>
     {
 
@@ -10,6 +14,11 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         {
         }
 
+        /// <summary>
+        ///  Constructs a request to extract financial data from DL via the FTP flow.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>a request for DL</returns>
         public override DlFtpRequest ToVendorRequest(FdeRequest request)
         {
             return new DlFtpRequest(

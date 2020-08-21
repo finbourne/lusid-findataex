@@ -4,7 +4,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
     /// <summary>
     ///
-    /// A client that extracts a preexisting response for fin data from Dl.
+    /// Simple DL client that loads a pre-existing DL response from file.
     ///
     /// Not intended for production use.
     /// 
@@ -20,12 +20,11 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         }
 
         /// <summary>
-        ///  Extracts a preexisting response with the same name and locations as the URL except
+        /// Extracts a preexisting response with the same name and locations as the URL except
         /// with a .out extension.
         /// </summary>
         /// <param name="submitGetDataRequest"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public DlFtpResponse Submit(DlFtpRequest submitGetDataRequest)
         {
             string requestFileUrl = submitGetDataRequest.RequestFileUrl;
