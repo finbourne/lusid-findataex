@@ -228,12 +228,12 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         private List<string> ProcessPriceDataEntry(string[] entry, List<string> priceDataHeaders)
         {
             // initiate a new price data entry starting with the ticker
-            var priceDataEntry = new List<string>{entry[RespTickerIndex]};
+            var priceDataEntry = new List<string>{entry[RespTickerIndex].Trim()};
             
             // construct the output price data ignoring DL id columns
             for (var i = RespNoOfIdColumns; i < entry.Length; i++)
             {
-                priceDataEntry.Add(entry[i]);
+                priceDataEntry.Add(entry[i].Trim());
             }
             
             if (priceDataEntry.Count != priceDataHeaders.Count)
@@ -260,10 +260,10 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
             }
 
             // initiate a new corp action data entry starting with the ticker
-            List<string> corpActionDataEntry = new List<string>{entry[RespTickerIndex]};
+            List<string> corpActionDataEntry = new List<string>{entry[RespTickerIndex].Trim()};
             for (var i = RespNoIdColumnsCorpAction; i < entry.Length; i++)
             {
-                corpActionDataEntry.Add(entry[i]);
+                corpActionDataEntry.Add(entry[i].Trim());
             }
 
             return corpActionDataEntry;

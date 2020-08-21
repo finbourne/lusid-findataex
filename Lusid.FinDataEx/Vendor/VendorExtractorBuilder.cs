@@ -35,21 +35,19 @@ namespace Lusid.FinDataEx.Vendor
 
         private IFdeExtractor CreateDlFdeExtractor(Dictionary<string,object> connectorConfig)
         {
-
             string connectorType = GetConnectorConfigParameter(connectorConfig, ConType);
-            //if (HasProperty(config, "type") && config.type == "ftp")
-            if (connectorType == "ftp")
+            switch (connectorType)
             {
-                IVendorClient<DlFtpRequest, DlFtpResponse> dlClient = new DlFileSystemClient(new DlFtpResponseBuilder());
-                DlFtpExtractor dlFtpExtractor = new DlFtpExtractor(dlClient);
-                Console.WriteLine("Using Dl ftp file based extractor");
-                return dlFtpExtractor;
+                case "ftp":
+                    IVendorClient<DlFtpRequest, DlFtpResponse> dlClient =
+                        new DlFileSystemClient(new DlFtpResponseBuilder());
+                    DlFtpExtractor dlFtpExtractor = new DlFtpExtractor(dlClient);
+                    Console.WriteLine("Using Dl ftp file based extractor");
+                    return dlFtpExtractor;
+                default:
+                    throw new InvalidDataException(
+                        $"No connector could be configured for connector type {connectorType}");
             }
-            else
-            {
-                throw new InvalidDataException($"No connector could be configured for connector type {connectorType}");
-            }
-            
         }
     }
 }

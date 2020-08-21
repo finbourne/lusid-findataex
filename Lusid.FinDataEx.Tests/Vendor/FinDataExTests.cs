@@ -58,15 +58,15 @@ namespace Lusid.FinDataEx.Tests.Vendor
             
             // ensure correct records
             Assert.AreEqual(
-                "ABC Index                       |N.A.|1234.220000|FLD UNKNOWN", 
+                "ABC Index|N.A.|1234.220000|FLD UNKNOWN", 
                 finData[1]);
             
             Assert.AreEqual(
-                "BRIGHTI Equity                  |6.174400|6.174400|FLD UNKNOWN", 
+                "BRIGHTI Equity|6.174400|6.174400|FLD UNKNOWN", 
                 finData[2]);
             
             Assert.AreEqual(
-                "CNTRY_1  11/08/18 Govt          |N.A.| |FLD UNKNOWN", 
+                "CNTRY_1  11/08/18 Govt|N.A.||FLD UNKNOWN", 
                 finData[4]);
 
         }
