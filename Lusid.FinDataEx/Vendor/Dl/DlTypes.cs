@@ -6,7 +6,7 @@
         CorpActions
     }
 
-    public enum DlCorpActions
+    public enum DlCorpActionType
     {
         StockSplt,
         DvdStock,

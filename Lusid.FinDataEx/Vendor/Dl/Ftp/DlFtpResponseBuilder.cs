@@ -3,140 +3,162 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lusid.FinDataEx.Util;
-using static Lusid.FinDataEx.Util.DictionaryUtils;
 
 namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
     public class DlFtpResponseBuilder
     {
 
-        public const string RespTagNone = "NONE";
-        public const string RespTagStartOfFile = "START-OF-FILE"; 
-        public const string RespTagStartOfFields = "START-OF-FIELDS"; 
-        public const string RespTagStartOfData = "START-OF-DATA";
-        public const string RespTagEndOf = "END-OF-";
-        public const string RespParamActions = "ACTIONS=";
+        private const string RespTagNone = "NONE";
+        private const string RespTagStartOfFile = "START-OF-FILE";
+        private const string RespTagStartOfFields = "START-OF-FIELDS"; 
+        private const string RespTagStartOfData = "START-OF-DATA";
+        private const string RespTagEndOf = "END-OF-";
 
-        private const int RespIndexTicker = 0;
-        private const int RespIdColumns = 3;
-        private const int RespIdColumnsCorpAction = 4;
-        private const int RespCorpActionColumn = 5;
+        private const int RespTickerIndex = 0;
+        private const int RespCorpActionColumnIndex = 4;
+        private const int RespNoOfIdColumns = 3;
+        private const int RespNoIdColumnsCorpAction = 4;
         private const char RespDataDelimiter = '|';
 
+        /// <summary>
+        /// Load a DL response file returned from DL ftp server and parse contents into
+        /// a DlRequestType.
+        /// 
+        /// </summary>
+        /// <param name="dlRequestType">Type of DL request being processed (e.g. Corporate Action, Price Information, etc...)</param>
+        /// <param name="dlResponseFileUrl">Location of decrypted DL response file returned from DL ftp server</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"> on unrecognised DL request type</exception>
         public DlFtpResponse CreateFromFile(DlRequestType dlRequestType, string dlResponseFileUrl)
         {
             string[] dlRequestFileEntries = LoadDlRequestEntriesFromFile(dlResponseFileUrl);
             switch (dlRequestType)
             {
                 case DlRequestType.Prices:
-                    return ToVendorResponseFromPrices(dlRequestFileEntries);
+                    return CreatePricesResponse(dlRequestFileEntries);
                 case DlRequestType.CorpActions:
-                    return ToVendorResponseFromCorpActions(dlRequestFileEntries);
+                    return CreateCorpActionsResponse(dlRequestFileEntries);
                 default:
                     throw new ArgumentException($"{dlRequestType} is not a currently supported DL request type.");
             }
         }
         
-        private string[] LoadDlRequestEntriesFromFile(string responseFileUrl)
+        /// <summary>
+        ///  Process and validate the contents of a DL response file containing price information. Expects a strict structure
+        ///  for DL price responses to follow. 
+        /// 
+        /// </summary>
+        /// <param name="dlResponseFileEntries"> contents of dl response from dl server</param>
+        /// <returns>a valid vendor response</returns>
+        internal DlFtpResponse CreatePricesResponse(string[] dlResponseFileEntries)
         {
-            return File.ReadAllLines(responseFileUrl);
-        }
-        
-        internal DlFtpResponse ToVendorResponseFromPrices(string[] dlResponseFileEntries)
-        {
-            // setup our response lists to populate and return
-            List<string> finDataHeaders = new List<string>();
-            finDataHeaders.Add("Ticker");
-            List<List<string>> finData = new List<List<string>>();
-            finData.Add(finDataHeaders);
+            // Setup headers and price data containers to populate from DL response
+            List<string> priceDataHeaders = new List<string>{"Ticker"};
+            List<List<string>> priceData = new List<List<string>> {priceDataHeaders};
             
-            // flags to ensure response sections have been processed in correct order
+            // flags to validate price files are processed in the expected order.
             bool processedStartOfFile = false;
             bool processedStartOfFields = false;
             bool processedStartOfData= false;
 
-            // iterate over vendor responses ensuring we apply right logic for different stages of the file
-            string processingTag = RespTagNone;
-            foreach (var entry in dlResponseFileEntries)
+            // Process the price data response in expected order -> {START-OF-FILE, START-OF-FIELDS, START-OF-DATA}
+            string currentProcessingTag = RespTagNone;
+            foreach (var dlResponseEntry in dlResponseFileEntries)
             {
-                processingTag = UpdateProcessingTag(processingTag, entry);
-                // all tag lines should be skipped
-                if (entry == processingTag)
+                currentProcessingTag = UpdateProcessingTag(currentProcessingTag, dlResponseEntry);
+                
+                // processing tag entries should be ignored
+                if (dlResponseEntry == currentProcessingTag)
                 {
                     continue;
                 }
-                switch (processingTag)
+                
+                // otherwise process the entry
+                switch (currentProcessingTag)
                 {
+                    // price responses contain no required data within the Start tags.
                     case (RespTagStartOfFile):
                         processedStartOfFile = true;
                         break;
-                    // field tag data contains the headers of our extracted data
+                    // price responses contain header information under the Field tags.
                     case (RespTagStartOfFields):
-                        ValidateTagOrder(processedStartOfFile, RespTagStartOfFile, RespTagStartOfFields);
+                        CheckTagInCorrectOrder(processedStartOfFile, RespTagStartOfFile, RespTagStartOfFields);
                         processedStartOfFields = true;
-                        finDataHeaders.Add(entry);
+                        priceDataHeaders.Add(dlResponseEntry);
                         break;
-                    // data tag contains the extracted data formatted as per vendor standards and the fields requested
+                    // price responses contain price data under the Data tags.
                     case (RespTagStartOfData):
+                        CheckTagInCorrectOrder(processedStartOfFields, RespTagStartOfFields, RespTagStartOfData);
                         processedStartOfData = true;
-                        ValidateTagOrder(processedStartOfFields, RespTagStartOfFields, RespTagStartOfData);
-                        string[] entryCols = SplitDlEntry(entry);
-                        finData.Add(ProcessPriceDataEntry(entryCols, finDataHeaders));
+                        string[] splitDlEntry = SplitDlEntry(dlResponseEntry);
+                        priceData.Add(ProcessPriceDataEntry(splitDlEntry, priceDataHeaders));
                         break;
-                    
                 }
             }
             
-            ValidateTagOrder(processedStartOfData,  RespTagStartOfData, RespTagEndOf);
+            // price response should have processed a Data tag otherwise the response is not supported.
+            CheckTagInCorrectOrder(processedStartOfData,  RespTagStartOfData, RespTagEndOf);
             
+            // create response
             Dictionary<string, List<List<string>>> pricesDataMap = new Dictionary<string, List<List<string>>>
             {
-                {DlRequestType.Prices.ToString(), finData}
+                {DlRequestType.Prices.ToString(), priceData}
             };
             return new DlFtpResponse(pricesDataMap);
         }
         
-        
-        internal DlFtpResponse ToVendorResponseFromCorpActions(string[] dlResponseFileEntries)
+        /// <summary>
+        ///  Process and validate the contents of a DL response file containing corporate action information. Expects a strict structure
+        ///  for DL corporate action responses to follow. 
+        ///
+        ///  Note while this method has similarities to CreatePricesResponse there are enough differences to warrant keeping them apart. Especially
+        ///  given the fact it's likely the Corporate Actions use case will become more complex going forward.
+        /// 
+        /// </summary>
+        /// <param name="dlResponseFileEntries"> contents of dl response from dl server</param>
+        /// <returns>a valid vendor response</returns>
+        internal DlFtpResponse CreateCorpActionsResponse(string[] dlResponseFileEntries)
         {
+            // Setup corp action data containers to populate from DL response.
+            // Corp action data will be split by corp action type as their corresponding output structures will differ.
             Dictionary<String,List<List<string>>> corpActionDataMap = new Dictionary<string, List<List<string>>>();
             
-            // setup our response lists to populate and return
-            List<List<string>> finData = new List<List<string>>();
-
-            // flags to ensure response sections have been processed in correct order
+            // flags to validate price files are processed in the expected order.
             bool processedStartOfFile = false;
             bool processedStartOfData= false;
 
-            // iterate over vendor responses ensuring we apply right logic for different stages of the file
-            string processingTag = RespTagNone;
-            foreach (var entry in dlResponseFileEntries)
+            // Process the price data response in expected order -> {START-OF-FILE, START-OF-DATA}
+            // Note : Corp action responses do not contain START-OF-FIELDS information.
+            string currentProcessingTag = RespTagNone;
+            foreach (var dlResponseEntry in dlResponseFileEntries)
             {
-                processingTag = UpdateProcessingTag(processingTag, entry);
-                // all tag lines should be skipped
-                if (entry == processingTag)
+                currentProcessingTag = UpdateProcessingTag(currentProcessingTag, dlResponseEntry);
+                // processing tag entries should be ignored
+                if (dlResponseEntry == currentProcessingTag)
                 {
                     continue;
                 }
-                switch (processingTag)
+                switch (currentProcessingTag)
                 {
+                    // corp actions responses contain no required data within the Start tags.
                     case (RespTagStartOfFile):
                         processedStartOfFile = true;
                         break;
                     
-                    // field tag data contains the headers of our extracted data
+                    // corp actions responses do not support field tags
                     case (RespTagStartOfFields):
                         throw new InvalidDataException("Invalid vendor DL response. Corporate actions response should not include" +
                                                        " request DL fields.");
                     
-                    // data tag contains the extracted data formatted as per vendor standards and the fields requested
+                    // corp action responses contain price data under the Data tags.
                     case (RespTagStartOfData):
-                        ValidateTagOrder(processedStartOfFile, RespTagStartOfFile, RespTagStartOfData);
+                        CheckTagInCorrectOrder(processedStartOfFile, RespTagStartOfFile, RespTagStartOfData);
                         processedStartOfData = true;
-                        string[] entryCols = SplitDlEntry(entry);
+                        string[] entryCols = SplitDlEntry(dlResponseEntry);
                         if (HasCorporateActions(entryCols))
                         {
-                            string corpActionType = entryCols[RespCorpActionColumn];
+                            string corpActionType = entryCols[RespCorpActionColumnIndex];
                             List<List<string>> corpActionData = corpActionDataMap.GetOrCreateAndPut(corpActionType);
                             List<string> corpActionEntry = ProcessCorpActionDataEntry(entryCols);
                             corpActionData.Add(corpActionEntry);
@@ -144,18 +166,29 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
                         break;
                 }
             }
-            // ensure processed data
-            ValidateTagOrder(processedStartOfData,  RespTagStartOfData, RespTagEndOf);
             
-            // populate headers for each corporate action type
+            // Corp action response should have processed a Data tag otherwise the response is not supported.
+            CheckTagInCorrectOrder(processedStartOfData,  RespTagStartOfData, RespTagEndOf);
+            
+            // As no Field tags are included in corp action DL responses manually populate headers for each corporate action type
             PopulateCorporateActionsHeaders(corpActionDataMap);
 
             return new DlFtpResponse(corpActionDataMap);
         }
 
-        internal string UpdateProcessingTag(string processingTag, string entry)
+        /// <summary>
+        /// Check if a processing stage has complete and parsing has  arrived at a new stage (e.g. from START-OF-FIELDS to
+        /// START-OF-DATA) otherwise continue in current processing stage.
+        /// 
+        /// Processing tags inform the current stage of DL request parsing and the parsing logic.   
+        /// 
+        /// </summary>
+        /// <param name="currentProcessingTag"> current stage of parsing of the DL request</param>
+        /// <param name="entry"> current line being parsed from the DL request</param>
+        /// <returns>the latest processing tag</returns>
+        private string UpdateProcessingTag(string currentProcessingTag, string entry)
         {
-            // if start of a new set of tags update to relevant tag and return
+            // if arrived at a processing tag then return to update our current processing tag
             switch (entry)
             {
                 case (RespTagStartOfFile):
@@ -164,48 +197,63 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
                     return entry;
             }
             
-            // if reached end of a set of tags let's reset to the NONE state
+            // if reached a termination condition for a processing tag let's reset to the NONE state
+            // until a the next processing tag
             if (entry.Trim() == "" || entry.StartsWith(RespTagEndOf))
             {
                 return RespTagNone;
             }
             
-            // otherwise remain unchanged in current tag and process entry
-            return processingTag;
+            // otherwise the entry is not a processing tag and our current processing tag remains unchanged
+            return currentProcessingTag;
         }
         
-        private List<string> ProcessPriceDataEntry(string[] entry, List<string> finDataHeaders)
+        /// <summary>
+        ///
+        /// Parse a DL price data response entry into an fde price entry 
+        /// 
+        /// </summary>
+        /// <param name="entry"> current pricing line being parsed from the DL request</param>
+        /// <param name="priceDataHeaders"></param>
+        /// <returns> pricing data</returns>
+        /// <exception cref="InvalidDataException"> if pricing data entry does not match the expected headers</exception>
+        private List<string> ProcessPriceDataEntry(string[] entry, List<string> priceDataHeaders)
         {
-            List<string> finDataEntry = new List<string>();
-            // Add ticker column
-            finDataEntry.Add(entry[RespIndexTicker]);
+            // initiate a new price data entry starting with the ticker
+            var priceDataEntry = new List<string>{entry[RespTickerIndex]};
             
-            for (int i = RespIdColumns; i < entry.Length; i++)
+            // construct the output price data ignoring DL id columns
+            for (var i = RespNoOfIdColumns; i < entry.Length; i++)
             {
-                finDataEntry.Add(entry[i]);
+                priceDataEntry.Add(entry[i]);
             }
             
-            if (finDataEntry.Count != finDataHeaders.Count)
+            if (priceDataEntry.Count != priceDataHeaders.Count)
             {
-                throw new InvalidDataException($"Invalid vendor response returned. Expected {finDataHeaders.Count} columns but only received {finDataEntry.Count} data columns.");
+                throw new InvalidDataException($"Invalid vendor response returned. Expected {priceDataHeaders.Count} columns but only received {priceDataEntry.Count} data columns.");
             }
 
-            return finDataEntry;
+            return priceDataEntry;
         }
         
+        /// <summary>
+        ///
+        /// Parse corporate action data response entry into an fde price entry 
+        /// 
+        /// </summary>
+        /// <param name="entry"> current corporate action line being parsed from the DL request</param>
+        /// <returns> corporate action data</returns>
+        /// <exception cref="InvalidDataException"> if corporate data entry does not contain any corporate action data</exception>
         private List<string> ProcessCorpActionDataEntry(string[] entry)
         {
-            List<string> corpActionDataEntry = new List<string>();
-            // columns in each entry = ticker (1) + meta cols (2) + data_columns
-            // RespIdCols and Headers both include ticker column hence the -1
-            if (entry.Length < RespIdColumnsCorpAction)
+            if (entry.Length < RespNoIdColumnsCorpAction)
             {
-                throw new InvalidDataException($"Invalid vendor response returned. Expected at least {RespIdColumns} columns but only received {entry.Length}");
+                throw new InvalidDataException($"Invalid vendor response returned. Expected at least {RespNoOfIdColumns} columns but only received {entry.Length}");
             }
-            // add ticker
-            corpActionDataEntry.Add(entry[RespIndexTicker]);
-            
-            for (int i = RespIdColumnsCorpAction; i < entry.Length; i++)
+
+            // initiate a new corp action data entry starting with the ticker
+            List<string> corpActionDataEntry = new List<string>{entry[RespTickerIndex]};
+            for (var i = RespNoIdColumnsCorpAction; i < entry.Length; i++)
             {
                 corpActionDataEntry.Add(entry[i]);
             }
@@ -213,18 +261,17 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
             return corpActionDataEntry;
         }
 
-        private string[] SplitDlEntry(string entry)
-        {
-            // note dl responses have a trailing delimiter hence the need to remove last char.
-            return entry.Remove(entry.Length-1).Split(RespDataDelimiter);
-        }
-        
-        private bool HasCorporateActions(string[] entry)
-        {
-            return entry.Length >= RespIdColumnsCorpAction;
-        }
-
-        private void ValidateTagOrder(bool preReqTag, string preReqName, string tag)
+        /// <summary>
+        /// Ensure the processing of the DL request is running in the correct order. Incorrect order suggests either
+        /// error in DL response or an unexpected structure that needs to be addressed.
+        /// 
+        /// </summary>
+        /// <param name="preReqTag"> has the prerequisite tag been parsed</param>
+        /// <param name="preReqName">the name of processing tag expecting to have been parsed<</param>
+        /// <param name="tag">the current processing tag that has started to be parsed</param>
+        /// <exception cref="InvalidDataException">if processing tag is being parsed before a previous processing
+        ///  tag is expected to have been parsed.</exception>
+        private void CheckTagInCorrectOrder(bool preReqTag, string preReqName, string tag)
         {
             if (!preReqTag)
             {
@@ -235,32 +282,45 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 
         /// <summary>
         /// Populate the corporate action headers. Currently these are automatically generated until more details are available
-        /// from DL docs on specifics of the headers for each doc.
+        /// from DL docs on specifics of the headers for each type.
         /// 
         /// </summary>
-        /// <param name="corpActionsDataMap"></param>
+        /// <param name="corpActionsDataMap"> corporate action data that has been parsed</param>
         /// <returns></returns>
         private void PopulateCorporateActionsHeaders(Dictionary<string,List<List<string>>> corpActionsDataMap)
         {
-            foreach (KeyValuePair<string,List<List<string>>> corpActionsData in corpActionsDataMap)
+            foreach (var corpActionsData in corpActionsDataMap)
             {
-                string corpActionType = corpActionsData.Key;
-                List<List<string>> corpActionsEntries = corpActionsData.Value;
+                var corpActionsEntries = corpActionsData.Value;
                 if (corpActionsEntries != null && corpActionsEntries.Any())
                 {
                     int colCount = corpActionsEntries.First().Count;
-                    List<string> corpActionHeaders = new List<string>();
-                    corpActionHeaders.Add("Ticker");
-                    // start at 1 to exclude ticker column
-                    for (int i = 1; i < colCount; i++)
+                    List<string> corpActionHeaders = new List<string>{"Ticker"};
+                    // start at 1 to exclude ticker column and pad out remaining columns with dummy headers.
+                    for (var i = 1; i < colCount; i++)
                     {
                         corpActionHeaders.Add($"CorpActionHeader_{i}");
                     }
-                    // Unlikely size of list will greater than order of 10k. If so look at moving to LinkedList if this append
-                    // starts slowing down.
+                    // if size of requests grow significantly (unlikely) move to using a LinkedList
                     corpActionsEntries.Insert(0, corpActionHeaders);
                 }
             }
+        }
+        
+        private string[] LoadDlRequestEntriesFromFile(string responseFileUrl)
+        {
+            return File.ReadAllLines(responseFileUrl);
+        }
+        
+        private string[] SplitDlEntry(string entry)
+        {
+            // remove last char before splitting as DL response contains a trailing delimitter "|"
+            return entry.Remove(entry.Length-1).Split(RespDataDelimiter);
+        }
+        
+        private bool HasCorporateActions(string[] entry)
+        {
+            return entry.Length > RespNoIdColumnsCorpAction;
         }
     }
 }

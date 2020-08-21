@@ -23,7 +23,7 @@ namespace Lusid.FinDataEx.Core
                 List<string> toWrite = finDataEntrySet.Value.ConvertAll(
                     e => string.Join("|", e));
                 File.WriteAllLines(
-                    _outputDir + Path.DirectorySeparatorChar + fdeRequest.Uid + "_" + finDataEntrySet.Key + "_" + ".csv",
+                    _outputDir + Path.DirectorySeparatorChar + fdeRequest.Uid + "_" + finDataEntrySet.Key + ".csv",
                     toWrite);
             }
             
