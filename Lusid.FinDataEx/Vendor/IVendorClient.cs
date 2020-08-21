@@ -13,7 +13,7 @@ namespace Lusid.FinDataEx.Vendor
     {
         /// <summary>
         ///
-        /// Submit a BBG DL request to retrieve financial data from BBG
+        /// Submit a vendor request to retrieve financial data
         /// 
         /// </summary>
         /// <param name="submitGetDataRequest"></param>

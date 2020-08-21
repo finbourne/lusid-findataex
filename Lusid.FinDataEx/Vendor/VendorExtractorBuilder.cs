@@ -15,23 +15,23 @@ namespace Lusid.FinDataEx.Vendor
             switch (fdeRequest.Vendor)
             {
                 case Vendors.DL:
-                    return CreateBbgFdExtractor(fdeRequest.ConnectorConfig);
+                    return CreateDlFdeExtractor(fdeRequest.ConnectorConfig);
                     break;
                 default:
                     throw new InvalidDataException($"Vendor {fdeRequest.Vendor} is not currently supported.");
             }
         }
 
-        private IFdeExtractor CreateBbgFdExtractor(Dictionary<string,object> connectorConfig)
+        private IFdeExtractor CreateDlFdeExtractor(Dictionary<string,object> connectorConfig)
         {
 
             string connectorType = GetConnectorConfigParameter(connectorConfig, ConType);
             //if (HasProperty(config, "type") && config.type == "ftp")
             if (connectorType == "ftp")
             {
-                IVendorClient<DlFtpRequest, DlFtpResponse> bbgClient = new DlFileSystemClient(new DlFtpResponseBuilder());
-                DlFtpExtractor dlFtpExtractor = new DlFtpExtractor(bbgClient);
-                Console.WriteLine("Using Bbg ftp file based extractor");
+                IVendorClient<DlFtpRequest, DlFtpResponse> dlClient = new DlFileSystemClient(new DlFtpResponseBuilder());
+                DlFtpExtractor dlFtpExtractor = new DlFtpExtractor(dlClient);
+                Console.WriteLine("Using Dl ftp file based extractor");
                 return dlFtpExtractor;
             }
             else

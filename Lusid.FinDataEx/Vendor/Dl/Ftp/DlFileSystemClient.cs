@@ -4,7 +4,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
     /// <summary>
     ///
-    /// A client that extracts a preexisting response for fin data from BBG.
+    /// A client that extracts a preexisting response for fin data from Dl.
     ///
     /// Not intended for production use.
     /// 

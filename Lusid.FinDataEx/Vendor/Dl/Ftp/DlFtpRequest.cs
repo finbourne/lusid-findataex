@@ -2,18 +2,18 @@
 {
     public class DlFtpRequest : IVendorRequest
     {
-        public string BbgFtpUrl { get; }
-        public string BbqUser { get; }
-        public string BbqPass { get; }
+        public string FtpUrl { get; }
+        public string User { get; }
+        public string Password { get; }
         public string RequestFileUrl { get; }
         
         public DlRequestType DlRequestType { get; }
 
-        public DlFtpRequest(string bbgFtpUrl, string bbqUser, string bbqPass, string requestFileUrl, DlRequestType dlRequestType)
+        public DlFtpRequest(string ftpUrl, string user, string password, string requestFileUrl, DlRequestType dlRequestType)
         {
-            BbgFtpUrl = bbgFtpUrl;
-            BbqUser = bbqUser;
-            BbqPass = bbqPass;
+            FtpUrl = ftpUrl;
+            User = user;
+            Password = password;
             RequestFileUrl = requestFileUrl;
             DlRequestType = dlRequestType;
         }
