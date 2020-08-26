@@ -67,12 +67,12 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
                 "ACTIONS=STOCK_SPLT | DVD_STOCK | DVD_CASH",
                 "REPLYFILENAME=DL12345.out",
                 "START-OF-DATA",
-                "EQ 1|Ticker|1000|0|DVD_CASH|Meta1|Meta2|Meta3|",
-                "EQ 2|Ticker|4000|0|DVD_STOCK|Meta1|Meta2|Meta3|Meta4|Meta5|",
-                "EQ 2|Ticker|1000|0|DVD_CASH|Meta3|Meta4|Meta5|",
-                "EQ 3|Ticker|1000|0|",
-                "EQ 1|Ticker|4000|0|DVD_STOCK|Meta6|Meta7|Meta8|Meta9|Meta10|",
-                "EQ 3|Ticker|1000|0|"
+                "EQ 1|Ticker|12345|1000|0|DVD_CASH|Meta1|Meta2|Meta3|",
+                "EQ 2|Ticker|2500|4000|0|DVD_STOCK|Meta1|Meta2|Meta3|Meta4|Meta5|",
+                "EQ 2|Ticker|2500|1000|0|DVD_CASH|Meta3|Meta4|Meta5|",
+                "EQ 3|Ticker|3000|1000|0|",
+                "EQ 1|Ticker|12345|4000|0|DVD_STOCK|Meta6|Meta7|Meta8|Meta9|Meta10|",
+                "EQ 3|Ticker|3000|1000|0|"
             };
             
             DlFtpResponse dlFtpResponse =  _dlFtpResponseBuilder.CreateCorpActionsResponse(dlCorpActionResponse);

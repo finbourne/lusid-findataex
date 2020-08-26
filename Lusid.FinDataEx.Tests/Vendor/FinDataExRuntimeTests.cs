@@ -35,6 +35,20 @@ namespace Lusid.FinDataEx.Tests.Vendor
         }
         
         [Test]
+        public void run_OnValidCorpActionsRequestWithLusidToolsOutput_ShouldProcessAndWriteToFile()
+        {
+            //when
+            string fde_valid_request = "Vendor\\Dl\\TestData\\fde_request_dl_corpactions_file.json";
+            
+            //execute
+            FinDataExRuntime.Main(new string[]{fde_valid_request, _tempOutputDir});
+            
+            // verify
+            Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "DL30001_DVD_CASH.csv", Does.Exist);
+            Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "DL30001_STOCK_SPLT.csv", Does.Exist);
+        }
+        
+        [Test]
         public void run_OnUnsupportedVendorRequest_ShouldNotProduceFileAndShouldThrowException()
         {
             //when

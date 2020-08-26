@@ -24,9 +24,9 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         private const string RespTagEndOf = "END-OF-";
 
         private const int RespTickerIndex = 0;
-        private const int RespCorpActionColumnIndex = 4;
+        private const int RespCorpActionColumnIndex = 5;
         private const int RespNoOfIdColumns = 3;
-        private const int RespNoIdColumnsCorpAction = 4;
+        private const int RespNoIdColumnsCorpAction = 5;
         private const char RespDataDelimiter = '|';
 
         /// <summary>

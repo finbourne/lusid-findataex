@@ -7,6 +7,7 @@ using NUnit.Framework;
 
 namespace Lusid.FinDataEx.Tests.Vendor
 {
+    [TestFixture]
     public class VendorExtractorBuilderTest
     {
         private VendorExtractorBuilder _vendorExtractorBuilder;
