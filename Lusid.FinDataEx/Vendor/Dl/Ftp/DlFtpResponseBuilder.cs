@@ -16,12 +16,16 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
     public class DlFtpResponseBuilder
     {
 
-        /* Tags required to correctly identify data for parsing from BBG files*/
-        private const string RespTagNone = "NONE";
-        private const string RespTagStartOfFile = "START-OF-FILE";
-        private const string RespTagStartOfFields = "START-OF-FIELDS"; 
-        private const string RespTagStartOfData = "START-OF-DATA";
-        private const string RespTagEndOf = "END-OF-";
+        /* Character to identify comment line in DL responses */
+        private const char DlCommentChar = '#';
+        /* DL Section Tags required to correctly identify data for parsing from BBG files*/
+        private const string DlSectionTagNone = "NONE";
+        private const string DlSectionTagStartOfFile = "START-OF-FILE";
+        private const string DlSectionTagStartOfFields = "START-OF-FIELDS"; 
+        private const string DlSectionTagStartOfData = "START-OF-DATA";
+        private const string DlSectionTagEndOf = "END-OF-";
+        private const string DlSectionTagTimeStarted = "TIMESTARTED=";
+        private const string DlSectionTagTimeFinished = "TIMEFINISHED=";
 
         private const int RespTickerIndex = 0;
         private const int RespCorpActionColumnIndex = 5;
@@ -71,7 +75,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
             bool processedStartOfData= false;
 
             // Process the price data response in expected order -> {START-OF-FILE, START-OF-FIELDS, START-OF-DATA}
-            string currentProcessingTag = RespTagNone;
+            string currentProcessingTag = DlSectionTagNone;
             foreach (var dlResponseEntry in dlResponseFileEntries)
             {
                 currentProcessingTag = UpdateProcessingTag(currentProcessingTag, dlResponseEntry);
@@ -86,18 +90,22 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
                 switch (currentProcessingTag)
                 {
                     // price responses contain no required data within the Start tags.
-                    case (RespTagStartOfFile):
+                    case (DlSectionTagStartOfFile):
                         processedStartOfFile = true;
                         break;
                     // price responses contain header information under the Field tags.
-                    case (RespTagStartOfFields):
-                        CheckTagInCorrectOrder(processedStartOfFile, RespTagStartOfFile, RespTagStartOfFields);
+                    case (DlSectionTagStartOfFields):
+                        CheckTagInCorrectOrder(processedStartOfFile, DlSectionTagStartOfFile, DlSectionTagStartOfFields);
                         processedStartOfFields = true;
                         priceDataHeaders.Add(dlResponseEntry);
                         break;
                     // price responses contain price data under the Data tags.
-                    case (RespTagStartOfData):
-                        CheckTagInCorrectOrder(processedStartOfFields, RespTagStartOfFields, RespTagStartOfData);
+                    case (DlSectionTagStartOfData):
+                        CheckTagInCorrectOrder(processedStartOfFields, DlSectionTagStartOfFields, DlSectionTagStartOfData);
+                        if (IsDlCommentEntry(dlResponseEntry))
+                        {
+                            break;
+                        }
                         processedStartOfData = true;
                         string[] splitDlEntry = SplitDlEntry(dlResponseEntry);
                         priceData.Add(ProcessPriceDataEntry(splitDlEntry, priceDataHeaders));
@@ -106,7 +114,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
             }
             
             // price response should have processed a Data tag otherwise the response is not supported.
-            CheckTagInCorrectOrder(processedStartOfData,  RespTagStartOfData, RespTagEndOf);
+            CheckTagInCorrectOrder(processedStartOfData,  DlSectionTagStartOfData, DlSectionTagEndOf);
             
             // create response
             Dictionary<string, List<List<string>>> pricesDataMap = new Dictionary<string, List<List<string>>>
@@ -138,7 +146,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 
             // Process the price data response in expected order -> {START-OF-FILE, START-OF-DATA}
             // Note : Corp action responses do not contain START-OF-FIELDS information.
-            string currentProcessingTag = RespTagNone;
+            string currentProcessingTag = DlSectionTagNone;
             foreach (var dlResponseEntry in dlResponseFileEntries)
             {
                 currentProcessingTag = UpdateProcessingTag(currentProcessingTag, dlResponseEntry);
@@ -150,19 +158,23 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
                 switch (currentProcessingTag)
                 {
                     // corp actions responses contain no required data within the Start tags.
-                    case (RespTagStartOfFile):
+                    case (DlSectionTagStartOfFile):
                         processedStartOfFile = true;
                         break;
                     
                     // corp actions responses do not support field tags
-                    case (RespTagStartOfFields):
+                    case (DlSectionTagStartOfFields):
                         throw new InvalidDataException("Invalid vendor DL response. Corporate actions response should not include" +
                                                        " request DL fields.");
                     
                     // corp action responses contain price data under the Data tags.
-                    case (RespTagStartOfData):
-                        CheckTagInCorrectOrder(processedStartOfFile, RespTagStartOfFile, RespTagStartOfData);
+                    case (DlSectionTagStartOfData):
+                        CheckTagInCorrectOrder(processedStartOfFile, DlSectionTagStartOfFile, DlSectionTagStartOfData);
                         processedStartOfData = true;
+                        if (IsDlCommentEntry(dlResponseEntry))
+                        {
+                            break;
+                        }
                         string[] entryCols = SplitDlEntry(dlResponseEntry);
                         if (HasCorporateActions(entryCols))
                         {
@@ -176,7 +188,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
             }
             
             // Corp action response should have processed a Data tag otherwise the response is not supported.
-            CheckTagInCorrectOrder(processedStartOfData,  RespTagStartOfData, RespTagEndOf);
+            CheckTagInCorrectOrder(processedStartOfData,  DlSectionTagStartOfData, DlSectionTagEndOf);
             
             // As no Field tags are included in corp action DL responses manually populate headers for each corporate action type
             PopulateCorporateActionsHeaders(corpActionDataMap);
@@ -199,17 +211,24 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
             // if arrived at a processing tag then return to update our current processing tag
             switch (entry)
             {
-                case (RespTagStartOfFile):
-                case (RespTagStartOfFields):
-                case (RespTagStartOfData):
+                case (DlSectionTagStartOfFile):
+                case (DlSectionTagStartOfFields):
+                case (DlSectionTagStartOfData):
                     return entry;
+            }
+            
+            // if it's a meta time stamping DL entry then log only
+            if (entry.StartsWith(DlSectionTagTimeStarted) || entry.StartsWith(DlSectionTagTimeFinished))
+            {
+                Console.WriteLine(entry);
+                return entry;
             }
             
             // if reached a termination condition for a processing tag let's reset to the NONE state
             // until a the next processing tag
-            if (entry.Trim() == "" || entry.StartsWith(RespTagEndOf))
+            if (entry.Trim() == "" || entry.StartsWith(DlSectionTagEndOf))
             {
-                return RespTagNone;
+                return DlSectionTagNone;
             }
             
             // otherwise the entry is not a processing tag and our current processing tag remains unchanged
@@ -326,9 +345,20 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
             return entry.Remove(entry.Length-1).Split(RespDataDelimiter);
         }
         
+        /// <summary>
+        /// As per DL docs (ref: "4.13.1 No Corporate Action for a Given Security") no corporate actions is reflected with an entry column 
+        /// in which only request id details are added. Any additional columns means corp actions have been returned.
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <returns></returns>
         private bool HasCorporateActions(string[] entry)
         {
             return entry.Length > RespNoIdColumnsCorpAction;
+        }
+        
+        private bool IsDlCommentEntry(string entry)
+        {
+            return entry.StartsWith(DlCommentChar);
         }
     }
 }
