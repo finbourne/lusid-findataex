@@ -27,9 +27,9 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         /// <returns></returns>
         public DlFtpResponse Submit(DlFtpRequest submitGetDataRequest)
         {
-            string requestFileUrl = submitGetDataRequest.RequestFileUrl;
-            string responseFileUrl = requestFileUrl.Replace(".req", ".out.txt");
-            return _dlFtpResponseBuilder.CreateFromFile(submitGetDataRequest.DlRequestType, responseFileUrl);
+            string requestFilePath = submitGetDataRequest.RequestFilePath;
+            string responseFilePath = requestFilePath.Replace(".req", ".out.txt");
+            return _dlFtpResponseBuilder.CreateFromFile(submitGetDataRequest.DlRequestType, responseFilePath);
         }
 
         

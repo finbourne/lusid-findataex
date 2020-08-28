@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Lusid.FinDataEx.Core;
 using Lusid.FinDataEx.Vendor;
 using Lusid.FinDataEx.Vendor.Dl;
@@ -20,14 +21,14 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
             // when
             _vendorClient = new DlFileSystemClient(new DlFtpResponseBuilder());
             _dlFtpExtractor = new DlFtpExtractor(_vendorClient);
-            FdeRequest dlPricesFdeRequest = LoadValidDLPriceOnlyRequest();
+            var dlPricesFdeRequest = LoadValidDLPriceOnlyRequest();
             
             // execute
-            IVendorResponse dlPricesFdeResponse = _dlFtpExtractor.Extract(dlPricesFdeRequest);
+            var dlPricesFdeResponse = _dlFtpExtractor.Extract(dlPricesFdeRequest);
 
             //verify
-            Dictionary<string, List<List<string>>> finDataMap = dlPricesFdeResponse.GetFinData();
-            List<List<string>> finData = finDataMap.GetValueOrDefault(DlRequestType.Prices.ToString(), new List<List<string>>());
+            var finDataMap = dlPricesFdeResponse.GetFinData();
+            var finData = finDataMap.GetValueOrDefault(DlRequestType.Prices.ToString(), new List<List<string>>());
             
             // ensure all records have been returned
             Assert.That(finData, Has.Exactly(10).Items);
@@ -54,14 +55,14 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
             // when
             _vendorClient = new DlFileSystemClient(new DlFtpResponseBuilder());
             _dlFtpExtractor = new DlFtpExtractor(_vendorClient);
-            FdeRequest dlPricesFdeRequest = LoadValidDLAllFieldsRequest();
+            var dlPricesFdeRequest = LoadValidDLAllFieldsRequest();
             
             // execute
-            IVendorResponse dlPricesFdeResponse = _dlFtpExtractor.Extract(dlPricesFdeRequest);
+            var dlPricesFdeResponse = _dlFtpExtractor.Extract(dlPricesFdeRequest);
 
             //verify
-            Dictionary<string, List<List<string>>> finDataMap = dlPricesFdeResponse.GetFinData();
-            List<List<string>> finData = finDataMap.GetValueOrDefault(DlRequestType.Prices.ToString(), new List<List<string>>());
+            var finDataMap = dlPricesFdeResponse.GetFinData();
+            var finData = finDataMap.GetValueOrDefault(DlRequestType.Prices.ToString(), new List<List<string>>());
             // ensure all records have been returned
             Assert.That(finData, Has.Exactly(14).Items);
 
@@ -86,14 +87,14 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
 
         private FdeRequest LoadValidDLPriceOnlyRequest()
         {
-            FdeRequestBuilder fdeRequestBuilder = new FdeRequestBuilder();
-            return fdeRequestBuilder.LoadFromFile("Vendor\\Dl\\TestData\\fde_request_dl_prices_file.json");
+            var fdeRequestBuilder = new FdeRequestBuilder();
+            return fdeRequestBuilder.LoadFromFile(Path.Combine(new[]{"Vendor","Dl","TestData","fde_request_dl_prices_file.json"}));
         }
         
         private FdeRequest LoadValidDLAllFieldsRequest()
         {
-            FdeRequestBuilder fdeRequestBuilder = new FdeRequestBuilder();
-            return fdeRequestBuilder.LoadFromFile("Vendor\\Dl\\TestData\\fde_request_dl_all_file.json");
+            var fdeRequestBuilder = new FdeRequestBuilder();
+            return fdeRequestBuilder.LoadFromFile(Path.Combine(new []{"Vendor","Dl","TestData","fde_request_dl_all_file.json"}));
         }
         
     }

@@ -33,7 +33,7 @@ namespace Lusid.FinDataEx.Tests.Core
         {
             IVendorResponse response = _fdeBaseExtractor.Extract(_fdeRequest);
             
-            Assert.AreEqual(_vendorResponse, response);
+            Assert.That(_vendorResponse, Is.EqualTo(response));
             _fdeBaseExtractorMock.Verify(m => m.ToVendorRequest(_fdeRequest), Times.Once);
             Mock.Get(_vendorClient).Verify(m => m.Submit(_vendorRequest), Times.Once);
         }

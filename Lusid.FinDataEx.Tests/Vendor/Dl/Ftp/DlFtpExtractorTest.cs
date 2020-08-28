@@ -19,7 +19,7 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
         private readonly string _callerId = "daily_scheduler_01";
         private readonly string _url = "sftp://dlserver.com:22";
         private readonly string _type = "ftp";
-        private readonly string _requestUrl = "/some/loc/DL12.req";
+        private readonly string _requestPath = "/some/loc/DL12.req";
         private readonly string _user = "user_1";
         private readonly string _pass = "passwd";
 
@@ -34,128 +34,106 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
         [Test]
         public void ToVendorRequest_OnWellFormedFdeRequest_ShouldReturnDlVendorRequest()
         {
-            FdeRequest wellFormedDlRequest = CreateWellFormedDlFdeRequest();
+            var wellFormedDlRequest = CreateWellFormedDlFdeRequest();
             
-            DlFtpRequest vendorRequest =  _dlFtpExtractor.ToVendorRequest(wellFormedDlRequest);
+            var vendorRequest =  _dlFtpExtractor.ToVendorRequest(wellFormedDlRequest);
             
-            Assert.AreEqual(_url, vendorRequest.FtpUrl);
-            Assert.AreEqual(_user, vendorRequest.User);
-            Assert.AreEqual(_pass, vendorRequest.Password);
-            Assert.AreEqual(_requestUrl, vendorRequest.RequestFileUrl);
+            Assert.That(_url, Is.EqualTo(vendorRequest.FtpUrl));
+            Assert.That(_user, Is.EqualTo(vendorRequest.User));
+            Assert.That(_pass, Is.EqualTo(vendorRequest.Password));
+            Assert.That(_requestPath, Is.EqualTo(vendorRequest.RequestFilePath));
         }
         
         [Test]
         public void ToVendorRequest_OnFdeRequestMissingConnectorConfig_ShouldThrowException()
         {
-            FdeRequest incompleteConInfoDlFdeRequest = CreateIncompleteConnectorInfoDlFdeRequest();
+            var incompleteConInfoDlFdeRequest = CreateIncompleteConnectorInfoDlFdeRequest();
 
-            try
-            {
-                _dlFtpExtractor.ToVendorRequest(incompleteConInfoDlFdeRequest);
-                Assert.Fail("Expected a bad data exception due to missing connection parameters.");
-            }
-            catch (InvalidDataException) {}
+            Assert.Throws<InvalidDataException>(() => _dlFtpExtractor.ToVendorRequest(incompleteConInfoDlFdeRequest),
+                "Expected a bad data exception due to missing connection parameters.");
         }
         
         [Test]
         public void ToVendorRequest_OnFdeRequestMissingRequestBody_ShouldReturnDlVendorRequest()
         {
-            FdeRequest incompleteRequestBodyDlFdeRequests = CreateIncompleteRequestBodyDlFdeRequest();
+            var incompleteRequestBodyDlFdeRequests = CreateIncompleteRequestBodyDlFdeRequest();
 
-            try
-            {
-                _dlFtpExtractor.ToVendorRequest(incompleteRequestBodyDlFdeRequests);
-                Assert.Fail("Expected a bad data exception due to missing request body parameters.");
-            }
-            catch (InvalidDataException) {}
+            Assert.Throws<InvalidDataException>(() => _dlFtpExtractor.ToVendorRequest(incompleteRequestBodyDlFdeRequests),
+                "Expected a bad data exception due to missing request body parameters.");
         }
         
         [Test]
         public void ToVendorRequest_OnBadlyFormedDlRequest_ShouldThrowException()
         {
-            // FdeRequests general structure should have been tested before reaching the extractor method.
-            // Therefore not catching any specific type of exception as this isn't handled by DL extractor.
-            FdeRequest badlyFormedFdeRequest = CreateBadlyFormedFdeRequest();
+            // FdeRequests general structure should have been tested before reaching the extractor method so expecting
+            // a null reference
+            var badlyFormedFdeRequest = CreateBadlyFormedFdeRequest();
 
-            try
-            {
-                _dlFtpExtractor.ToVendorRequest(badlyFormedFdeRequest);
-                Assert.Fail("Expected an exception due to badly formed request.");
-            }
-            catch (Exception e) {}
+            Assert.Throws<NullReferenceException>(() => _dlFtpExtractor.ToVendorRequest(badlyFormedFdeRequest),
+                "Expected an exception due to badly formed request.");
         }
         
         private FdeRequest CreateWellFormedDlFdeRequest()
         {
-            FdeRequest request = new FdeRequest();
-            request.Uid = _uid;
-            request.CallerId = _callerId;
-            request.ConnectorConfig = new Dictionary<string, object>()
-                {
-                    {"type" , _type},
-                    {"url" , _url},
-                    {"user" , _user},
-                    {"password" , _pass}
-                };
-            request.RequestBody = new Dictionary<string, object>()
+            var request = new FdeRequest
             {
-                {"source" , "file"},
-                {"sourceData" , _requestUrl},
-                {"requestType", "Prices"}
+                Uid = _uid,
+                CallerId = _callerId,
+                ConnectorConfig =
+                    new Dictionary<string, object>
+                    {
+                        ["type"] = _type, ["url"] = _url, ["user"] = _user, ["password"] = _pass
+                    },
+                RequestBody = new Dictionary<string, object>()
+                {
+                    ["source"] = "file", ["sourceData"] = _requestPath, ["requestType"] = "Prices",
+                },
+                Vendor = Vendors.DL
             };
-            request.Vendor = Vendors.DL;
             return request;
         }
         
         private FdeRequest CreateIncompleteConnectorInfoDlFdeRequest()
         {
-            FdeRequest request = new FdeRequest();
-            request.Uid = _uid;
-            request.CallerId = _callerId;
-            request.ConnectorConfig = new Dictionary<string, object>()
+            var request = new FdeRequest
             {
-                // Missing User information
-                {"type" , _type},
-                {"url" , _url},
-                {"password" , _pass}
+                Uid = _uid,
+                CallerId = _callerId,
+                ConnectorConfig = new Dictionary<string, object>()
+                {
+                    // Missing User information
+                    ["type"] = _type, ["url"] = _url, ["password"] = _pass
+                },
+                RequestBody = new Dictionary<string, object>() {["source"] = "file", ["sourceData"] = _requestPath},
+                Vendor = Vendors.DL
             };
-            request.RequestBody = new Dictionary<string, object>()
-            {
-                {"source" , "file"},
-                {"sourceData" , _requestUrl},
-            };
-            request.Vendor = Vendors.DL;
             return request;
         }
         
         private FdeRequest CreateIncompleteRequestBodyDlFdeRequest()
         {
-            FdeRequest request = new FdeRequest();
-            request.Uid = _uid;
-            request.CallerId = _callerId;
-            request.ConnectorConfig = new Dictionary<string, object>()
+            var request = new FdeRequest
             {
-                {"type" , _type},
-                {"url" , _url},
-                {"user" , _user},
-                {"password" , _pass}
+                Uid = _uid,
+                CallerId = _callerId,
+                ConnectorConfig = new Dictionary<string, object>()
+                {
+                    ["type"] = _type, ["url"] = _url, ["user"] = _user, ["password"] = _pass
+                },
+                RequestBody = new Dictionary<string, object>()
+                {
+                    ["source"] = "file",
+                    //missing source data file for dl request
+                },
+                Vendor = Vendors.DL
             };
-            request.RequestBody = new Dictionary<string, object>()
-            {
-                {"source" , "file"},
-                //missing source data file for dl request
-            };
-            request.Vendor = Vendors.DL;
             return request;
         }
         
         private FdeRequest CreateBadlyFormedFdeRequest()
         {
-            FdeRequest request = new FdeRequest();
-            request.Uid = _uid;
-            request.CallerId = _callerId;
+            var request = new FdeRequest {Uid = _uid, CallerId = _callerId, Vendor = Vendors.DL};
             //missing connection and request config
-            request.Vendor = Vendors.DL;
             return request;
         }
         

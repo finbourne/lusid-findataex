@@ -13,16 +13,16 @@
         /// <summary> password for DL ftp server/// </summary>
         public string Password { get; }
         /// <summary> the location of the specific DL request file/// </summary>
-        public string RequestFileUrl { get; }
+        public string RequestFilePath { get; }
         /// <summary> type of financial data requesting from DL/// </summary>
         public DlRequestType DlRequestType { get; }
 
-        public DlFtpRequest(string ftpUrl, string user, string password, string requestFileUrl, DlRequestType dlRequestType)
+        public DlFtpRequest(string ftpUrl, string user, string password, string requestFilePath, DlRequestType dlRequestType)
         {
             FtpUrl = ftpUrl;
             User = user;
             Password = password;
-            RequestFileUrl = requestFileUrl;
+            RequestFilePath = requestFilePath;
             DlRequestType = dlRequestType;
         }
     }

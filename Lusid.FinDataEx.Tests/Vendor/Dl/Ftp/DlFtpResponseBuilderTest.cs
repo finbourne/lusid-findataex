@@ -20,7 +20,7 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
         [Test]
         public void ToVendorResponse_OnValidDLResponseWithPriceOnly_ShouldReturnResponse()
         {
-            string[] dlResponseWithIncorrectColsOnData = new string[]
+            var dlResponseWithIncorrectColsOnData = new[]
             {
                 "START-OF-FILE",
                 "RUNDATE=20200813",
@@ -36,9 +36,9 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
                 "CTY_10YR Index|0|3|.650|.670|FLD UNKNOWN|"
             };
 
-            DlFtpResponse dlFtpResponse =  _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithIncorrectColsOnData);
-            Dictionary<string, List<List<string>>> finDataMap = dlFtpResponse.GetFinData();
-            List<List<string>> finData = finDataMap.GetValueOrDefault(DlRequestType.Prices.ToString(), new List<List<string>>());
+            var dlFtpResponse =  _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithIncorrectColsOnData);
+            var finDataMap = dlFtpResponse.GetFinData();
+            var finData = finDataMap.GetValueOrDefault(DlRequestType.Prices.ToString(), new List<List<string>>());
 
             // ensure all records have been returned
             Assert.That(finData, Has.Exactly(3).Items);
@@ -100,7 +100,7 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
         {
             // This usecase exists for the Corporate Actions extract from DL.
 
-            string[] dlCorpActionResponse = new string[]
+            var dlCorpActionResponse = new[]
             {
                 "START-OF-FILE",
                 "RUNDATE=20200813",
@@ -115,15 +115,15 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
                 "EQ 3|Ticker|3000|1000|0|"
             };
             
-            DlFtpResponse dlFtpResponse =  _dlFtpResponseBuilder.CreateCorpActionsResponse(dlCorpActionResponse);
-            Dictionary<string, List<List<string>>> finDataMap = dlFtpResponse.GetFinData();
+            var dlFtpResponse =  _dlFtpResponseBuilder.CreateCorpActionsResponse(dlCorpActionResponse);
+            var finDataMap = dlFtpResponse.GetFinData();
             
             // Verify only two corp actions produced and all requests with no corporate actions ignored
             Assert.That(finDataMap, Has.Exactly(2).Items);
             
             // Verify specific corp actions responses for each corp action type
-            List<List<string>> dvdCashFinData = finDataMap.GetValueOrDefault("DVD_CASH", new List<List<string>>());
-            List<List<string>> dvdStockFinData = finDataMap.GetValueOrDefault("DVD_STOCK", new List<List<string>>());
+            var dvdCashFinData = finDataMap.GetValueOrDefault("DVD_CASH", new List<List<string>>());
+            var dvdStockFinData = finDataMap.GetValueOrDefault("DVD_STOCK", new List<List<string>>());
 
             // Verify Dvd Cash Entries
             Assert.That(dvdCashFinData, Has.Exactly(3).Items);
@@ -157,7 +157,7 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
         {
             // This usecase exists for the Corporate Actions extract from DL.
 
-            string[] dlCorpActionResponse = new string[]
+            var dlCorpActionResponse = new[]
             {
                 "START-OF-FILE",
                 "RUNDATE=20200813",
@@ -175,15 +175,15 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
                 "EQ 3|Ticker|3000|1000|0|"
             };
             
-            DlFtpResponse dlFtpResponse =  _dlFtpResponseBuilder.CreateCorpActionsResponse(dlCorpActionResponse);
-            Dictionary<string, List<List<string>>> finDataMap = dlFtpResponse.GetFinData();
+            var dlFtpResponse =  _dlFtpResponseBuilder.CreateCorpActionsResponse(dlCorpActionResponse);
+            var finDataMap = dlFtpResponse.GetFinData();
             
             // Verify only two corp actions produced and all requests with no corporate actions ignored
             Assert.That(finDataMap, Has.Exactly(2).Items);
             
             // Verify specific corp actions responses for each corp action type
-            List<List<string>> dvdCashFinData = finDataMap.GetValueOrDefault("DVD_CASH", new List<List<string>>());
-            List<List<string>> dvdStockFinData = finDataMap.GetValueOrDefault("DVD_STOCK", new List<List<string>>());
+            var dvdCashFinData = finDataMap.GetValueOrDefault("DVD_CASH", new List<List<string>>());
+            var dvdStockFinData = finDataMap.GetValueOrDefault("DVD_STOCK", new List<List<string>>());
 
             // Verify Dvd Cash Entries
             Assert.That(dvdCashFinData, Has.Exactly(3).Items);
@@ -217,7 +217,7 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
         {
             // Missing fields parameters for non corporate actions requests are unexpected or incorrect.
 
-            string[] dlResponseWithNoFieldsForNonCorpAction = new string[]
+            var dlResponseWithNoFieldsForNonCorpAction = new[]
             {
                 "START-OF-FILE",
                 "RUNDATE=20200813",
@@ -227,20 +227,16 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
                 "DSHNBWY_OTC_ Equity|Ticker|"
             };
             
-            try
-            {
-                _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithNoFieldsForNonCorpAction);
-                Assert.Fail("Exception should have been thrown due to missing fields in the DL response which is only" +
-                            "supported for corporate actions");
-            } catch (InvalidDataException e){}
-
+            Assert.Throws<InvalidDataException>(() => _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithNoFieldsForNonCorpAction),
+                "Exception should have been thrown due to missing fields in the DL response which is only" +
+                "supported for corporate actions");
         }
 
 
         [Test]
         public void ToVendorResponse_OnResponseWithTooFewColumnsInResponse_ShouldThrowDataException()
         {
-            string[] dlResponseWithTooFewColsOnData = new string[]
+            var dlResponseWithTooFewColsOnData = new[]
             {
                 "START-OF-FILE",
                 "RUNDATE=20200813",
@@ -256,18 +252,14 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
                 "CTY_10YR Index|0|3|"
             };
 
-            try
-            {
-                DlFtpResponse dlFtpResponse = _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithTooFewColsOnData);
-                Assert.Fail("Exception should have been thrown due to too few columns");
-            } catch (InvalidDataException e){}
-
+            Assert.Throws<InvalidDataException>(() => _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithTooFewColsOnData),
+                "Exception should have been thrown due to too few columns");
         }
         
         [Test]
         public void ToVendorResponse_OnResponseWithTooManyColumnsInResponse_ShouldThrowDataException()
         {
-            string[] dlResponseWithTooManyColsOnData = new string[]
+            var dlResponseWithTooManyColsOnData = new string[]
             {
                 "START-OF-FILE",
                 "RUNDATE=20200813",
@@ -282,12 +274,8 @@ namespace Lusid.FinDataEx.Tests.Vendor.Dl.Ftp
                 "ABC Index|0|3|N.A.|1234.220000|FLD UNKNOWN|ExtraCol|ExtraCol2|"
             };
             
-            try
-            {
-                DlFtpResponse dlFtpResponse = _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithTooManyColsOnData);
-                Assert.Fail("Exception should have been thrown due to too many columns");
-            } catch (InvalidDataException e){}
-            
+            Assert.Throws<InvalidDataException>(() => _dlFtpResponseBuilder.CreatePricesResponse(dlResponseWithTooManyColsOnData),
+                "Exception should have been thrown due to too many columns");
         }
         
         

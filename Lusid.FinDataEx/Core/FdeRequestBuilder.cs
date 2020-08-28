@@ -8,11 +8,11 @@ namespace Lusid.FinDataEx.Core
         /// <summary>
         ///  Construct a FdeRequest from a json file
         /// </summary>
-        /// <param name="requestUrl"> location of the json file FdeRequest</param>
+        /// <param name="requestPath"> location of the json file FdeRequest</param>
         /// <returns></returns>
-        public FdeRequest LoadFromFile(string requestUrl)
+        public FdeRequest LoadFromFile(string requestPath)
         {
-            FdeRequest fdeRequest = JsonConvert.DeserializeObject<FdeRequest>(File.ReadAllText(requestUrl));
+            FdeRequest fdeRequest = JsonConvert.DeserializeObject<FdeRequest>(File.ReadAllText(requestPath));
             return fdeRequest;
         }
     }

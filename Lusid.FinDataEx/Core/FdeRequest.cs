@@ -11,6 +11,7 @@ namespace Lusid.FinDataEx.Core
     {
         /// <summary> unique id of the request </summary>
         public string Uid { get; set; }
+
         /// <summary> id of the application making the request </summary>
         public string CallerId { get; set;}
         

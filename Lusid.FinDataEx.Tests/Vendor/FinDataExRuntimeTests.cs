@@ -25,10 +25,10 @@ namespace Lusid.FinDataEx.Tests.Vendor
         public void run_OnValidRequestWithLusidToolsOutput_ShouldProcessAndWriteToFile()
         {
             //when
-            string fde_valid_request = "Vendor\\Dl\\TestData\\fde_request_dl_prices_file.json";
+            var fdeValidRequest = Path.Combine(new[]{"Vendor","Dl","TestData","fde_request_dl_prices_file.json"});
             
             //execute
-            FinDataExRuntime.Main(new string[]{fde_valid_request, _tempOutputDir});
+            FinDataExRuntime.Main(new string[]{fdeValidRequest, _tempOutputDir});
             
             // verify
             Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "DL12345_Prices.csv", Does.Exist);
@@ -38,10 +38,10 @@ namespace Lusid.FinDataEx.Tests.Vendor
         public void run_OnValidCorpActionsRequestWithLusidToolsOutput_ShouldProcessAndWriteToFile()
         {
             //when
-            string fde_valid_request = "Vendor\\Dl\\TestData\\fde_request_dl_corpactions_file.json";
+            var fdeValidRequest = Path.Combine(new[]{"Vendor","Dl","TestData","fde_request_dl_corpactions_file.json"});
             
             //execute
-            FinDataExRuntime.Main(new string[]{fde_valid_request, _tempOutputDir});
+            FinDataExRuntime.Main(new string[]{fdeValidRequest, _tempOutputDir});
             
             // verify
             Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "DL30001_DVD_CASH.csv", Does.Exist);
@@ -52,15 +52,12 @@ namespace Lusid.FinDataEx.Tests.Vendor
         public void run_OnUnsupportedVendorRequest_ShouldNotProduceFileAndShouldThrowException()
         {
             //when
-            string unsupported_vendor_fde_request = "Vendor\\Dl\\TestData\\unsupported_vendor_request_file.json";
+            var unsupportedVendorFdeRequest = Path.Combine(new[]{"Vendor","Dl","TestData","unsupported_vendor_request_file.json"});
             
             //execute
-            try
-            {
-                FinDataExRuntime.Main(new string[]{unsupported_vendor_fde_request, _tempOutputDir});
-                Assert.Fail("Should have thrown an invalid data exception due to unknown vendor");
-            }
-            catch (InvalidDataException e) {}
+            
+            Assert.Throws<InvalidDataException>(() => FinDataExRuntime.Main(new string[]{unsupportedVendorFdeRequest, _tempOutputDir}),
+                "Should have thrown an invalid data exception due to unknown vendor");
             
             // verify
             Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "VendorABC_123456_Prices.csv", Does.Not.Exist);

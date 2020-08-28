@@ -21,37 +21,31 @@ namespace Lusid.FinDataEx.Tests.Vendor
         [Test]
         public void CreateFdeExtractor_OnValidDlFtpFdeRequest_ShouldReturnDlFtpExtractor()
         {
-            FdeRequest dlFtpRequest = CreateDlFtpFdeRequest();
-            IFdeExtractor fdeExtractor = _vendorExtractorBuilder.CreateFdeExtractor(dlFtpRequest);
+            var dlFtpRequest = CreateDlFtpFdeRequest();
+            var fdeExtractor = _vendorExtractorBuilder.CreateFdeExtractor(dlFtpRequest);
             Assert.IsInstanceOf(typeof(DlFtpExtractor), fdeExtractor);
         }
         
         [Test]
         public void CreateFdeExtractor_OnNonFtpConnectorConfig_ShouldThrowException()
         {
-            FdeRequest dlFtpRequest = new FdeRequest
+            var dlFtpRequest = new FdeRequest
             {
                 Vendor = Vendors.DL,
-                ConnectorConfig = new Dictionary<string, object>(){{"type", "webservice"}}
+                ConnectorConfig = new Dictionary<string, object>(){["type"] = "webservice"}
             };
-            try
-            {
-                _vendorExtractorBuilder.CreateFdeExtractor(dlFtpRequest);
-                Assert.Fail("Exception should have been thrown due to no connector config");
-            }
-            catch (InvalidDataException e) {}
+            
+            Assert.Throws<InvalidDataException>(() => _vendorExtractorBuilder.CreateFdeExtractor(dlFtpRequest),
+                "Exception should have been thrown due to no connector config");
         }
         
         [Test]
         public void CreateFdeExtractor_OnUnsupportedVendor_ShouldThrowException()
         {
-            FdeRequest dlFtpRequest = new FdeRequest {Vendor = "SomeUnsupportedVendor"};
-            try
-            {
-                _vendorExtractorBuilder.CreateFdeExtractor(dlFtpRequest);
-                Assert.Fail("Exception should have been thrown due to unsupported vendor");
-            }
-            catch (InvalidDataException e) {}
+            var dlFtpRequest = new FdeRequest {Vendor = "SomeUnsupportedVendor"};
+            
+            Assert.Throws<InvalidDataException>(() => _vendorExtractorBuilder.CreateFdeExtractor(dlFtpRequest),
+                "Exception should have been thrown due to unsupported vendor");
         }
         
         private FdeRequest CreateDlFtpFdeRequest()
@@ -59,10 +53,10 @@ namespace Lusid.FinDataEx.Tests.Vendor
             FdeRequest request = new FdeRequest();
             request.ConnectorConfig = new Dictionary<string, object>()
             {
-                {"type" , "ftp"},
-                {"url" , "http://url"},
-                {"user" , "user_1"},
-                {"password" , "pass"}
+                ["type"] = "ftp", 
+                ["url"] = "http://url", 
+                ["user"] = "user_1",
+                ["password"] = "pass"
             };
             request.Vendor = Vendors.DL;
             return request;
