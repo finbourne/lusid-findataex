@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Text;
+using Lusid.Drive.Sdk.Api;
+using Lusid.Drive.Sdk.Utilities;
 
 namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
@@ -6,7 +10,9 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
     ///
     /// Simple DL client that loads a pre-existing DL response from file.
     ///
-    /// Not intended for production use.
+    /// Additionally supports loading from lusid drive.
+    ///
+    /// NOT intended for production use only for testing purposes
     /// 
     /// </summary>
     public class DlFileSystemClient : IVendorClient<DlFtpRequest, DlFtpResponse>
@@ -27,9 +33,37 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         /// <returns></returns>
         public DlFtpResponse Submit(DlFtpRequest submitGetDataRequest)
         {
-            string requestFilePath = submitGetDataRequest.RequestFilePath;
+            string[] dlRequestFileEntries = LoadDlRequestEntries(submitGetDataRequest);
+            return _dlFtpResponseBuilder.CreateFromFile(submitGetDataRequest.DlRequestType, dlRequestFileEntries);
+        }
+
+        private string[] LoadDlRequestEntries(DlFtpRequest dlFtpRequest)
+        {
+            if (dlFtpRequest.FtpUrl.StartsWith("lusiddrive://"))
+            {
+                return LoadDlRequestEntriesFromLusidDrive(dlFtpRequest.FtpUrl.Split("//")[1]);
+            }
+            else
+            {
+                return LoadDlRequestEntriesFromFile(dlFtpRequest.RequestFilePath);
+            }
+        }
+        
+        private string[] LoadDlRequestEntriesFromFile(string requestFilePath)
+        {
             string responseFilePath = requestFilePath.Replace(".req", ".out.txt");
-            return _dlFtpResponseBuilder.CreateFromFile(submitGetDataRequest.DlRequestType, responseFilePath);
+            return File.ReadAllLines(responseFilePath);
+        }
+        
+        private string[] LoadDlRequestEntriesFromLusidDrive(string responseLusidFileId)
+        {
+            ILusidApiFactory factory = LusidApiFactoryBuilder.Build("secrets.json");
+            IFilesApi filesApi = factory.Api<IFilesApi>();
+            Stream responseDlFileStream = filesApi.DownloadFile(responseLusidFileId);
+            byte[] responseDlFileData = new byte[responseDlFileStream.Length];
+            responseDlFileStream.Read(responseDlFileData);
+            string dlResponse = Encoding.UTF8.GetString(responseDlFileData);
+            return dlResponse.Split("\r\n");
         }
 
         

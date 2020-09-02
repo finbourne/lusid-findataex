@@ -39,12 +39,11 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         /// 
         /// </summary>
         /// <param name="dlRequestType">Type of DL request being processed (e.g. Corporate Action, Price Information, etc...)</param>
-        /// <param name="dlResponseFilePath">Location of decrypted DL response file returned from DL ftp server</param>
+        /// <param name="dlRequestFileEntries">DL response file entries</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"> on unrecognised DL request type</exception>
-        public DlFtpResponse CreateFromFile(DlRequestType dlRequestType, string dlResponseFilePath)
+        public DlFtpResponse CreateFromFile(DlRequestType dlRequestType, string[] dlRequestFileEntries)
         {
-            string[] dlRequestFileEntries = LoadDlRequestEntriesFromFile(dlResponseFilePath);
             switch (dlRequestType)
             {
                 case DlRequestType.Prices:
@@ -333,12 +332,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
                 }
             }
         }
-        
-        private string[] LoadDlRequestEntriesFromFile(string responseFilePath)
-        {
-            return File.ReadAllLines(responseFilePath);
-        }
-        
+
         private string[] SplitDlEntry(string entry)
         {
             // remove last char before splitting as DL response contains a trailing delimitter "|"

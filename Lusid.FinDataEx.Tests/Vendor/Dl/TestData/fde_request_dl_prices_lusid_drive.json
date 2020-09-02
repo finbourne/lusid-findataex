@@ -5,7 +5,7 @@
   "output" : "lusiddrive",
   "connectorConfig" : {
     "type" : "ftp",
-    "url" : "sftp://dl_ftp.com:22",
+    "url" : "lusiddrive://52ff9d39-ace8-4873-95dc-d288feda3011",
     "user" : "user_1",
     "password" : "pass_1"
   },
