@@ -120,7 +120,11 @@ namespace Lusid.FinDataEx.Core
                 ProcessResponseResultStatus.Fail, null, null,
                 null, null);
         }
-        
+
+        public override string ToString()
+        {
+            return $"{nameof(FdeRequestId)}: {FdeRequestId}, {nameof(FinDataKey)}: {FinDataKey}, {nameof(LuisdDriveUploadStatus)}: {LuisdDriveUploadStatus}, {nameof(LusidDriveFolder)}: {LusidDriveFolder}, {nameof(LusidDriveFileName)}: {LusidDriveFileName}, {nameof(LusidDriveFileId)}: {LusidDriveFileId}, {nameof(LusidDriveFileSize)}: {LusidDriveFileSize}";
+        }
     }
     
     

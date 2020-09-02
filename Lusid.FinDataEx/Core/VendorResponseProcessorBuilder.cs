@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Lusid.Drive.Sdk.Utilities;
 
 namespace Lusid.FinDataEx.Core
 {
@@ -11,7 +12,8 @@ namespace Lusid.FinDataEx.Core
     public class FdeResponseProcessorBuilder
     {
         private const string LptResponseProcessor = "lusidtools";
-        
+        private const string LusidDriveResponseProcessor = "lusiddrive";
+
         
         public string OutputDir { get; }
 
@@ -33,6 +35,9 @@ namespace Lusid.FinDataEx.Core
                 case LptResponseProcessor:
                     return new LptVendorResponseProcessor(OutputDir);
                     break;
+                case LusidDriveResponseProcessor:
+                    ILusidApiFactory factory = LusidApiFactoryBuilder.Build("secrets.json");
+                    return new LusidDriveVendorResponseProcessor(OutputDir, factory);
             }
 
             throw new InvalidDataException($"No response processor found for {fdeRequest.Output}");
