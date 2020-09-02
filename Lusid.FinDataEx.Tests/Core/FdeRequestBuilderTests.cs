@@ -9,7 +9,7 @@ namespace Lusid.FinDataEx.Tests.Core
     [TestFixture]
     public class FdeRequestBuilderTests
     {
-        private const string CiTestFdePricesRequestLusidDriveId = "e2dd4c7d-edcb-4af2-8c02-6ee61308c6dd";
+        public const string CiTestFdePricesRequestLusidDriveId = "e2dd4c7d-edcb-4af2-8c02-6ee61308c6dd";
 
         private FdeRequestBuilder _fdeRequestBuilder;
         

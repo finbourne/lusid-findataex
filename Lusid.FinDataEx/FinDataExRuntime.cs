@@ -25,21 +25,22 @@ namespace Lusid.FinDataEx
         /// <exception cref="ArgumentException"></exception>
         public static void Main(string[] args)
         {
-            if (args.Length != 2)
+            if (args.Length != 3)
             {
                 throw new ArgumentException($"Invalid arguments {string.Join(", ", args)}. Arguments" +
-                                            $" must be of format \"lusidfindataex -f <request_file_path> -o <outputdir>\"");
+                                            $" must be of format \"lusidfindataex -t <request_source> -f <request_file_path> -o <output_dir>\"");
             }
-            
-            string requestJsonFilePath = args[0];
-            string outputDir = args[1];
-            Console.WriteLine($"running FinDataEx for request={requestJsonFilePath}, output directory={outputDir}.");
+
+            string requestSource = args[0];
+            string requestPath = args[1];
+            string outputDir = args[2];
+            Console.WriteLine($"running FinDataEx for request source={requestSource}, request={requestPath}, output directory={outputDir}.");
             
             FdeRequestBuilder fdeRequestBuilder = new FdeRequestBuilder();
             VendorExtractorBuilder vendorExtractorBuilder = new VendorExtractorBuilder();
             FdeResponseProcessorBuilder fdeResponseProcessorBuilder = new FdeResponseProcessorBuilder(outputDir);
             FinDataEx finDataEx = new FinDataEx(fdeRequestBuilder, vendorExtractorBuilder, fdeResponseProcessorBuilder);
-            finDataEx.Process(requestJsonFilePath);
+            finDataEx.Process(requestSource, requestPath);
         }
     }
 }

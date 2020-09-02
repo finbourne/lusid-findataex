@@ -4,6 +4,7 @@ using System.Linq;
 using Lusid.Drive.Sdk.Api;
 using Lusid.Drive.Sdk.Model;
 using Lusid.Drive.Sdk.Utilities;
+using Lusid.FinDataEx.Tests.Core;
 using NUnit.Framework;
 
 namespace Lusid.FinDataEx.Tests.Vendor
@@ -49,7 +50,20 @@ namespace Lusid.FinDataEx.Tests.Vendor
             var fdeValidRequestWithOutputToLusidDrive = Path.Combine(new[]{"Vendor","Dl","TestData","fde_request_dl_prices_lusid_drive.json"});
             
             //execute
-            FinDataExRuntime.Main(new string[]{fdeValidRequestWithOutputToLusidDrive, _processedResponseFolder});
+            FinDataExRuntime.Main(new string[]{"FileSystem", fdeValidRequestWithOutputToLusidDrive, _processedResponseFolder});
+            
+            // verify - get files from LUSID Drive ensure it exists
+            Assert.Fail("Unfinished. Implement assertions that fetch from drive and confirm existence of file");
+        }
+        
+        [Test]
+        public void run_OnValidPricesRequestWithLusidDriveOutputAndRequestFromLusidDrive_ShouldProcessAndWriteToFile()
+        {
+            //when
+            var fdeValidRequestFileLusidDriveId = FdeRequestBuilderTests.CiTestFdePricesRequestLusidDriveId;
+            
+            //execute
+            FinDataExRuntime.Main(new string[]{"LusidDrive", fdeValidRequestFileLusidDriveId, _processedResponseFolder});
             
             // verify - get files from LUSID Drive ensure it exists
             Assert.Fail("Unfinished. Implement assertions that fetch from drive and confirm existence of file");

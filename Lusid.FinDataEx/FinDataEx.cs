@@ -27,21 +27,37 @@ namespace Lusid.FinDataEx
         /// 
         /// </summary>
         /// <param name="fdeJsonRequest"></param>
-        public void Process(String fdeJsonRequest)
+        public void Process(string fdeRequestSource, string fdeJsonRequest)
         {
-            FdeRequest fdeRequest =  _fdeRequestBuilder.LoadFromFile(fdeJsonRequest);
+            // TODO : fdeRequestSource to Enum
+            FdeRequest fdeRequest =  CreateFdeRequest(fdeRequestSource, fdeJsonRequest);
             IFdeExtractor ifdExtractor = _vendorExtractorBuilder.CreateFdeExtractor(fdeRequest);
             IVendorResponseProcessor vendorResponseProcessor = _fdeResponseProcessorBuilder.CreateFdeResponseProcessor(fdeRequest);
             
             IVendorResponse vendorResponse = ifdExtractor.Extract(fdeRequest);
             ProcessResponseResult processResponseResult = vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
             
-            // TODO decide on how to handle fail/parital fail respsonse. Fail entire scheduled run?
+            // TODO decide on how to handle fail/parital fail response. Fail entire scheduled run?
             if (processResponseResult.Status != ProcessResponseResultStatus.Ok)
             {
                 Console.WriteLine("Fin data extraction completed with failures...");
             }
             Console.WriteLine(processResponseResult.Message);
+        }
+
+        public void Process(string fdeJsonRequest)
+        {
+            Process("FileSystem", fdeJsonRequest);
+        }
+
+        private FdeRequest CreateFdeRequest(string fdeRequestSource, string fdeJsonRequest)
+        {
+            if (fdeRequestSource.Equals("LusidDrive"))
+            {
+                return _fdeRequestBuilder.LoadFromLusidDrive(fdeJsonRequest);
+                
+            }
+            return _fdeRequestBuilder.LoadFromFile(fdeJsonRequest);
         }
         
     }
