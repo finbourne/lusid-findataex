@@ -68,6 +68,19 @@ namespace Lusid.FinDataEx.Tests.Vendor
             // verify - get files from LUSID Drive ensure it exists
             Assert.Fail("Unfinished. Implement assertions that fetch from drive and confirm existence of file");
         }
+        
+        [Test]
+        public void run_OnValidPricesRequestWithSchedulerTypeArguments_ShouldProcessAndWriteToLusidDrive()
+        {
+            //when
+            var fdeValidRequestFileLusidDriveId = FdeRequestBuilderTests.CiTestFdePricesRequestLusidDriveId;
+            
+            //execute
+            FinDataExRuntime.Main(new string[]{"fdeRequestSource=LusidDrive", "requestPath=" + fdeValidRequestFileLusidDriveId, "outputDirectory=" + _processedResponseFolder});
+            
+            // verify - get files from LUSID Drive ensure it exists
+            Assert.Fail("Unfinished. Implement assertions that fetch from drive and confirm existence of file");
+        }
 
     }
 }

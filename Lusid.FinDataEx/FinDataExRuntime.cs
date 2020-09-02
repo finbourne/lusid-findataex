@@ -10,6 +10,8 @@ namespace Lusid.FinDataEx
     /// </summary>
     public class FinDataExRuntime
     {
+
+        private const char LusidSchedulerArgumentSeparator = '=';
         
         /// <summary>
         /// Entry method to run a financial data extract.
@@ -31,9 +33,9 @@ namespace Lusid.FinDataEx
                                             $" must be of format \"lusidfindataex -t <request_source> -f <request_file_path> -o <output_dir>\"");
             }
 
-            string requestSource = args[0];
-            string requestPath = args[1];
-            string outputDir = args[2];
+            string requestSource = ParseArgumentVariable(args[0]);
+            string requestPath = ParseArgumentVariable(args[1]);
+            string outputDir = ParseArgumentVariable(args[2]);
             Console.WriteLine($"running FinDataEx for request source={requestSource}, request={requestPath}, output directory={outputDir}.");
             
             FdeRequestBuilder fdeRequestBuilder = new FdeRequestBuilder();
@@ -42,5 +44,15 @@ namespace Lusid.FinDataEx
             FinDataEx finDataEx = new FinDataEx(fdeRequestBuilder, vendorExtractorBuilder, fdeResponseProcessorBuilder);
             finDataEx.Process(requestSource, requestPath);
         }
+        
+        private static string ParseArgumentVariable(string argument){
+            if(argument.Contains(LusidSchedulerArgumentSeparator))
+            {
+                return argument.Split(LusidSchedulerArgumentSeparator)[1];
+            }
+            return argument;
+        }
     }
+    
+    
 }

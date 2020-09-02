@@ -31,6 +31,7 @@ namespace Lusid.FinDataEx
         {
             // TODO : fdeRequestSource to Enum
             FdeRequest fdeRequest =  CreateFdeRequest(fdeRequestSource, fdeJsonRequest);
+            Console.WriteLine($"Processing request from source {fdeRequestSource} with loaded fdeRequest={fdeRequest}");
             IFdeExtractor ifdExtractor = _vendorExtractorBuilder.CreateFdeExtractor(fdeRequest);
             IVendorResponseProcessor vendorResponseProcessor = _fdeResponseProcessorBuilder.CreateFdeResponseProcessor(fdeRequest);
             

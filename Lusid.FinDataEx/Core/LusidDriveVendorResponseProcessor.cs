@@ -34,6 +34,7 @@ namespace Lusid.FinDataEx.Core
                     
                     string outputFilename = fdeRequest.Uid + "_" + finDataEntrySet.Key + ".csv";
                     
+                    Console.WriteLine($"Attempting to write to LUSID drive filename={outputFilename}, folder={_luisdDriveOutputFolder}.");
                     //Upload a file
                     var upload = _filesApi.CreateFile(outputFilename, _luisdDriveOutputFolder, data.Length, data);
 

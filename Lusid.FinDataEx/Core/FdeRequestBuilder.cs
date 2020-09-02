@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using Lusid.Drive.Sdk.Api;
+using Lusid.Drive.Sdk.Client;
 using Lusid.Drive.Sdk.Utilities;
 using Newtonsoft.Json;
 
@@ -31,12 +30,24 @@ namespace Lusid.FinDataEx.Core
         {
             ILusidApiFactory factory = LusidApiFactoryBuilder.Build("secrets.json");
             IFilesApi filesApi = factory.Api<IFilesApi>();
-            Stream responseDlFileStream = filesApi.DownloadFile(lusidDriveFileId);
-            using (StreamReader sr = new StreamReader(responseDlFileStream))
+            try
             {
-                FdeRequest fdeRequest = JsonConvert.DeserializeObject<FdeRequest>(sr.ReadToEnd());
-                return fdeRequest;
+                Console.WriteLine($"Loading FDE request from lusidDriveFileId={lusidDriveFileId}");
+                Stream responseDlFileStream = filesApi.DownloadFile(lusidDriveFileId);
+                using (StreamReader sr = new StreamReader(responseDlFileStream))
+                {
+                    FdeRequest fdeRequest = JsonConvert.DeserializeObject<FdeRequest>(sr.ReadToEnd());
+                    return fdeRequest;
+                }
             }
+            catch (ApiException e)
+            {
+                Console.WriteLine($"Error in processing fde request from lusidDriveFileId={lusidDriveFileId}");
+                Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error code={e.ErrorCode}");
+                Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error content={e.ErrorContent}");
+                throw e;
+            }
+            
         }
     }
 }

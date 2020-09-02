@@ -33,12 +33,13 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         /// <returns></returns>
         public DlFtpResponse Submit(DlFtpRequest submitGetDataRequest)
         {
-            string[] dlRequestFileEntries = LoadDlRequestEntries(submitGetDataRequest);
-            return _dlFtpResponseBuilder.CreateFromFile(submitGetDataRequest.DlRequestType, dlRequestFileEntries);
+            string[] dlResponseEntries = LoadDlResponseEntries(submitGetDataRequest);
+            return _dlFtpResponseBuilder.CreateFromFile(submitGetDataRequest.DlRequestType, dlResponseEntries);
         }
 
-        private string[] LoadDlRequestEntries(DlFtpRequest dlFtpRequest)
+        private string[] LoadDlResponseEntries(DlFtpRequest dlFtpRequest)
         {
+            Console.WriteLine($"Processing DL responses for DLFtpRequest from url={dlFtpRequest.FtpUrl}");
             if (dlFtpRequest.FtpUrl.StartsWith("lusiddrive://"))
             {
                 return LoadDlRequestEntriesFromLusidDrive(dlFtpRequest.FtpUrl.Split("//")[1]);
