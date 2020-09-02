@@ -4,6 +4,8 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
 
         <IsPackable>false</IsPackable>
+
+        <LangVersion>8</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +21,7 @@
     
     <ItemGroup>
         <None Include="Vendor\Dl\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Vendor\Dl\TestData\')" />
+        <None Include="secrets.json" CopyToOutputDirectory="Always" Condition="Exists('secrets.json')" />
     </ItemGroup>
 
 </Project>

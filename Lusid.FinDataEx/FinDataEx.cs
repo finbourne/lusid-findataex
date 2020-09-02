@@ -34,7 +34,14 @@ namespace Lusid.FinDataEx
             IVendorResponseProcessor vendorResponseProcessor = _fdeResponseProcessorBuilder.CreateFdeResponseProcessor(fdeRequest);
             
             IVendorResponse vendorResponse = ifdExtractor.Extract(fdeRequest);
-            vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
+            ProcessResponseResult processResponseResult = vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
+            
+            // TODO decide on how to handle fail/parital fail respsonse. Fail entire scheduled run?
+            if (processResponseResult.Status != ProcessResponseResultStatus.Ok)
+            {
+                Console.WriteLine("Fin data extraction completed with failures...");
+            }
+            Console.WriteLine(processResponseResult.Message);
         }
         
     }
