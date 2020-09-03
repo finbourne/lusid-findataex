@@ -8,10 +8,9 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
 {
     /// <summary>
     ///
-    /// Simple DL client that loads a pre-existing DL response from file.
-    ///
-    /// Additionally supports loading from lusid drive.
-    ///
+    /// Simple DL client that loads a pre-existing DL response from file in local file system
+    /// or from lusid drive.
+    /// 
     /// NOT intended for production use only for testing purposes
     /// 
     /// </summary>

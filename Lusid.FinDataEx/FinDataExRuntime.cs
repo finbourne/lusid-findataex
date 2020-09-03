@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Lusid.FinDataEx.Core;
 using Lusid.FinDataEx.Vendor;
 
@@ -18,10 +19,11 @@ namespace Lusid.FinDataEx
         ///
         /// Expects as arguments a path to a valid FdeRequest json file and the output directory to persist
         /// any responses. 
-        /// e.g. lusidfindataex -f "/var/fderequests/fde_req_2020_08_14.json" -o "/var/outputdata/2020_08_14" 
+        /// e.g. Lusid.FinDataEx.dll "FileSystem" "/var/fderequests/fde_req_2020_08_14.json" "/var/outputdata/2020_08_14"
+        /// e.g. Lusid.FinDataEx.dll "LusidDrive" "0eb302a8-6435-4676-9ea4-0930a11b80df" "/lusid_drive_folder/2020_08_14" 
         ///
-        /// TODO support e.g. lusidfindataex -j "{req : ""...}" -o "/var/outputdata/2020_08_14" which takes in
-        /// TODO all request parameters and constructs vendor requests file. 
+        /// TODO integrate https://github.com/fclp/fluent-command-line-parser for args. Check first that scheduler
+        /// TODO supports passing in only strings and not param=string
         /// </summary>
         /// <param name="args"></param>
         /// <exception cref="ArgumentException"></exception>
@@ -33,10 +35,10 @@ namespace Lusid.FinDataEx
                                             $" must be of format \"lusidfindataex -t <request_source> -f <request_file_path> -o <output_dir>\"");
             }
 
-            string requestSource = ParseArgumentVariable(args[0]);
+            FdeRequestSource requestSource = ParseRequestSourceArgument(args[0]);
             string requestPath = ParseArgumentVariable(args[1]);
             string outputDir = ParseArgumentVariable(args[2]);
-            Console.WriteLine($"running FinDataEx for request source={requestSource}, request={requestPath}, output directory={outputDir}.");
+            Console.WriteLine($"Running FinDataEx for request source={requestSource}, request={requestPath}, output directory={outputDir}.");
             
             FdeRequestBuilder fdeRequestBuilder = new FdeRequestBuilder();
             VendorExtractorBuilder vendorExtractorBuilder = new VendorExtractorBuilder();
@@ -44,13 +46,24 @@ namespace Lusid.FinDataEx
             FinDataEx finDataEx = new FinDataEx(fdeRequestBuilder, vendorExtractorBuilder, fdeResponseProcessorBuilder);
             finDataEx.Process(requestSource, requestPath);
         }
-        
-        private static string ParseArgumentVariable(string argument){
-            if(argument.Contains(LusidSchedulerArgumentSeparator))
+
+        private static FdeRequestSource ParseRequestSourceArgument(string argument)
+        {
+            var requestSourceArgument = ParseArgumentVariable(argument);
+            if (!Enum.TryParse<FdeRequestSource>(requestSourceArgument, true, out var fdeRequestSource))
             {
-                return argument.Split(LusidSchedulerArgumentSeparator)[1];
-            }
-            return argument;
+                throw new ArgumentException($"{requestSourceArgument} is not a supported source of FDE requests");
+            };
+            return fdeRequestSource;
+        }
+
+        /// <summary>
+        /// LUSID scheduler jobs currently only pass in argument parameters in the form paramName=paramValue. This method
+        /// adds support for that format.
+        /// </summary>
+        private static string ParseArgumentVariable(string argument)
+        {
+            return argument.Contains(LusidSchedulerArgumentSeparator) ? argument.Split(LusidSchedulerArgumentSeparator).Last() : argument;
         }
     }
     

@@ -7,49 +7,69 @@ using Lusid.FinDataEx.Vendor;
 
 namespace Lusid.FinDataEx.Core
 {
+    /// <summary>
+    ///
+    /// Response processor that persists IVendorResponses to LUSID drive as csv files.
+    ///
+    /// TODO Test version enforces "|" delimitted files with .csv extension. Output configuration
+    /// TODO to be added to the FdeRequest under Output arguments.
+    /// </summary>
     public class LusidDriveVendorResponseProcessor : IVendorResponseProcessor
     {
 
-        private readonly string _luisdDriveOutputFolder;
+        private const char OutputFileDelimiter = '|';
+        private const string OutputFileEntrySeparator = "\n";
+
+        private readonly string _lusidDriveOutputFolder;
         private readonly IFilesApi _filesApi;
 
-        public LusidDriveVendorResponseProcessor(string luisdDriveOutputFolder, ILusidApiFactory factory)
+        public LusidDriveVendorResponseProcessor(string lusidDriveOutputFolder, ILusidApiFactory factory)
         {
-            _luisdDriveOutputFolder = luisdDriveOutputFolder;
+            _lusidDriveOutputFolder = lusidDriveOutputFolder;
             _filesApi = factory.Api<IFilesApi>();
         }
 
+        
         public ProcessResponseResult ProcessResponse(FdeRequest fdeRequest, IVendorResponse vendorResponse)
         {
             Dictionary<string, List<List<string>>> finData = vendorResponse.GetFinData();
             Dictionary<string, object> processResponseProperties = new Dictionary<string, object>();
+            
+            // write each set of data in the vendor response (e.g set fo corp action 1, another for corp action 2)
+            // to lusid drive
             foreach (var finDataEntrySet in finData)
             {
                 try
                 {
-                    List<string> entries = finDataEntrySet.Value.ConvertAll(
-                        e => string.Join("|", e));
-                    string toWrite = string.Join("\n", entries);
-                    byte[] data = Encoding.ASCII.GetBytes(toWrite);
+                    // convert to byte array representation of all entries in a structured format
+                    // TODO these configs to move into FdeRequest to allow for customisability based on request
+                    List<string> finDataEntries = finDataEntrySet.Value.ConvertAll(
+                        e => string.Join(OutputFileDelimiter, e));
+                    string finDataEntriesStr = string.Join(OutputFileEntrySeparator, finDataEntries);
+                    byte[] finDataEntriesBytes = Encoding.ASCII.GetBytes(finDataEntriesStr);
                     
+                    // create output file name based on request and the specific set of this response (e.g. corpAction1)
                     string outputFilename = fdeRequest.Uid + "_" + finDataEntrySet.Key + ".csv";
                     
-                    Console.WriteLine($"Attempting to write to LUSID drive filename={outputFilename}, folder={_luisdDriveOutputFolder}.");
-                    //Upload a file
-                    var upload = _filesApi.CreateFile(outputFilename, _luisdDriveOutputFolder, data.Length, data);
+                    // upload and write data to LUSID drive in given output folder.
+                    Console.WriteLine($"Attempting to write to LUSID drive filename={outputFilename}, folder={_lusidDriveOutputFolder}.");
+                    var upload = _filesApi.CreateFile(outputFilename, _lusidDriveOutputFolder, finDataEntriesBytes.Length, finDataEntriesBytes);
 
+                    // record as successful upload to lusid drive 
                     processResponseProperties.Add(finDataEntrySet.Key, 
-                        LusidDriveUploadResults.CreateSuccessUploadResults(fdeRequest.Uid, finDataEntrySet.Key, _luisdDriveOutputFolder, outputFilename, upload.Id, upload.Size));
+                        LusidDriveUploadResults.CreateSuccessUploadResults(fdeRequest.Uid, finDataEntrySet.Key, _lusidDriveOutputFolder, outputFilename, upload.Id, upload.Size));
                     
                 }
                 catch (Exception e)
                 {
+                    // record as failed upload to lusid drive 
                     processResponseProperties.Add(finDataEntrySet.Key, 
                         LusidDriveUploadResults.CreateFailedUploadResults(fdeRequest.Uid, finDataEntrySet.Key));
 
                 }
             }
 
+            // collect and process the results of the upload to return to the caller
             ProcessResponseResultStatus status = getOverallStatus(processResponseProperties);
             string message = getResponseProcessMessage(fdeRequest, processResponseProperties);
             return new ProcessResponseResult(status, message, processResponseProperties);
@@ -85,6 +105,11 @@ namespace Lusid.FinDataEx.Core
         }
     }
 
+    /// <summary>
+    ///
+    /// Contains details of the upload request to LUSID drive.
+    /// 
+    /// </summary>
     public class LusidDriveUploadResults
     {
         public readonly string FdeRequestId;

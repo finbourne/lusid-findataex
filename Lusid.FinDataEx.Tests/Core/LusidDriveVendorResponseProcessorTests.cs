@@ -20,7 +20,6 @@ namespace Lusid.FinDataEx.Tests.Core
         private string _processedResponseFolderName;
         private ILusidApiFactory _factory;
         private IFoldersApi _foldersApi;
-        private IFilesApi _filesApi;
         private string _processedResponseFolderId;
         
         [OneTimeSetUp]
@@ -29,13 +28,13 @@ namespace Lusid.FinDataEx.Tests.Core
             _processedResponseFolderName = ("Test_Folder_FDExResponseProcessor_" + Guid.NewGuid()).Substring(0,49);
             _processedResponseFolder = "/" + _processedResponseFolderName;
             _factory = LusidApiFactoryBuilder.Build("secrets.json");
-            _filesApi = _factory.Api<IFilesApi>();
             _foldersApi = _factory.Api<IFoldersApi>();
         }
         
         [SetUp]
         public void SetUp()
         {
+            // setup temp test folder in LUSID drive for each run
             _processedResponseFolderId = _foldersApi.GetRootFolder(filter: $"Name eq '{_processedResponseFolderName}'").Values.SingleOrDefault()?.Id;
             var createFolder = new CreateFolder("/", _processedResponseFolderName);
             _processedResponseFolderId ??= _foldersApi.CreateFolder(createFolder).Id;
@@ -46,20 +45,27 @@ namespace Lusid.FinDataEx.Tests.Core
         [TearDown]
         public void TearDown()
         {
+            // remove folders in drive at end of each test.
+            // note if debugging ensure to clean lusid drive if terminate tests early
             _foldersApi.DeleteFolder(_processedResponseFolderId);
         }
 
         [Test]
         public void ProcessResponse_OnValidFinData_ShouldOutputFileToLusidDrive()
         {
+            //when
             FdeRequest request = CreateFdeRequest();
             IVendorResponse vendorResponse = CreateMockVendorResponse();
+            
+            //execute
             ProcessResponseResult processResponseResult = _responseProcessor.ProcessResponse(request, vendorResponse);
             
+            //verify status ok
             Assert.AreEqual(ProcessResponseResultStatus.Ok,processResponseResult.Status);
+            
+            //verify process response results as expected
             LusidDriveUploadResults quoteDataLusidDriveUploadResults = 
                 processResponseResult.Properties["MyVendorQuoteData"] as LusidDriveUploadResults;
-            
             Assert.AreEqual(quoteDataLusidDriveUploadResults.FdeRequestId, "fde_req_001");
             Assert.AreEqual(quoteDataLusidDriveUploadResults.FinDataKey, "MyVendorQuoteData");
             Assert.AreEqual(quoteDataLusidDriveUploadResults.LuisdDriveUploadStatus, ProcessResponseResultStatus.Ok);
@@ -69,13 +75,19 @@ namespace Lusid.FinDataEx.Tests.Core
         }
         
         [Test]
-        public void ProcessResponse_OnValidInvalidRequestDueToRequestIdSize_ShouldReturnFailedStatus()
+        public void ProcessResponse_OnInvalidRequestDueToBadFileName_ShouldReturnFailedStatus()
         {
-            FdeRequest request = CreateFdeRequestWithIllegalReqId();
+            //when
+            FdeRequest request = CreateFdeRequestWithBadFileName();
             IVendorResponse vendorResponse = CreateMockVendorResponse();
+            
+            //execute
             ProcessResponseResult processResponseResult = _responseProcessor.ProcessResponse(request, vendorResponse);
             
+            //verify status fail
             Assert.AreEqual(ProcessResponseResultStatus.Fail,processResponseResult.Status);
+            
+            //verify process response results as expected
             LusidDriveUploadResults quoteDataLusidDriveUploadResults = 
                 processResponseResult.Properties["MyVendorQuoteData"] as LusidDriveUploadResults;
             
@@ -119,12 +131,12 @@ namespace Lusid.FinDataEx.Tests.Core
             
         }
         
-        private FdeRequest CreateFdeRequestWithIllegalReqId()
+        private FdeRequest CreateFdeRequestWithBadFileName()
         {
-            // Illegal Id in this case for LUSID drive is a request ID that is too long (>50chars)
+            // Illegal name with multiple "." which are not valid on LUSID drive.
             return new FdeRequest()
             {
-                Uid = "some_long_long_long_long_long_long_long_long_long_long_long_long_long_long_long_long_uid_" + Guid.NewGuid(),
+                Uid = "some_bad$£_name$$><",
                 Output = _processedResponseFolder
             };
         }

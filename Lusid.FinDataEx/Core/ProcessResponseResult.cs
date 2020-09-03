@@ -17,10 +17,15 @@ namespace Lusid.FinDataEx.Core
             Message = message;
             Properties = properties;
         }
+
+        public override string ToString()
+        {
+            return $"{nameof(Status)}: {Status}, {nameof(Message)}: {Message}, {nameof(Properties)}: {Properties}";
+        }
     }
 
     public enum ProcessResponseResultStatus
     {
-        Ok, Fail, PartialFail
+        Ok, Fail
     }
 }

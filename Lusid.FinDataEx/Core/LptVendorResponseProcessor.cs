@@ -40,15 +40,10 @@ namespace Lusid.FinDataEx.Core
                     responseFailResults.Add($"Failed to process vendor response for fde request={fdeRequest.Uid} and key={finDataEntrySet.Key}. Cause of failure: {e}");
                 }
             }
-            
-            ProcessResponseResultStatus status = ProcessResponseResultStatus.Ok;
-            if (!responseFailResults.Any())
-            {
-                status = (responseOkResults.Any())
-                    ? ProcessResponseResultStatus.PartialFail
-                    : ProcessResponseResultStatus.Fail;
-            }
-            
+
+            ProcessResponseResultStatus status = (responseFailResults.Any())
+                ? ProcessResponseResultStatus.Fail
+                : ProcessResponseResultStatus.Ok;
             List<string> responseResults = new List<string>
             {
                 $"Preparing csv outputs from vendor data responses for fde request={fdeRequest.Uid}"

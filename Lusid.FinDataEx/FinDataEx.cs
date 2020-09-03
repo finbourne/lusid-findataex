@@ -5,7 +5,7 @@ using Lusid.FinDataEx.Vendor;
 namespace Lusid.FinDataEx
 {
     /// <summary>
-    ///  Wrapper class for the FinDataEx workflow
+    /// Central class for the FinDataEx workflow. 
     /// </summary>
     public class FinDataEx
     {
@@ -21,44 +21,65 @@ namespace Lusid.FinDataEx
         }
 
         /// <summary>
-        /// Processes an FdeRequest provided by the caller. Loads the provided request and retrieve the financial data
+        /// Processes an FdeRequest provided by the caller. Loads the provided request and retrieves the financial data
         /// using the vendor and connector flow (e.g. DL via FTP) included in the request. The financial data is then processed
         /// based on the behaviour defined in the request (e.g. lusidtools which outputs to .csv)
         /// 
         /// </summary>
-        /// <param name="fdeJsonRequest"></param>
-        public void Process(string fdeRequestSource, string fdeJsonRequest)
+        /// <param name="fdeRequestSource"></param>
+        /// <param name="fdeRequestPath"></param>
+        public void Process(FdeRequestSource fdeRequestSource, string fdeRequestPath)
         {
-            // TODO : fdeRequestSource to Enum
-            FdeRequest fdeRequest =  CreateFdeRequest(fdeRequestSource, fdeJsonRequest);
-            Console.WriteLine($"Processing request from source {fdeRequestSource} with loaded fdeRequest={fdeRequest}");
+            // load and construct request from source
+            var fdeRequest =  CreateFdeRequest(fdeRequestSource, fdeRequestPath);
+            Console.WriteLine($"Processing request from source {fdeRequestSource} with content={fdeRequest}");
+            
+            // setup the vendor extractor that has been selected in the request
             IFdeExtractor ifdExtractor = _vendorExtractorBuilder.CreateFdeExtractor(fdeRequest);
+            // setup the vendor response processor that has been selected in the request
             IVendorResponseProcessor vendorResponseProcessor = _fdeResponseProcessorBuilder.CreateFdeResponseProcessor(fdeRequest);
             
+            // run the extract against an external vendor
             IVendorResponse vendorResponse = ifdExtractor.Extract(fdeRequest);
-            ProcessResponseResult processResponseResult = vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
             
-            // TODO decide on how to handle fail/parital fail response. Fail entire scheduled run?
+            // process the vendor specific extract response and display errors if any exist
+            ProcessResponseResult processResponseResult = vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
+            // TODO how to handle partial failures in requests
             if (processResponseResult.Status != ProcessResponseResultStatus.Ok)
             {
-                Console.WriteLine("Fin data extraction completed with failures...");
+                Console.Error.WriteLine("FinDataEx request completed with failures. See details below: ");
+                Console.Error.WriteLine(processResponseResult);
             }
-            Console.WriteLine(processResponseResult.Message);
-        }
-
-        public void Process(string fdeJsonRequest)
-        {
-            Process("FileSystem", fdeJsonRequest);
-        }
-
-        private FdeRequest CreateFdeRequest(string fdeRequestSource, string fdeJsonRequest)
-        {
-            if (fdeRequestSource.Equals("LusidDrive"))
+            else
             {
-                return _fdeRequestBuilder.LoadFromLusidDrive(fdeJsonRequest);
+                Console.WriteLine(processResponseResult.Message);
+            }
+        }
+
+        /// <summary>
+        ///  Default behaviour attempts to load requests from the local file system
+        /// </summary>
+        /// <param name="fdeRequestPath"></param>
+        public void Process(string fdeRequestPath)
+        {
+            Process(FdeRequestSource.FileSystem, fdeRequestPath);
+        }
+
+        /// <summary>
+        /// Load and construct the fde request from the source and path/id provided.
+        /// 
+        /// </summary>
+        /// <param name="fdeRequestSource"></param>
+        /// <param name="fdeRequestPath"></param>
+        /// <returns></returns>
+        private FdeRequest CreateFdeRequest(FdeRequestSource fdeRequestSource, string fdeRequestPath)
+        {
+            if (fdeRequestSource.Equals(FdeRequestSource.LusidDrive))
+            {
+                return _fdeRequestBuilder.LoadFromLusidDrive(fdeRequestPath);
                 
             }
-            return _fdeRequestBuilder.LoadFromFile(fdeJsonRequest);
+            return _fdeRequestBuilder.LoadFromFile(fdeRequestPath);
         }
         
     }

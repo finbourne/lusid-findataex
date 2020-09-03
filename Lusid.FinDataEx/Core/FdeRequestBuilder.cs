@@ -45,7 +45,7 @@ namespace Lusid.FinDataEx.Core
                 Console.WriteLine($"Error in processing fde request from lusidDriveFileId={lusidDriveFileId}");
                 Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error code={e.ErrorCode}");
                 Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error content={e.ErrorContent}");
-                throw e;
+                throw;
             }
             
         }
