@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lusid.Drive.Sdk.Api;
@@ -16,7 +17,6 @@ namespace Lusid.FinDataEx.Tests.Vendor
         private string _processedResponseFolderName;
         private ILusidApiFactory _factory;
         private IFoldersApi _foldersApi;
-        private IFilesApi _filesApi;
         private string _processedResponseFolderId;
 
         [OneTimeSetUp]
@@ -25,13 +25,13 @@ namespace Lusid.FinDataEx.Tests.Vendor
             _processedResponseFolderName = ("FinDataEx_CI_TempDataFolder_" + Guid.NewGuid()).Substring(0,49);
             _processedResponseFolder = "/" + _processedResponseFolderName;
             _factory = LusidApiFactoryBuilder.Build("secrets.json");
-            _filesApi = _factory.Api<IFilesApi>();
             _foldersApi = _factory.Api<IFoldersApi>();
         }
         
         [SetUp]
         public void SetUp()
         {
+            // setup temporary test folder in LUSID drive
             _processedResponseFolderId = _foldersApi.GetRootFolder(filter: $"Name eq '{_processedResponseFolderName}'").Values.SingleOrDefault()?.Id;
             var createFolder = new CreateFolder("/", _processedResponseFolderName);
             _processedResponseFolderId ??= _foldersApi.CreateFolder(createFolder).Id;
@@ -40,11 +40,13 @@ namespace Lusid.FinDataEx.Tests.Vendor
         [TearDown]
         public void TearDown()
         {
+            // remove temporary folders.
+            // note if debugging and terminating test early ensure folder is delete on LUSID drive
             _foldersApi.DeleteFolder(_processedResponseFolderId);
         }
         
         [Test]
-        public void run_OnValidPricesRequestWithLusidDriveOutput_ShouldProcessAndWriteToFile()
+        public void run_OnRequestFromFileSystemWithOutputToLusidDrive_ShouldProcessAndWriteToLusidDrive()
         {
             //when
             var fdeValidRequestWithOutputToLusidDrive = Path.Combine(new[]{"Vendor","Dl","TestData","fde_request_dl_prices_lusid_drive.json"});
@@ -52,12 +54,12 @@ namespace Lusid.FinDataEx.Tests.Vendor
             //execute
             FinDataExRuntime.Main(new string[]{"FileSystem", fdeValidRequestWithOutputToLusidDrive, _processedResponseFolder});
             
-            // verify - get files from LUSID Drive ensure it exists
-            Assert.Fail("Unfinished. Implement assertions that fetch from drive and confirm existence of file");
+            // verify
+            AssertProcessedOutputExistsInLusidDrive();
         }
         
         [Test]
-        public void run_OnValidPricesRequestWithLusidDriveOutputAndRequestFromLusidDrive_ShouldProcessAndWriteToFile()
+        public void run_OnRequestFromLusidDriveWithOutputToLusidDrive_ShouldProcessAndWriteToLusidDrive()
         {
             //when
             var fdeValidRequestFileLusidDriveId = FdeRequestBuilderTests.CiTestFdePricesRequestLusidDriveId;
@@ -65,12 +67,12 @@ namespace Lusid.FinDataEx.Tests.Vendor
             //execute
             FinDataExRuntime.Main(new string[]{"LusidDrive", fdeValidRequestFileLusidDriveId, _processedResponseFolder});
             
-            // verify - get files from LUSID Drive ensure it exists
-            Assert.Fail("Unfinished. Implement assertions that fetch from drive and confirm existence of file");
+            // verify
+            AssertProcessedOutputExistsInLusidDrive();
         }
         
         [Test]
-        public void run_OnValidPricesRequestWithSchedulerTypeArguments_ShouldProcessAndWriteToLusidDrive()
+        public void run_OnRequestWithSchedulerTypeArguments_ShouldProcessAndWriteToLusidDrive()
         {
             //when
             var fdeValidRequestFileLusidDriveId = FdeRequestBuilderTests.CiTestFdePricesRequestLusidDriveId;
@@ -78,8 +80,47 @@ namespace Lusid.FinDataEx.Tests.Vendor
             //execute
             FinDataExRuntime.Main(new string[]{"fdeRequestSource=LusidDrive", "requestPath=" + fdeValidRequestFileLusidDriveId, "outputDirectory=" + _processedResponseFolder});
             
-            // verify - get files from LUSID Drive ensure it exists
-            Assert.Fail("Unfinished. Implement assertions that fetch from drive and confirm existence of file");
+            // verify
+            AssertProcessedOutputExistsInLusidDrive();
+        }
+        
+        [Test]
+        public void run_WithBadRequestSource_ShouldThrowException()
+        {
+            //when
+            var fdeValidRequestFileLusidDriveId = FdeRequestBuilderTests.CiTestFdePricesRequestLusidDriveId;
+            
+            //execute and verify
+            Assert.Throws<ArgumentException>(() => 
+                FinDataExRuntime.Main(new string[]{"fdeRequestSource=SomeNonExistingSource", "requestPath=" + fdeValidRequestFileLusidDriveId, "outputDirectory=" + _processedResponseFolder}));
+            
+            // even with exception verify no files were created
+            AssertProcessedOutputDoesNotExistInLusidDrive();
+        }
+
+        private void AssertProcessedOutputExistsInLusidDrive()
+        {
+
+            PagedResourceListOfStorageObject listOfFilesInFolder = _foldersApi.GetFolderContents(_processedResponseFolderId);
+            List<StorageObject> filesInFolder = listOfFilesInFolder.Values;
+            
+            // verify only one file created
+            Assert.That(filesInFolder.Count, Is.EqualTo(1));
+            
+            // verify processed file is as expected
+            StorageObject processedOutputFile = filesInFolder[0]; 
+            Assert.That(processedOutputFile.Name, Is.EqualTo("DL12345_Prices.csv"));
+            Assert.That(processedOutputFile.Type, Is.EqualTo("File"));
+            Assert.That(processedOutputFile.Size, Is.EqualTo(424));
+        }
+        
+        private void AssertProcessedOutputDoesNotExistInLusidDrive()
+        {
+
+            PagedResourceListOfStorageObject listOfFilesInFolder = _foldersApi.GetFolderContents(_processedResponseFolderId);
+            List<StorageObject> filesInFolder = listOfFilesInFolder.Values;
+            // verify no files created
+            Assert.That(filesInFolder.Count, Is.EqualTo(0));
         }
 
     }

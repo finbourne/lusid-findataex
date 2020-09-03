@@ -28,7 +28,7 @@ namespace Lusid.FinDataEx
         /// </summary>
         /// <param name="fdeRequestSource"></param>
         /// <param name="fdeRequestPath"></param>
-        public void Process(FdeRequestSource fdeRequestSource, string fdeRequestPath)
+        public ProcessResponseResult Process(FdeRequestSource fdeRequestSource, string fdeRequestPath)
         {
             // load and construct request from source
             var fdeRequest =  CreateFdeRequest(fdeRequestSource, fdeRequestPath);
@@ -42,18 +42,8 @@ namespace Lusid.FinDataEx
             // run the extract against an external vendor
             IVendorResponse vendorResponse = ifdExtractor.Extract(fdeRequest);
             
-            // process the vendor specific extract response and display errors if any exist
-            ProcessResponseResult processResponseResult = vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
-            // TODO how to handle partial failures in requests
-            if (processResponseResult.Status != ProcessResponseResultStatus.Ok)
-            {
-                Console.Error.WriteLine("FinDataEx request completed with failures. See details below: ");
-                Console.Error.WriteLine(processResponseResult);
-            }
-            else
-            {
-                Console.WriteLine(processResponseResult.Message);
-            }
+            // process the vendor specific extract response
+            return vendorResponseProcessor.ProcessResponse(fdeRequest, vendorResponse);
         }
 
         /// <summary>

@@ -17,6 +17,9 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
     public class DlFileSystemClient : IVendorClient<DlFtpRequest, DlFtpResponse>
     {
 
+        // Used for passing in location of mock response files when testing with LUSID drive
+        private const string LusidDriveFabricatedUrlPrefix = "lusiddrive://";
+        
         private readonly DlFtpResponseBuilder _dlFtpResponseBuilder;
 
         public DlFileSystemClient(DlFtpResponseBuilder dlFtpResponseBuilder)
@@ -39,7 +42,7 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         private string[] LoadDlResponseEntries(DlFtpRequest dlFtpRequest)
         {
             Console.WriteLine($"Processing DL responses for DLFtpRequest from url={dlFtpRequest.FtpUrl}");
-            if (dlFtpRequest.FtpUrl.StartsWith("lusiddrive://"))
+            if (dlFtpRequest.FtpUrl.StartsWith(LusidDriveFabricatedUrlPrefix))
             {
                 return LoadDlRequestEntriesFromLusidDrive(dlFtpRequest.FtpUrl.Split("//")[1]);
             }
@@ -57,12 +60,12 @@ namespace Lusid.FinDataEx.Vendor.Dl.Ftp
         
         private string[] LoadDlRequestEntriesFromLusidDrive(string responseLusidFileId)
         {
-            ILusidApiFactory factory = LusidApiFactoryBuilder.Build("secrets.json");
-            IFilesApi filesApi = factory.Api<IFilesApi>();
-            Stream responseDlFileStream = filesApi.DownloadFile(responseLusidFileId);
-            byte[] responseDlFileData = new byte[responseDlFileStream.Length];
+            var factory = LusidApiFactoryBuilder.Build("secrets.json");
+            var filesApi = factory.Api<IFilesApi>();
+            var responseDlFileStream = filesApi.DownloadFile(responseLusidFileId);
+            var responseDlFileData = new byte[responseDlFileStream.Length];
             responseDlFileStream.Read(responseDlFileData);
-            string dlResponse = Encoding.UTF8.GetString(responseDlFileData);
+            var dlResponse = Encoding.UTF8.GetString(responseDlFileData);
             return dlResponse.Split("\r\n");
         }
 

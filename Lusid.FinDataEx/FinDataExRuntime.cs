@@ -29,22 +29,31 @@ namespace Lusid.FinDataEx
         /// <exception cref="ArgumentException"></exception>
         public static void Main(string[] args)
         {
+            // ensure correct number of arguments passed in
             if (args.Length != 3)
             {
                 throw new ArgumentException($"Invalid arguments {string.Join(", ", args)}. Arguments" +
-                                            $" must be of format \"lusidfindataex -t <request_source> -f <request_file_path> -o <output_dir>\"");
+                                            $" must be of format \"Lusid.FinDataEx.dll -t <request_source> -f <request_file_path> -o <output_dir>\"");
             }
 
+            // parse arguments - scheduler jobs for example pass in a specific format.
             FdeRequestSource requestSource = ParseRequestSourceArgument(args[0]);
             string requestPath = ParseArgumentVariable(args[1]);
             string outputDir = ParseArgumentVariable(args[2]);
             Console.WriteLine($"Running FinDataEx for request source={requestSource}, request={requestPath}, output directory={outputDir}.");
             
+            // construct request, the extractor for a specific vendor and the processor of vendor responses
             FdeRequestBuilder fdeRequestBuilder = new FdeRequestBuilder();
             VendorExtractorBuilder vendorExtractorBuilder = new VendorExtractorBuilder();
             FdeResponseProcessorBuilder fdeResponseProcessorBuilder = new FdeResponseProcessorBuilder(outputDir);
+            
+            // create central workflow processor for findataex
             FinDataEx finDataEx = new FinDataEx(fdeRequestBuilder, vendorExtractorBuilder, fdeResponseProcessorBuilder);
-            finDataEx.Process(requestSource, requestPath);
+            // TODO should we throw exception on failed (or partially failed) extracts
+            ProcessResponseResult processResponseResult =  finDataEx.Process(requestSource, requestPath);
+
+            // log response results
+            LogProcessResponseResult(processResponseResult);
         }
 
         private static FdeRequestSource ParseRequestSourceArgument(string argument)
@@ -64,6 +73,19 @@ namespace Lusid.FinDataEx
         private static string ParseArgumentVariable(string argument)
         {
             return argument.Contains(LusidSchedulerArgumentSeparator) ? argument.Split(LusidSchedulerArgumentSeparator).Last() : argument;
+        }
+
+        private static void LogProcessResponseResult(ProcessResponseResult processResponseResult)
+        {
+            if (processResponseResult.Status != ProcessResponseResultStatus.Ok)
+            {
+                Console.Error.WriteLine("FinDataEx request completed with failures. See details below: ");
+                Console.Error.WriteLine(processResponseResult);
+            }
+            else
+            {
+                Console.WriteLine(processResponseResult.Message);
+            }
         }
     }
     

@@ -30,17 +30,12 @@ namespace Lusid.FinDataEx.Core
         /// <exception cref="InvalidDataException"> if the requested vendor processor is not supported</exception>
         public IVendorResponseProcessor CreateFdeResponseProcessor(FdeRequest fdeRequest)
         {
-            switch (fdeRequest.Output)
+            return fdeRequest.Output switch
             {
-                case LptResponseProcessor:
-                    return new LptVendorResponseProcessor(OutputDir);
-                    break;
-                case LusidDriveResponseProcessor:
-                    ILusidApiFactory factory = LusidApiFactoryBuilder.Build("secrets.json");
-                    return new LusidDriveVendorResponseProcessor(OutputDir, factory);
-            }
-
-            throw new InvalidDataException($"No response processor found for {fdeRequest.Output}");
+                LptResponseProcessor => new LptVendorResponseProcessor(OutputDir),
+                LusidDriveResponseProcessor => new LusidDriveVendorResponseProcessor(OutputDir, LusidApiFactoryBuilder.Build("secrets.json")),
+                _ => throw new InvalidDataException($"No response processor found for {fdeRequest.Output}")
+            };
         }
     }
 }

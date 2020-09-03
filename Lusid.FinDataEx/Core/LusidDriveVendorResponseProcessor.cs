@@ -46,7 +46,7 @@ namespace Lusid.FinDataEx.Core
                     List<string> finDataEntries = finDataEntrySet.Value.ConvertAll(
                         e => string.Join(OutputFileDelimiter, e));
                     string finDataEntriesStr = string.Join(OutputFileEntrySeparator, finDataEntries);
-                    byte[] finDataEntriesBytes = Encoding.ASCII.GetBytes(finDataEntriesStr);
+                    byte[] finDataEntriesBytes = Encoding.UTF8.GetBytes(finDataEntriesStr);
                     
                     // create output file name based on request and the specific set of this response (e.g. corpAction1)
                     string outputFilename = fdeRequest.Uid + "_" + finDataEntrySet.Key + ".csv";
@@ -62,6 +62,8 @@ namespace Lusid.FinDataEx.Core
                 }
                 catch (Exception e)
                 {
+                    Console.Error.WriteLine($"Failed to process response for {finDataEntrySet.Key}. A failed response will be recorded. " +
+                                            $"Exception Details: {e}");
                     // record as failed upload to lusid drive 
                     processResponseProperties.Add(finDataEntrySet.Key, 
                         LusidDriveUploadResults.CreateFailedUploadResults(fdeRequest.Uid, finDataEntrySet.Key));
