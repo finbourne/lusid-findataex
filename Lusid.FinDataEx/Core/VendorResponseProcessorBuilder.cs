@@ -19,7 +19,7 @@ namespace Lusid.FinDataEx.Core
 
         public FdeResponseProcessorBuilder(string outputDir)
         {
-            this.OutputDir = outputDir;
+            OutputDir = outputDir;
         }
 
         /// <summary>

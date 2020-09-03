@@ -13,10 +13,5 @@
     "source" : "file",
     "sourceData" : "Vendor/Dl/TestData/DlRequests/DL12345.req",
     "requestType" : "Prices" 
-  },
-  "outputConfig" : {
-    "format" : "lusidtools",
-    "url" : "./",
-    "lusidToolsConfig" : "./LusidToolsConfig/dl_all_lusidtools_instructions.json"
   }
 }

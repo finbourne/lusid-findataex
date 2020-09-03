@@ -52,7 +52,7 @@ namespace Lusid.FinDataEx.Tests.Vendor
             var fdeValidRequestWithOutputToLusidDrive = Path.Combine(new[]{"Vendor","Dl","TestData","fde_request_dl_prices_lusid_drive.json"});
             
             //execute
-            FinDataExRuntime.Main(new string[]{"FileSystem", fdeValidRequestWithOutputToLusidDrive, _processedResponseFolder});
+            FinDataExRuntime.Main(new[]{"FileSystem", fdeValidRequestWithOutputToLusidDrive, _processedResponseFolder});
             
             // verify
             AssertProcessedOutputExistsInLusidDrive();
@@ -65,7 +65,7 @@ namespace Lusid.FinDataEx.Tests.Vendor
             var fdeValidRequestFileLusidDriveId = FdeRequestBuilderTests.CiTestFdePricesRequestLusidDriveId;
             
             //execute
-            FinDataExRuntime.Main(new string[]{"LusidDrive", fdeValidRequestFileLusidDriveId, _processedResponseFolder});
+            FinDataExRuntime.Main(new[]{"LusidDrive", fdeValidRequestFileLusidDriveId, _processedResponseFolder});
             
             // verify
             AssertProcessedOutputExistsInLusidDrive();
@@ -78,7 +78,7 @@ namespace Lusid.FinDataEx.Tests.Vendor
             var fdeValidRequestFileLusidDriveId = FdeRequestBuilderTests.CiTestFdePricesRequestLusidDriveId;
             
             //execute
-            FinDataExRuntime.Main(new string[]{"fdeRequestSource=LusidDrive", "requestPath=" + fdeValidRequestFileLusidDriveId, "outputDirectory=" + _processedResponseFolder});
+            FinDataExRuntime.Main(new[]{"fdeRequestSource=LusidDrive", "requestPath=" + fdeValidRequestFileLusidDriveId, "outputDirectory=" + _processedResponseFolder});
             
             // verify
             AssertProcessedOutputExistsInLusidDrive();
@@ -92,7 +92,7 @@ namespace Lusid.FinDataEx.Tests.Vendor
             
             //execute and verify
             Assert.Throws<ArgumentException>(() => 
-                FinDataExRuntime.Main(new string[]{"fdeRequestSource=SomeNonExistingSource", "requestPath=" + fdeValidRequestFileLusidDriveId, "outputDirectory=" + _processedResponseFolder}));
+                FinDataExRuntime.Main(new[]{"fdeRequestSource=SomeNonExistingSource", "requestPath=" + fdeValidRequestFileLusidDriveId, "outputDirectory=" + _processedResponseFolder}));
             
             // even with exception verify no files were created
             AssertProcessedOutputDoesNotExistInLusidDrive();

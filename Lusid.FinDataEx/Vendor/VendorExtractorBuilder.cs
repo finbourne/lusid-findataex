@@ -13,6 +13,8 @@ namespace Lusid.FinDataEx.Vendor
     /// </summary>
     public class VendorExtractorBuilder
     {
+
+        public const string FtpConnector = "ftp";
         
         /// <summary>
         /// Create an extractor based on the parameters supplied by an FdeRequest
@@ -27,7 +29,6 @@ namespace Lusid.FinDataEx.Vendor
             {
                 case Vendors.DL:
                     return CreateDlFdeExtractor(fdeRequest.ConnectorConfig);
-                    break;
                 default:
                     throw new InvalidDataException($"Vendor {fdeRequest.Vendor} is not currently supported.");
             }
@@ -38,7 +39,7 @@ namespace Lusid.FinDataEx.Vendor
             string connectorType = GetConnectorConfigParameter(connectorConfig, ConType);
             switch (connectorType)
             {
-                case "ftp":
+                case FtpConnector:
                     IVendorClient<DlFtpRequest, DlFtpResponse> dlClient =
                         new DlFileSystemClient(new DlFtpResponseBuilder());
                     DlFtpExtractor dlFtpExtractor = new DlFtpExtractor(dlClient);
