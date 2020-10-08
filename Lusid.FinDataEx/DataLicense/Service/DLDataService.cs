@@ -15,6 +15,8 @@ namespace Lusid.FinDataEx.DataLicense.Service
         public const int DataNotAvailable = 100;
         public const int Success = 0;
         public const int RequestError = 200;
+        public const int InstrumentSuccessCode = 0;
+        public const int NoCorpActionCode = 300;
 
         private readonly PerSecurityWS _perSecurityWs;
 

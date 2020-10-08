@@ -65,12 +65,12 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
                                                 $"certificate. Ensure you've set environment variable {BbgDlCertEnvVar}");
             }
-            if (clientCertFilePath == null)
+            string clientCertPassword = Environment.GetEnvironmentVariable(BbgDlPassEnvVar);
+            if (clientCertPassword == null)
             {
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
-                                                $"password. Ensure you've set environment variable {BbgDlCertEnvVar}");
+                                                $"password. Ensure you've set environment variable {BbgDlPassEnvVar}");
             }
-            string clientCertPassword = Environment.GetEnvironmentVariable(BbgDlPassEnvVar);
             return new X509Certificate2(clientCertFilePath, clientCertPassword);
         }
     }

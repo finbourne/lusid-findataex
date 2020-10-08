@@ -40,10 +40,10 @@ namespace Lusid.FinDataEx.DataLicense
             RetrieveGetDataResponse retrieveGetDataResponse =  GetDataResponseSync(retrieveGetDataResponseRequest);
 
 
-            string json = JsonSerializer.Serialize(retrieveGetDataResponse);
             // log output
-            Console.WriteLine("GetData response : ");
+            Console.WriteLine($"GetData response for id={retrieveGetDataResponse.responseId} and response-level status code={retrieveGetDataResponse.statusCode.code}({retrieveGetDataResponse.statusCode.description})");
             DlUtils.PrintGetDataResponse(retrieveGetDataResponse);
+            DlUtils.PrintJsonResponse(retrieveGetDataResponse);
             return retrieveGetDataResponse;
         }
 

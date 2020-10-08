@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using Lusid.FinDataEx.DataLicense.Service;
 using PerSecurity_Dotnet;
 
@@ -7,6 +8,20 @@ namespace Lusid.FinDataEx.DataLicense.Util
 {
     public class DlUtils
     {
+
+        /// <summary>
+        /// Print the BBG DL response as JSON to allow the response to be reconstructed
+        /// in a test environment for debugging purposes
+        /// 
+        /// </summary>
+        /// <param name="response"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void PrintJsonResponse<T>(T response)
+        {
+            string bbgResponseAsJson = JsonSerializer.Serialize(response);
+            Console.WriteLine("Response as Json for debugging:");
+            Console.WriteLine(bbgResponseAsJson);
+        }
 
         public static void PrintGetDataResponse(RetrieveGetDataResponse retrieveGetDataResponse)
         {

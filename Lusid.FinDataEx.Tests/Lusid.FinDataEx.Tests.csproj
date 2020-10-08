@@ -14,11 +14,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="DataLicense\Service\Call\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('DataLicense\Service\Call\TestData\')" />
+        <None Include="Unit\DataLicense\Service\Call\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Unit\DataLicense\Service\Call\TestData\')" />
     </ItemGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\Lusid.FinDataEx\Lusid.FinDataEx.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Unit" />
     </ItemGroup>
 
 </Project>
