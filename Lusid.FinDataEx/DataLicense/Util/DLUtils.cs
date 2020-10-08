@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using Lusid.FinDataEx.DataLicense.Service;
 using PerSecurity_Dotnet;
 

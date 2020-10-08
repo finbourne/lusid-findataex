@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading;
 using Lusid.FinDataEx.DataLicense.Service;
+using Lusid.FinDataEx.DataLicense.Util;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense
 {
     public class GetDataBbgCall : IBbgCall<RetrieveGetDataResponse>
     {
+        /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
+         or worse if poll interval against actual servers*/
+        public int PollingInterval { get; set; } = DLDataService.PollInterval;
+        
         private readonly PerSecurityWS _perSecurityWs;
         private readonly GetDataHeaders _getDataHeaders;
         private readonly string[] _getDataFields;
@@ -32,6 +38,12 @@ namespace Lusid.FinDataEx.DataLicense
             retrieveGetDataResponseRequest retrieveGetDataResponseRequest =
                 RetrieveGetDataResponseRequest(submitGetDataResponse);
             RetrieveGetDataResponse retrieveGetDataResponse =  GetDataResponseSync(retrieveGetDataResponseRequest);
+
+
+            string json = JsonSerializer.Serialize(retrieveGetDataResponse);
+            // log output
+            Console.WriteLine("GetData response : ");
+            DlUtils.PrintGetDataResponse(retrieveGetDataResponse);
             return retrieveGetDataResponse;
         }
 
@@ -42,7 +54,7 @@ namespace Lusid.FinDataEx.DataLicense
             RetrieveGetDataResponse getDataResponse;
             do
             {
-                Thread.Sleep(DLDataService.PollInterval);
+                Thread.Sleep(PollingInterval);
                 retrieveGetDataResponseResponse retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
                 getDataResponse = retrieveGetDataResponse.retrieveGetDataResponse;
             }

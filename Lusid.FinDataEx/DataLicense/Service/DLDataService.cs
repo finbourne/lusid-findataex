@@ -9,11 +9,13 @@ namespace Lusid.FinDataEx.DataLicense.Service
 {
     public class DLDataService
     {
+        /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
+         or worse if poll interval against actual servers*/
+        public const int PollInterval = 30000;
         public const int DataNotAvailable = 100;
         public const int Success = 0;
         public const int RequestError = 200;
-        public const int PollInterval = 30000;
-        
+
         private readonly PerSecurityWS _perSecurityWs;
 
         public DLDataService(PerSecurityWS perSecurityWs)
