@@ -4,10 +4,10 @@ namespace Lusid.FinDataEx
 {
     public class FinDataOutput
     {
-        private List<string> Header { get; }
-        private List<List<string>> Records { get; }
+        public List<string> Header { get; }
+        public List<Dictionary<string,string>> Records { get; }
 
-        public FinDataOutput(List<string> header, List<List<string>> records)
+        public FinDataOutput(List<string> header, List<Dictionary<string,string>> records)
         {
             this.Header = header;
             this.Records = records;

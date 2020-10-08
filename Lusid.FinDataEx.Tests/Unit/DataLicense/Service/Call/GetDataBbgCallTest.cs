@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Lusid.FinDataEx.DataLicense;
 using Lusid.FinDataEx.DataLicense.Service;
+using Lusid.FinDataEx.Tests.Unit;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -27,7 +28,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
         {
             //when
             Instruments testInstruments = CreateTestInstruments();
-            string responseId = "1602149495-71386027";
+            string responseId = "1602149495-71386027_ValidInstruments";
 
             // setup mock to submit request and get back response id to poll
             submitGetDataRequestRequest submitGetDataRequestRequest = null;
@@ -78,7 +79,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
             
             //when
             Instruments testInstruments = CreateTestInstrumentsWithBadInstrument();
-            string responseId = "1602161569-1051504982";
+            string responseId = "1602161569-1051504982_OneBadInstrument";
 
             // setup mock to submit request and get back response id to poll
             submitGetDataRequestRequest submitGetDataRequestRequest = null;
@@ -123,7 +124,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
 
         private void AssertBbUniqueQueriedInstrumentIsPopulated(string[] getDataFields, InstrumentData instrumentData, string bbUid, string lastPrice)
         {
-            Assert.That(instrumentData.code, Is.EqualTo("0"));
+            Assert.That(instrumentData.code, Is.EqualTo(DLDataService.InstrumentSuccessCode));
             Assert.That(instrumentData.instrument.id, Is.EqualTo(bbUid));
             Assert.That(instrumentData.instrument.yellowkey, Is.EqualTo(MarketSector.Govt));
             
@@ -136,7 +137,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
         
         private void AssertIsinQueriedInstrumentIsPopulated(string[] getDataFields, InstrumentData instrumentData, string isin, string bbUid, string lastPrice)
         {
-            Assert.That(instrumentData.code, Is.EqualTo("0"));
+            Assert.That(instrumentData.code, Is.EqualTo(DLDataService.InstrumentSuccessCode));
             Assert.That(instrumentData.instrument.id, Is.EqualTo(isin));
             Assert.That(instrumentData.instrument.yellowkey, Is.EqualTo(MarketSector.Govt));
             
@@ -149,7 +150,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
         
         private void AssertBadInstrumentIsNotPopulated(string[] getDataFields, InstrumentData instrumentData, string bbUid)
         {
-            Assert.That(instrumentData.code, Is.Not.EqualTo("0"));
+            Assert.That(instrumentData.code, Is.Not.EqualTo(DLDataService.InstrumentSuccessCode));
             Assert.That(instrumentData.instrument.id, Is.EqualTo(bbUid));
             
             Assert.That(getDataFields[0], Is.EqualTo("ID_BB_UNIQUE"));
@@ -205,7 +206,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
 
         private retrieveGetDataResponseResponse CreateRetrieveGetDataResponseResponse(string responseId)
         {
-            RetrieveGetDataResponse retrieveGetDataResponse = LoadResponseFromFile(responseId);
+            RetrieveGetDataResponse retrieveGetDataResponse = TestUtils.LoadResponseFromFile(responseId);
             retrieveGetDataResponseResponse retrieveGetDataResponseResponse = new retrieveGetDataResponseResponse
             {
                 retrieveGetDataResponse = retrieveGetDataResponse
@@ -213,12 +214,5 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
             return retrieveGetDataResponseResponse;
         }
 
-        private RetrieveGetDataResponse LoadResponseFromFile(string responseId)
-        {
-            string responsePath = Path.Combine(new[]{"Unit","DataLicense","Service","Call","TestData",$"{responseId}.json"});
-            RetrieveGetDataResponse retrieveGetDataResponse =  JsonConvert.DeserializeObject<RetrieveGetDataResponse>(File.ReadAllText(responsePath));
-            return retrieveGetDataResponse;
-        }
-        
     }
 }
