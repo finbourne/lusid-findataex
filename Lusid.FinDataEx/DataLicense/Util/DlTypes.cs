@@ -1,6 +1,6 @@
-﻿namespace Lusid.FinDataEx.DataLicense
+﻿namespace Lusid.FinDataEx.DataLicense.Util
 {
-    public class BbgDlTypes
+    public class DlTypes
     {
         public enum DataTypes
         {

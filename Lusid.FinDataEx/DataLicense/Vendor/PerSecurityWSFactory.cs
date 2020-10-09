@@ -13,6 +13,12 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
         public const string BbgDlCertEnvVar = "BBG_DL_CERT";
         public const string BbgDlPassEnvVar = "BBG_DL_PASS";
 
+        public PerSecurityWS CreateDefault()
+        {
+            X509Certificate2 certificate = CreateCertificateFromEnvVar();
+            return Create(BbgDlAddress, certificate);
+        }
+        
         public PerSecurityWS CreateDefault(string bbgDlAddress)
         {
             X509Certificate2 certificate = CreateCertificateFromEnvVar();

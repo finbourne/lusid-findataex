@@ -74,7 +74,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
         [Test]
         public void Get_OnOneBadInstrumentId_ShouldReturnNothingForBadInstrumentOnly()
         {
-            // A bad instrument should still return a success code for the general BBG DL call but the
+            // A bad instrument should still return as a success for the general BBG DL call but the
             // instrument data should be empty with instrument specific status code as error.
             
             //when
@@ -176,8 +176,8 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
 
             return new Instruments {instrument = new Instrument[] {bbUniqueId1, bbUniqueId2}};
         }
-        
-        internal static Instruments CreateTestInstrumentsWithBadInstrument()
+
+        private Instruments CreateTestInstrumentsWithBadInstrument()
         {
             // IBM
             Instrument bbUniqueId1 = new Instrument

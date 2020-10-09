@@ -4,13 +4,15 @@ namespace Lusid.FinDataEx
 {
     public class FinDataOutput
     {
+        public string Id { get; }
         public List<string> Header { get; }
         public List<Dictionary<string,string>> Records { get; }
 
-        public FinDataOutput(List<string> header, List<Dictionary<string,string>> records)
+        public FinDataOutput(string id, List<string> header, List<Dictionary<string, string>> records)
         {
-            this.Header = header;
-            this.Records = records;
+            Id = id;
+            Header = header;
+            Records = records;
         }
     }
 }

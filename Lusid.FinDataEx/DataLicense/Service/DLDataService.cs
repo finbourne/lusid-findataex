@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Transform;
 using PerSecurity_Dotnet;
-using static Lusid.FinDataEx.DataLicense.BbgDlTypes;
+using static Lusid.FinDataEx.DataLicense.Util.DlTypes;
 
 namespace Lusid.FinDataEx.DataLicense.Service
 {
@@ -63,7 +63,8 @@ namespace Lusid.FinDataEx.DataLicense.Service
             var instruments = bbgIds.Select(id => new Instrument()
             {
                 id = id,
-                type = InstrumentType.BB_GLOBAL
+                type = InstrumentType.BB_UNIQUE,
+                typeSpecified = true
             }).ToArray();
             return new Instruments()
             {
