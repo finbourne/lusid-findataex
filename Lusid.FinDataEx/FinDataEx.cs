@@ -12,6 +12,7 @@ namespace Lusid.FinDataEx
     {
         public static void Main(string[] args)
         {
+            // TODO move to CommandLineParser library
             // parse required arguments
             DataTypes dlDataType = Enum.Parse<DataTypes>(args[0]);
             List<string> bbgIds = GetBbgIds(args[1]);

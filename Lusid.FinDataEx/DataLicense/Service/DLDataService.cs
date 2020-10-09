@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Transform;
@@ -27,9 +28,18 @@ namespace Lusid.FinDataEx.DataLicense.Service
 
         public List<FinDataOutput> Get(List<string> bbgIds, ProgramTypes programType, DataTypes dataType)
         {
+            // validate inputs
+            if(!bbgIds.Any()) return new List<FinDataOutput>();
+            VerifyBblFlags(programType, dataType);
+            
+            // construct bbg instruments
             Instruments instruments = CreateInstruments(bbgIds);
+            
+            // create relevant action and call to DLWS
             IBbgCall<PerSecurityResponse> bbgCall = CreateBbgCall(instruments, programType, dataType);
             PerSecurityResponse perSecurityResponse = bbgCall.Get(instruments);
+            
+            // parse and transform dl response to standard output
             List<FinDataOutput> finDataOutputs = TransformBbgResponse(perSecurityResponse, dataType);
             return finDataOutputs;
         }
@@ -41,11 +51,11 @@ namespace Lusid.FinDataEx.DataLicense.Service
                 case DataTypes.GetData:
                     return new GetDataResponseTransformer().Transform((RetrieveGetDataResponse) perSecurityResponse);
                 default:
-                    throw new InvalidEnumArgumentException($"{dataType} is not a currently supported BBG Data type.");
+                    throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.");
             }
         }
 
-        // Ask Riz why this won't work with generics and extension?? Maybe think again!
+        //TODO Ask Riz why this won't work with generics and extension?? Maybe think again!
         //IBbgCall<T> CreateBbgCall<T>(Instruments instruments, ProgramTypes programType, DataTypes dataType) where T : extends PerSecurityResponse
         IBbgCall<PerSecurityResponse> CreateBbgCall(Instruments instruments, ProgramTypes programType, DataTypes dataType)
         {
@@ -54,7 +64,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
                 case DataTypes.GetData:
                     return new GetDataBbgCall(_perSecurityWs);
                 default:
-                    throw new InvalidEnumArgumentException($"{dataType} is not a currently supported BBG Data type.");
+                    throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.");
             }
         }
 
@@ -70,6 +80,14 @@ namespace Lusid.FinDataEx.DataLicense.Service
             {
                 instrument = instruments
             };
+        }
+
+        private void VerifyBblFlags(ProgramTypes programType, DataTypes dataType)
+        {
+            if (programType != ProgramTypes.Adhoc)
+            {
+                throw new NotSupportedException($"Only {ProgramTypes.Adhoc} program types are currently allowed.");
+            }
         }
 
     }
