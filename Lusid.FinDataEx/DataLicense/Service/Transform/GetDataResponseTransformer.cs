@@ -23,9 +23,9 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
             var headers = perSecurityResponse.fields.ToList();
             var finDataRecords = new List<Dictionary<string, string>>(); 
             var instrumentDatas = perSecurityResponse.instrumentDatas;
-            Dictionary<string,string> instrumentRecord = new Dictionary<string, string>();
             foreach (var instrumentData in instrumentDatas)
             {
+                Dictionary<string,string> instrumentRecord = new Dictionary<string, string>();
                 // instruments with errors should be logged and ignored
                 if (instrumentData.code != DlDataService.InstrumentSuccessCode)
                 {
