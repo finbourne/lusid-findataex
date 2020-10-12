@@ -44,6 +44,7 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
         {
             BasicHttpBinding basicHttpBinding = new BasicHttpBinding();
             basicHttpBinding.Name = "PerSecurityWSBinding";
+            // Need to review docs on using the timeouts
             /*basicHttpBinding.CloseTimeout = TimeSpan.FromMinutes(1);
             basicHttpBinding.OpenTimeout = TimeSpan.FromMinutes(1);
             basicHttpBinding.ReceiveTimeout = TimeSpan.FromMinutes(10);
