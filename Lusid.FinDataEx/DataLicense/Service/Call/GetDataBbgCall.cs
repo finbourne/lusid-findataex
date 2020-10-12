@@ -63,10 +63,10 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             //Poll for data availability. As per BBG DL sample recommendation.
             //Beware amending the poll interval due to BBG limitations. Especially in TEST.
             RetrieveGetDataResponse getDataResponse;
-            var retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
             do
             {
                 Thread.Sleep(PollingInterval);
+                var retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
                 getDataResponse = retrieveGetDataResponse.retrieveGetDataResponse;
             }
             while (getDataResponse.statusCode.code == DlDataService.DataNotAvailable);
