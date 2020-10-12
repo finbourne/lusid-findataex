@@ -14,24 +14,24 @@ namespace Lusid.FinDataEx
         {
             // TODO move to CommandLineParser library
             // parse required arguments
-            DataTypes dlDataType = Enum.Parse<DataTypes>(args[0]);
-            List<string> bbgIds = GetBbgIds(args[1]);
-            string outputDirectory = args[2];
+            var dlDataType = Enum.Parse<DataTypes>(args[0]);
+            var bbgIds = GetBbgIds(args[1]);
+            var outputDirectory = args[2];
 
             // prepare DL service and output writer
-            DLDataService dlDataService = CreateDlDataService();
-            IFinDataOutputWriter finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory);
+            var dlDataService = CreateDlDataService();
+            var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory);
             
             // call DL and write results to specified output
-            List<FinDataOutput> finDataOutputs =  dlDataService.Get(bbgIds, ProgramTypes.Adhoc, dlDataType);
-            WriteResult writeResult =  finDataOutputWriter.Write(finDataOutputs);
+            var finDataOutputs =  dlDataService.Get(bbgIds, ProgramTypes.Adhoc, dlDataType);
+            var writeResult =  finDataOutputWriter.Write(finDataOutputs);
             LogWriteResult(writeResult);
         }
 
-        private static DLDataService CreateDlDataService()
+        private static DlDataService CreateDlDataService()
         {
-            PerSecurityWSFactory perSecurityWsFactory = new PerSecurityWSFactory();
-            return new DLDataService(perSecurityWsFactory.CreateDefault());
+            var perSecurityWsFactory = new PerSecurityWsFactory();
+            return new DlDataService(perSecurityWsFactory.CreateDefault());
         }
 
         private static IFinDataOutputWriter CreateFinDataOutputWriter(string outputDirectory)

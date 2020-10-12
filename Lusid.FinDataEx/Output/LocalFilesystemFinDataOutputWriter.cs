@@ -6,6 +6,9 @@ using static Lusid.FinDataEx.Output.IFinDataOutputWriter;
 
 namespace Lusid.FinDataEx.Output
 {
+    /// <summary>
+    ///  Writes FinDataOutput to local file system.
+    /// </summary>
     public class LocalFilesystemFinDataOutputWriter : IFinDataOutputWriter
     {
 
@@ -16,16 +19,16 @@ namespace Lusid.FinDataEx.Output
             _outputDir = outputDir;
         }
         
-        public WriteResult Write(List<FinDataOutput> finDataOutputs)
+        public WriteResult Write(IEnumerable<FinDataOutput> finDataOutputs)
         {
          
-            List<string> responseOkResults = new List<string>();
-            List<string> responseFailResults = new List<string>();
+            var responseOkResults = new List<string>();
+            var responseFailResults = new List<string>();
             foreach (var finDataOutput in finDataOutputs)
             {
                 // prepare fin data as strings to be written to file
-                string headers = string.Join(BbgDlDelimitter, finDataOutput.Header);
-                List<string> finDataRecords = new List<string>{headers};
+                var headers = string.Join(BbgDlDelimiter, finDataOutput.Header);
+                var finDataRecords = new List<string>{headers};
                 finDataRecords.AddRange(
                 finDataOutput.Records.Select(dR =>
                         {
@@ -36,11 +39,11 @@ namespace Lusid.FinDataEx.Output
                                 record.Add(recordEntry);
                             }
 
-                            return string.Join(BbgDlDelimitter, record);
+                            return string.Join(BbgDlDelimiter, record);
                         }).ToList()
                 );
                 
-                string outputPath = _outputDir + Path.DirectorySeparatorChar + finDataOutput.Id + BbgDlOutputFileFormat;
+                var outputPath = _outputDir + Path.DirectorySeparatorChar + finDataOutput.Id + BbgDlOutputFileFormat;
                 try
                 {
                     File.WriteAllLines(outputPath, finDataRecords);
@@ -53,10 +56,10 @@ namespace Lusid.FinDataEx.Output
             }
             
             // Prepare the result status to return
-            WriteResultStatus status = (responseFailResults.Any())
+            var status = (responseFailResults.Any())
                 ? WriteResultStatus.Fail
                 : WriteResultStatus.Ok;
-            List<string> responseResults = new List<string>();
+            var responseResults = new List<string>();
             responseResults.AddRange(responseFailResults);
             responseResults.AddRange(responseOkResults);
 

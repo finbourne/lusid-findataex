@@ -1,17 +1,22 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading;
-using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Util;
 using PerSecurity_Dotnet;
 
-namespace Lusid.FinDataEx.DataLicense
+namespace Lusid.FinDataEx.DataLicense.Service.Call
 {
+    /// <summary>
+    ///  GetData BBG DLWS call.
+    ///
+    ///  GetData calls are the typical BBG DL call that request a set of fields of data for
+    ///  a given set of instruments
+    /// 
+    /// </summary>
     public class GetDataBbgCall : IBbgCall<RetrieveGetDataResponse>
     {
         /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
-        public int PollingInterval { get; set; } = DLDataService.PollInterval;
+        public int PollingInterval { get; set; } = DlDataService.PollInterval;
         
         private readonly PerSecurityWS _perSecurityWs;
         private readonly GetDataHeaders _getDataHeaders;
@@ -19,25 +24,31 @@ namespace Lusid.FinDataEx.DataLicense
 
         public GetDataBbgCall(PerSecurityWS perSecurityWs) : this(perSecurityWs, GetDefaultHeaders(),
             GetDefaultDataFields()) {}
-        
-        public GetDataBbgCall(PerSecurityWS perSecurityWs, GetDataHeaders dataHeaders, string[] dataFields)
+
+        private GetDataBbgCall(PerSecurityWS perSecurityWs, GetDataHeaders dataHeaders, string[] dataFields)
         {
             _perSecurityWs = perSecurityWs;
             _getDataHeaders = dataHeaders;
             _getDataFields = dataFields;
         }
 
+        /// <summary>
+        /// Execute a GetData call for a given set of instruments.
+        /// 
+        /// </summary>
+        /// <param name="instruments">Instruments to retrieve data against.</param>
+        /// <returns>Response from BBG DLWS that should contain the requested data and relevant status codes.</returns>
         public RetrieveGetDataResponse Get(Instruments instruments)
         {
-            submitGetDataRequestRequest getDataRequest = CreateGetDataRequest(instruments);
-            submitGetDataRequestResponse submitGetDataRequest = _perSecurityWs.submitGetDataRequest(getDataRequest);
-            SubmitGetDataResponse submitGetDataResponse = submitGetDataRequest.submitGetDataResponse;
+            var getDataRequest = CreateGetDataRequest(instruments);
+            var submitGetDataRequest = _perSecurityWs.submitGetDataRequest(getDataRequest);
+            var submitGetDataResponse = submitGetDataRequest.submitGetDataResponse;
             Console.WriteLine($"Submitted GetDataRequest. Response ID to check for {submitGetDataResponse.responseId} with current status {submitGetDataResponse.statusCode}");
             
             // Await for response and retrieve once ready
-            retrieveGetDataResponseRequest retrieveGetDataResponseRequest =
+            var retrieveGetDataResponseRequest =
                 RetrieveGetDataResponseRequest(submitGetDataResponse);
-            RetrieveGetDataResponse retrieveGetDataResponse =  GetDataResponseSync(retrieveGetDataResponseRequest);
+            var retrieveGetDataResponse =  GetDataResponseSync(retrieveGetDataResponseRequest);
 
 
             // log output
@@ -52,33 +63,33 @@ namespace Lusid.FinDataEx.DataLicense
             //Poll for data availability. As per BBG DL sample recommendation.
             //Beware amending the poll interval due to BBG limitations. Especially in TEST.
             RetrieveGetDataResponse getDataResponse;
+            var retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
             do
             {
                 Thread.Sleep(PollingInterval);
-                retrieveGetDataResponseResponse retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
                 getDataResponse = retrieveGetDataResponse.retrieveGetDataResponse;
             }
-            while (getDataResponse.statusCode.code == DLDataService.DataNotAvailable);
+            while (getDataResponse.statusCode.code == DlDataService.DataNotAvailable);
             return getDataResponse;
         }
 
         private submitGetDataRequestRequest CreateGetDataRequest(Instruments instruments)
         {
-            SubmitGetDataRequest submitGetDataRequest = new SubmitGetDataRequest
+            var submitGetDataRequest = new SubmitGetDataRequest
             {
                 headers = _getDataHeaders, fields = _getDataFields, instruments = instruments
             };
-            submitGetDataRequestRequest submitGetDataRequestRequest = new submitGetDataRequestRequest(submitGetDataRequest);
+            var submitGetDataRequestRequest = new submitGetDataRequestRequest(submitGetDataRequest);
             return submitGetDataRequestRequest;
         }
 
         private retrieveGetDataResponseRequest RetrieveGetDataResponseRequest(SubmitGetDataResponse submitGetDataResponse)
         {
-            RetrieveGetDataRequest retrieveGetDataRequest = new RetrieveGetDataRequest
+            var retrieveGetDataRequest = new RetrieveGetDataRequest
             {
                 responseId = submitGetDataResponse.responseId
             };
-            retrieveGetDataResponseRequest retrieveGetDataResponseRequest = new retrieveGetDataResponseRequest(retrieveGetDataRequest);
+            var retrieveGetDataResponseRequest = new retrieveGetDataResponseRequest(retrieveGetDataRequest);
             return retrieveGetDataResponseRequest;
         }
 

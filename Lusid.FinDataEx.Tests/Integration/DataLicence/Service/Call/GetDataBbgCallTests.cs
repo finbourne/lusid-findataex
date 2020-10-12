@@ -1,12 +1,11 @@
-﻿using System;
-using Lusid.FinDataEx.DataLicense;
-using Lusid.FinDataEx.DataLicense.Service;
+﻿using Lusid.FinDataEx.DataLicense.Service;
+using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
-using static Lusid.FinDataEx.Tests.DataLicence.Service.Call.GetDataBbgCallTest;
+using static Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call.GetDataBbgCallTest;
 
-namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
+namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
 {
     [TestFixture]
     public class GetDataBbgCallTests
@@ -17,7 +16,7 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
         [SetUp]
         public void SetUp()
         {
-            PerSecurityWS perSecurityWs = new PerSecurityWSFactory().CreateDefault(PerSecurityWSFactory.BbgDlAddress);
+            var perSecurityWs = new PerSecurityWsFactory().CreateDefault(PerSecurityWsFactory.BbgDlAddress);
             _getDataBbgCall = new GetDataBbgCall(perSecurityWs);
         }
 
@@ -25,15 +24,15 @@ namespace Lusid.FinDataEx.Tests.DataLicence.Service.Call
         public void Get_OnValidInstruments_ShouldReturnPrice()
         {
             //when
-            Instruments testInstruments = CreateTestInstruments();
+            var testInstruments = CreateTestInstruments();
             
             //execute
-            RetrieveGetDataResponse retrieveGetDataResponse =  _getDataBbgCall.Get(testInstruments);
-            InstrumentData[] instrumentDatas = retrieveGetDataResponse.instrumentDatas;
-            string[] getDataFields = retrieveGetDataResponse.fields;
+            var retrieveGetDataResponse =  _getDataBbgCall.Get(testInstruments);
+            var instrumentDatas = retrieveGetDataResponse.instrumentDatas;
+            var getDataFields = retrieveGetDataResponse.fields;
 
             //verify
-            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DLDataService.Success));
+            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DlDataService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(2));
             AssertBbUniqueQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[0], "EQ0010174300001000");
             AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "EQ0021695200001000");

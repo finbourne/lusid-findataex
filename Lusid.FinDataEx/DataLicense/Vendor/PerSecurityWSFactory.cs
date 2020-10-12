@@ -2,77 +2,111 @@
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.Text;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Vendor
 {
-    public class PerSecurityWSFactory
+    /// <summary>
+    /// Factory for creating BBG DL web service proxy class. Default setups should
+    /// work fine for most use cases but if specific settings are needed (e.g. increased timeouts
+    /// due to large calls) than new factory creation methods should be added here.
+    /// </summary>
+    public class PerSecurityWsFactory
     {
         
         public const string BbgDlAddress = "https://dlws.bloomberg.com/dlps";
         public const string BbgDlCertEnvVar = "BBG_DL_CERT";
         public const string BbgDlPassEnvVar = "BBG_DL_PASS";
 
+        /// <summary>
+        ///  Creates a default BBG DLWS client using default bbg ws address 
+        ///  (https://dlws.bloomberg.com/dlps). Retrieves certificates and
+        /// password details from environment variables BBG_DL_CERT and BBG_DL_PASS
+        /// </summary>
+        /// <returns></returns>
         public PerSecurityWS CreateDefault()
         {
-            X509Certificate2 certificate = CreateCertificateFromEnvVar();
+            var certificate = CreateCertificateFromEnvVar();
             return Create(BbgDlAddress, certificate);
         }
         
+        /// <summary>
+        ///  Creates a default BBG DLWS client against specified address and
+        ///  authentication and retrieves certificates and
+        /// password details from environment variables BBG_DL_CERT and BBG_DL_PASS
+        /// </summary>
+        /// <param name="bbgDlAddress"></param>
+        /// <returns></returns>
         public PerSecurityWS CreateDefault(string bbgDlAddress)
         {
-            X509Certificate2 certificate = CreateCertificateFromEnvVar();
+            var certificate = CreateCertificateFromEnvVar();
             return Create(bbgDlAddress, certificate);
         }
         
+        /// <summary>
+        ///  Creates a default BBG DLWS client.
+        /// </summary>
+        /// <param name="bbgDlAddress"></param>
+        /// <param name="bbgDlCert"></param>
+        /// <param name="bbgDlPass"></param>
+        /// <returns></returns>
         public PerSecurityWS CreateDefault(string bbgDlAddress, string bbgDlCert, string bbgDlPass)
         {
-            X509Certificate2 certificate =  new X509Certificate2(bbgDlCert, bbgDlPass);
+            var certificate =  new X509Certificate2(bbgDlCert, bbgDlPass);
             return Create(bbgDlAddress, certificate);
         }
 
         private PerSecurityWS Create(string bbgDlAddress, X509Certificate2 certificate)
         {
-            Binding binding = CreateDefaultBinding();
-            EndpointAddress endpointAddress = new EndpointAddress(bbgDlAddress);
-            PerSecurityWSClient perSecurityWsClient = new PerSecurityWSClient(binding, endpointAddress);
+            var binding = CreateDefaultBinding();
+            var endpointAddress = new EndpointAddress(bbgDlAddress);
+            var perSecurityWsClient = new PerSecurityWSClient(binding, endpointAddress);
             perSecurityWsClient.ClientCredentials.ClientCertificate.Certificate = certificate;
             return perSecurityWsClient;
         }
 
         private Binding CreateDefaultBinding()
         {
-            BasicHttpBinding basicHttpBinding = new BasicHttpBinding();
-            basicHttpBinding.Name = "PerSecurityWSBinding";
+            var basicHttpBinding = new BasicHttpBinding
+            {
+                Name = "PerSecurityWSBinding",
+                AllowCookies = false,
+                BypassProxyOnLocal = false,
+                MaxBufferPoolSize = 524288,
+                MaxBufferSize = 104857600,
+                MaxReceivedMessageSize = 104857600,
+                TextEncoding = Encoding.UTF8,
+                TransferMode = TransferMode.Buffered,
+                UseDefaultWebProxy = true,
+                Security =
+                {
+                    Mode = BasicHttpSecurityMode.Transport,
+                    Transport =
+                    {
+                        ClientCredentialType = HttpClientCredentialType.Certificate,
+                        ProxyCredentialType = HttpProxyCredentialType.None
+                    },
+                    Message = {ClientCredentialType = BasicHttpMessageCredentialType.Certificate}
+                }
+            };
             // Need to review docs on using the timeouts
             /*basicHttpBinding.CloseTimeout = TimeSpan.FromMinutes(1);
             basicHttpBinding.OpenTimeout = TimeSpan.FromMinutes(1);
             basicHttpBinding.ReceiveTimeout = TimeSpan.FromMinutes(10);
             basicHttpBinding.SendTimeout = TimeSpan.FromMinutes(1);*/
-            basicHttpBinding.AllowCookies = false;
-            basicHttpBinding.BypassProxyOnLocal = false;
-            basicHttpBinding.MaxBufferPoolSize = 524288;
-            basicHttpBinding.MaxBufferSize = 104857600;
-            basicHttpBinding.MaxReceivedMessageSize = 104857600;
-            basicHttpBinding.TextEncoding = System.Text.Encoding.UTF8;
-            basicHttpBinding.TransferMode = TransferMode.Buffered;
-            basicHttpBinding.UseDefaultWebProxy = true;
-            basicHttpBinding.Security.Mode = BasicHttpSecurityMode.Transport;
-            basicHttpBinding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Certificate;
-            basicHttpBinding.Security.Transport.ProxyCredentialType = HttpProxyCredentialType.None;
-            basicHttpBinding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.Certificate;
             return basicHttpBinding;
         }
         
         private X509Certificate2 CreateCertificateFromEnvVar()
         {
-            string clientCertFilePath = Environment.GetEnvironmentVariable(BbgDlCertEnvVar);
+            var clientCertFilePath = Environment.GetEnvironmentVariable(BbgDlCertEnvVar);
             if (clientCertFilePath == null)
             {
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
                                                 $"certificate. Ensure you've set environment variable {BbgDlCertEnvVar}");
             }
-            string clientCertPassword = Environment.GetEnvironmentVariable(BbgDlPassEnvVar);
+            var clientCertPassword = Environment.GetEnvironmentVariable(BbgDlPassEnvVar);
             if (clientCertPassword == null)
             {
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +

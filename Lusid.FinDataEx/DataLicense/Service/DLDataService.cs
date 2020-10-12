@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Service.Transform;
 using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.DataLicense.Util.DlTypes;
 
 namespace Lusid.FinDataEx.DataLicense.Service
 {
-    public class DLDataService
+    /// <summary>
+    /// Service that manages the lifecycle of all calls to BBG DLWS. Includes request
+    /// construction, call execution and waiting, and transformation of response data
+    /// into a standard FinDataOutput.
+    /// 
+    /// </summary>
+    public class DlDataService
     {
         /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
@@ -21,11 +27,21 @@ namespace Lusid.FinDataEx.DataLicense.Service
 
         private readonly PerSecurityWS _perSecurityWs;
 
-        public DLDataService(PerSecurityWS perSecurityWs)
+        public DlDataService(PerSecurityWS perSecurityWs)
         {
             _perSecurityWs = perSecurityWs;
         }
 
+        /// <summary>
+        ///  Executes a request to BBG DLWS for a given set of BB_UNIQUE_IDs and a given data type. On response
+        /// will return a standardised output as a FinDataOutput.
+        /// 
+        /// </summary>
+        /// <param name="bbgIds"></param>
+        /// <param name="programType">Program type of the given call (e.g. Adhoc, Scheduled)</param>
+        /// <param name="dataType">Type of call to BBG DLWS (e.g. GetData, GetActions). Different data types retrieve
+        ///  different sets of data. </param>
+        /// <returns>FinDataOutput of data returned for instruments requested</returns>
         public List<FinDataOutput> Get(List<string> bbgIds, ProgramTypes programType, DataTypes dataType)
         {
             // validate inputs
@@ -33,18 +49,18 @@ namespace Lusid.FinDataEx.DataLicense.Service
             VerifyBblFlags(programType, dataType);
             
             // construct bbg instruments
-            Instruments instruments = CreateInstruments(bbgIds);
+            var instruments = CreateInstruments(bbgIds);
             
             // create relevant action and call to DLWS
-            IBbgCall<PerSecurityResponse> bbgCall = CreateBbgCall(instruments, programType, dataType);
-            PerSecurityResponse perSecurityResponse = bbgCall.Get(instruments);
+            var bbgCall = CreateBbgCall(instruments, programType, dataType);
+            var perSecurityResponse = bbgCall.Get(instruments);
             
             // parse and transform dl response to standard output
-            List<FinDataOutput> finDataOutputs = TransformBbgResponse(perSecurityResponse, dataType);
+            var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataType);
             return finDataOutputs;
         }
 
-        List<FinDataOutput> TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
+        private List<FinDataOutput> TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
         {
             switch (dataType)
             {
@@ -55,9 +71,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
             }
         }
 
-        //TODO Ask Riz why this won't work with generics and extension?? Maybe think again!
-        //IBbgCall<T> CreateBbgCall<T>(Instruments instruments, ProgramTypes programType, DataTypes dataType) where T : extends PerSecurityResponse
-        IBbgCall<PerSecurityResponse> CreateBbgCall(Instruments instruments, ProgramTypes programType, DataTypes dataType)
+        private IBbgCall<PerSecurityResponse> CreateBbgCall(Instruments instruments, ProgramTypes programType, DataTypes dataType)
         {
             switch (dataType)
             {
@@ -68,7 +82,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
             }
         }
 
-        Instruments CreateInstruments(List<string> bbgIds)
+        private Instruments CreateInstruments(IEnumerable<string> bbgIds)
         {
             var instruments = bbgIds.Select(id => new Instrument()
             {

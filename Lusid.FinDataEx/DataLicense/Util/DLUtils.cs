@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using Lusid.FinDataEx.DataLicense.Service;
 using PerSecurity_Dotnet;
@@ -18,15 +17,21 @@ namespace Lusid.FinDataEx.DataLicense.Util
         /// <typeparam name="T"></typeparam>
         public static void PrintJsonResponse<T>(T response)
         {
-            string bbgResponseAsJson = JsonSerializer.Serialize(response);
+            var bbgResponseAsJson = JsonSerializer.Serialize(response);
             Console.WriteLine("Response as Json for debugging:");
             Console.WriteLine(bbgResponseAsJson);
         }
 
+        /// <summary>
+        /// Utility method to print out response of a BBG DLWS GetData call.
+        ///
+        /// NOTE : This code is copied straight from c# BBG samples and so remains untouched.
+        /// </summary>
+        /// <param name="retrieveGetDataResponse"></param>
         public static void PrintGetDataResponse(RetrieveGetDataResponse retrieveGetDataResponse)
         {
             // Code taken from BBG DL Samples
-            if (retrieveGetDataResponse.statusCode.code == DLDataService.Success)
+            if (retrieveGetDataResponse.statusCode.code == DlDataService.Success)
             {
                 // Displaying the RetrieveGetDataResponse
                 for (int i = 0; i < retrieveGetDataResponse.instrumentDatas.Length; i++)

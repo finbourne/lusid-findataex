@@ -29,19 +29,19 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnValidFinData_ShouldWriteToOutputDir()
         {
-            List<FinDataOutput> finDataOutputs = new List<FinDataOutput>
+            var finDataOutputs = new List<FinDataOutput>
             {
                 CreateFinDataEntry("id_1.GetData"),
                 CreateFinDataEntry("id_2.GetData")
             };
 
-            WriteResult writeResult =  _outputWriter.Write(finDataOutputs);
+            var writeResult =  _outputWriter.Write(finDataOutputs);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "id_1.GetData.csv", Does.Exist);
             Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "id_2.GetData.csv", Does.Exist);
             
             // ensure file is properly populated
-            string[] entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id_1.GetData.csv");
+            var entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id_1.GetData.csv");
             // check headers
             Assert.That(entries[0], Is.EqualTo("h1|h2|h3"));
             Assert.That(entries[1], Is.EqualTo("entry1Record1|entry2Record1|entry3Record1"));
@@ -51,16 +51,16 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnEmptyInput_ShouldWriteFileWithHeaderOnly()
         {
-            List<FinDataOutput> finDataOutputs = new List<FinDataOutput>();
-            List<string> headers = new List<string>{"h1","h2","h3"};
-            List<Dictionary<string, string>> records = new List<Dictionary<string, string>>();
+            var finDataOutputs = new List<FinDataOutput>();
+            var headers = new List<string>{"h1","h2","h3"};
+            var records = new List<Dictionary<string, string>>();
             finDataOutputs.Add(new FinDataOutput("id.GetData", headers, records));
 
-            WriteResult writeResult =  _outputWriter.Write(finDataOutputs);
+            var writeResult =  _outputWriter.Write(finDataOutputs);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             
             // ensure file is properly populated
-            string[] entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id.GetData.csv");
+            var entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id.GetData.csv");
             // contains headers only
             Assert.That(entries.Length, Is.EqualTo(1));
             // check headers
@@ -71,9 +71,9 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnNoFinData_ShouldDoNothingButReturnOk()
         {
-            List<FinDataOutput> finDataOutputs = new List<FinDataOutput>();
+            var finDataOutputs = new List<FinDataOutput>();
 
-            WriteResult writeResult =  _outputWriter.Write(finDataOutputs);
+            var writeResult =  _outputWriter.Write(finDataOutputs);
             
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             Assert.False(Directory.EnumerateFileSystemEntries(_tempOutputDir).Any());
@@ -90,7 +90,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
                 CreateFinDataEntry("id_1.GetData"),
                 CreateFinDataEntry("id_2.GetData")
             };
-            WriteResult writeResult =  _outputWriter.Write(finDataOutputs);
+            var writeResult =  _outputWriter.Write(finDataOutputs);
             
             //verify
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Fail));
@@ -98,8 +98,8 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
 
         private FinDataOutput CreateFinDataEntry(string id)
         {
-            List<string> headers = new List<string>{"h1","h2","h3"};
-            List<Dictionary<string,string>> records = new List<Dictionary<string,string>>
+            var headers = new List<string>{"h1","h2","h3"};
+            var records = new List<Dictionary<string,string>>
             {
                 new Dictionary<string, string>
                 {

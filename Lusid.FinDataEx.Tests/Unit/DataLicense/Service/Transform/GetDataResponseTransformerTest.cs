@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Lusid.FinDataEx.DataLicense.Service.Transform;
 using NUnit.Framework;
-using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
 {
@@ -20,12 +19,12 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         public void transform_OnAllValidInstrumentsResponse_IsWellFormed()
         {
             //when
-            string responseId = "1602149495-71386027_ValidInstruments";
-            RetrieveGetDataResponse retrieveGetDataResponse =  TestUtils.LoadResponseFromFile(responseId);
+            var responseId = "1602149495-71386027_ValidInstruments";
+            var retrieveGetDataResponse =  TestUtils.LoadResponseFromFile(responseId);
             
             //execute
-            List<FinDataOutput> getDataOutputs = _transformer.Transform(retrieveGetDataResponse);
-            FinDataOutput getDataOutput = getDataOutputs[0];
+            var getDataOutputs = _transformer.Transform(retrieveGetDataResponse);
+            var getDataOutput = getDataOutputs[0];
             
             //verify
             Assert.That(getDataOutputs.Count, Is.EqualTo(1));
@@ -48,12 +47,12 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         public void transform_OnOneBadInstrumentsResponse_IsWellFormedWithOnlyValidInstrument()
         {
             //when
-            string responseId = "1602161569-1051504982_OneBadInstrument";
-            RetrieveGetDataResponse retrieveGetDataResponse =  TestUtils.LoadResponseFromFile(responseId);
+            var responseId = "1602161569-1051504982_OneBadInstrument";
+            var retrieveGetDataResponse =  TestUtils.LoadResponseFromFile(responseId);
             
             //execute
-            List<FinDataOutput> getDataOutputs = _transformer.Transform(retrieveGetDataResponse);
-            FinDataOutput getDataOutput = getDataOutputs[0];
+            var getDataOutputs = _transformer.Transform(retrieveGetDataResponse);
+            var getDataOutput = getDataOutputs[0];
             
             //verify
             Assert.That(getDataOutputs.Count, Is.EqualTo(1));

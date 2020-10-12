@@ -2,6 +2,10 @@
 
  namespace Lusid.FinDataEx.Output
 {
+    /// <summary>
+    /// Contains status and any error messages of writing FinDataOutput
+    /// returned from BBG DLWS
+    /// </summary>
     public class WriteResult
     {
         public readonly WriteResultStatus Status;
