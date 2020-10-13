@@ -67,6 +67,36 @@ namespace Lusid.FinDataEx.DataLicense.Util
             else 
                 Console.WriteLine($"Error in the submitted request with status code {retrieveGetDataResponse.statusCode.code}");
         }
-        
+
+        public static void PrintGetActionsResponse(RetrieveGetActionsResponse retrieveGetActionsResponse)
+        {
+            if (retrieveGetActionsResponse.statusCode.code == DlDataService.Success)
+            {
+                Console.WriteLine("Retrieve get quotes request successful.  Response ID:" + retrieveGetActionsResponse.responseId);
+                for (int i = 0; i < retrieveGetActionsResponse.instrumentDatas.Length; i++)
+                {
+                    Console.WriteLine("Data for :"
+                                      + retrieveGetActionsResponse.instrumentDatas[i].instrument.id + " "
+                                      + retrieveGetActionsResponse.instrumentDatas[i].instrument.yellowkey
+                    );
+                    Console.WriteLine(", Company id = " + retrieveGetActionsResponse.instrumentDatas[i].standardFields.companyId.ToString());
+                    Console.WriteLine(", Security id = " + retrieveGetActionsResponse.instrumentDatas[i].standardFields.securityId.ToString());
+                    if (retrieveGetActionsResponse.instrumentDatas[i].data != null)
+                    {
+                        for (int j = 0; j < retrieveGetActionsResponse.instrumentDatas[i].data.Length; j++)
+                        {
+                            Console.WriteLine(": field =  "
+                                              + retrieveGetActionsResponse.instrumentDatas[i].data[j].field
+                                              + ", value =  "
+                                              + retrieveGetActionsResponse.instrumentDatas[i].data[j].value);
+                        }
+                    }
+
+                }
+            }
+            else if (retrieveGetActionsResponse.statusCode.code == DlDataService.RequestError)
+                Console.WriteLine("Error in submitted request");
+        }
+
     }
 }

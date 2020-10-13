@@ -17,13 +17,24 @@
         }
         
         /// <summary>
-        /// ProgramTypes supported by BBG DLWS and FinDataEx. Decide on the operation mode whic impacts
+        /// ProgramTypes supported by BBG DLWS and FinDataEx. Decide on the operation mode which impacts
         /// behaviour of the call to BBG DL (e.g. running job at specific time, delay in job time, etc...)
         /// </summary>
         public enum ProgramTypes
         {
             Adhoc,
             Scheduled
+        }
+
+        /// <summary>
+        ///  Corporate Actions supported by BBG DLWS and FinDataEx.
+        ///  Currently using BBG DL naming conventions so do NOT amend unless also amended by BBG DL.
+        /// </summary>
+        public enum CorpActionTypes
+        {    
+            DVD_CASH,
+            DVD_STOCK,
+            STOCK_SPLT
         }
     }
 }
