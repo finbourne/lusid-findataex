@@ -41,7 +41,7 @@ namespace Lusid.FinDataEx
         {
             if (fileSystem.Equals(LusidFileSystem))
             {
-                ILusidApiFactory lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
+                var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
                 return new LusidDriveFinDataOutputWriter(outputDirectory, lusidApiFactory);
             }
             else

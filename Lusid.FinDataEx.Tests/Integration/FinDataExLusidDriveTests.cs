@@ -6,8 +6,7 @@ using Lusid.Drive.Sdk.Model;
 using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.Output;
 using NUnit.Framework;
-using static Lusid.FinDataEx.Tests.Unit.TestUtils
-    ;
+
 namespace Lusid.FinDataEx.Tests.Integration
 {
     public class FinDataExLusidDriveTests
@@ -72,11 +71,11 @@ namespace Lusid.FinDataEx.Tests.Integration
 
         private string[] GetFileAsStringsFromFolderInDrive(string lusdiDriveFolderId)
         {
-            PagedResourceListOfStorageObject contents = _foldersApi.GetFolderContents(lusdiDriveFolderId);
+            var contents = _foldersApi.GetFolderContents(lusdiDriveFolderId);
             // ensure only one file in folder otherwise test folder is contaminated and test corrupt
             Assert.That(contents.Values.Count, Is.EqualTo(1));
             
-            StorageObject expectedPricesStorageObject = contents.Values[0];
+            var expectedPricesStorageObject = contents.Values[0];
             StringAssert.EndsWith("_GetData.csv", expectedPricesStorageObject.Name);
             
             return new StreamReader(_filesApi.DownloadFile(expectedPricesStorageObject.Id))

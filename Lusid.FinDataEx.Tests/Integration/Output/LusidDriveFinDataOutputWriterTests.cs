@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Lusid.Drive.Sdk.Api;
 using Lusid.Drive.Sdk.Model;
@@ -100,7 +99,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         
         private void AssertLusidDriveFolderIsEmpty(string lusdiDriveFolderId)
         {
-            PagedResourceListOfStorageObject contents = _foldersApi.GetFolderContents(lusdiDriveFolderId);
+            var contents = _foldersApi.GetFolderContents(lusdiDriveFolderId);
             CollectionAssert.IsEmpty(contents.Values);
         }
         
