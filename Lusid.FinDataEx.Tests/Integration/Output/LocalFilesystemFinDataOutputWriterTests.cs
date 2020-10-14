@@ -31,18 +31,18 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         {
             var finDataOutputs = new List<FinDataOutput>
             {
-                CreateFinDataEntry("id_1.GetData"),
-                CreateFinDataEntry("id_2.GetData")
+                CreateFinDataEntry("id_1_GetData"),
+                CreateFinDataEntry("id_2_GetData")
             };
 
             var writeResult =  _outputWriter.Write(finDataOutputs);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            CollectionAssert.AreEqual(writeResult.FilesWritten, new List<string>(){"id_1.GetData", "id_2.GetData"});
-            Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "id_1.GetData.csv", Does.Exist);
-            Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "id_2.GetData.csv", Does.Exist);
+            CollectionAssert.AreEqual(writeResult.FilesWritten, new List<string>(){"TempTestDir_FinDataExTests\\id_1_GetData.csv", "TempTestDir_FinDataExTests\\id_2_GetData.csv"});
+            Assert.That(writeResult.FilesWritten[0], Does.Exist);
+            Assert.That(writeResult.FilesWritten[1], Does.Exist);
             
             // ensure file is properly populated
-            var entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id_1.GetData.csv");
+            var entries = File.ReadAllLines(writeResult.FilesWritten[0]);
             // check headers
             Assert.That(entries[0], Is.EqualTo("h1|h2|h3"));
             Assert.That(entries[1], Is.EqualTo("entry1Record1|entry2Record1|entry3Record1"));
@@ -55,13 +55,13 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             var finDataOutputs = new List<FinDataOutput>();
             var headers = new List<string>{"h1","h2","h3"};
             var records = new List<Dictionary<string, string>>();
-            finDataOutputs.Add(new FinDataOutput("id.GetData", headers, records));
+            finDataOutputs.Add(new FinDataOutput("id_GetData", headers, records));
 
             var writeResult =  _outputWriter.Write(finDataOutputs);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             
             // ensure file is properly populated
-            var entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id.GetData.csv");
+            var entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id_GetData.csv");
             // contains headers only
             Assert.That(entries.Length, Is.EqualTo(1));
             // check headers
@@ -88,8 +88,8 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             
             List<FinDataOutput> finDataOutputs = new List<FinDataOutput>
             {
-                CreateFinDataEntry("id_1.GetData"),
-                CreateFinDataEntry("id_2.GetData")
+                CreateFinDataEntry("id_1_GetData"),
+                CreateFinDataEntry("id_2_GetData")
             };
             var writeResult =  _outputWriter.Write(finDataOutputs);
             

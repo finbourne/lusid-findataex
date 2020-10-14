@@ -36,6 +36,7 @@ namespace Lusid.FinDataEx
 
         private static IFinDataOutputWriter CreateFinDataOutputWriter(string outputDirectory)
         {
+            
             return new LocalFilesystemFinDataOutputWriter(outputDirectory);
         }
         

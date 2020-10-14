@@ -41,7 +41,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                 finDataRecords.Add(instrumentRecord);
             }
 
-            var finDataOutputId = $"{perSecurityResponse.responseId}.GetData"; 
+            var finDataOutputId = $"{perSecurityResponse.responseId}_GetData"; 
             var getDataOutput = new FinDataOutput(finDataOutputId, headers, finDataRecords);
             return new List<FinDataOutput>{getDataOutput};
         }
