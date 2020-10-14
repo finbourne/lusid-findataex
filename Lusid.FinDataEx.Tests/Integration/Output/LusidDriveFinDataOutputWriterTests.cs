@@ -21,7 +21,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         private ILusidApiFactory _factory;
         private IFoldersApi _foldersApi;
         private IFilesApi _filesApi;
-        private string _processedResponseFolderId;
+        private string _outputDirId;
         
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -37,9 +37,9 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         public void SetUp()
         {
             // setup temp test folder in LUSID drive for each run
-            _processedResponseFolderId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidOutputDirName}'").Values.SingleOrDefault()?.Id;
+            _outputDirId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidOutputDirName}'").Values.SingleOrDefault()?.Id;
             var createFolder = new CreateFolder("/", _lusidOutputDirName);
-            _processedResponseFolderId ??= _foldersApi.CreateFolder(createFolder).Id;
+            _outputDirId ??= _foldersApi.CreateFolder(createFolder).Id;
             _outputWriter = new LusidDriveFinDataOutputWriter(_lusidOutputDirPath, _factory);
         }
         
@@ -48,7 +48,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         {
             // remove folders in drive at end of each test.
             // note if debugging ensure to clean lusid drive if terminate tests early
-            _foldersApi.DeleteFolder(_processedResponseFolderId);
+            _foldersApi.DeleteFolder(_outputDirId);
         }
         
         [Test]
@@ -79,7 +79,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             
             //verify
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            AssertLusidDriveFolderIsEmpty(_processedResponseFolderId);
+            AssertLusidDriveFolderIsEmpty(_outputDirId);
         }
 
         private void AssertFileExistsInLusidDrive(string lusidDriveFileId)

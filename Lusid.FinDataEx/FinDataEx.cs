@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using Lusid.FinDataEx.Output;
@@ -10,6 +11,7 @@ namespace Lusid.FinDataEx
 {
     public class FinDataEx
     {
+        private static readonly string LusidFileSystem = "lusid";
         public static void Main(string[] args)
         {
             // TODO move to CommandLineParser library
@@ -17,10 +19,11 @@ namespace Lusid.FinDataEx
             var dlDataType = Enum.Parse<DataTypes>(args[0]);
             var bbgIds = GetBbgIds(args[1]);
             var outputDirectory = args[2];
+            var fileSystem = (args.Length > 3) ? args[3] : "";
 
             // prepare DL service and output writer
             var dlDataService = CreateDlDataService();
-            var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory);
+            var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory, fileSystem);
             
             // call DL and write results to specified output
             var finDataOutputs =  dlDataService.Get(bbgIds, ProgramTypes.Adhoc, dlDataType);
@@ -34,10 +37,17 @@ namespace Lusid.FinDataEx
             return new DlDataService(perSecurityWsFactory.CreateDefault());
         }
 
-        private static IFinDataOutputWriter CreateFinDataOutputWriter(string outputDirectory)
+        private static IFinDataOutputWriter CreateFinDataOutputWriter(string outputDirectory, string fileSystem)
         {
-            
-            return new LocalFilesystemFinDataOutputWriter(outputDirectory);
+            if (fileSystem.Equals(LusidFileSystem))
+            {
+                ILusidApiFactory lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
+                return new LusidDriveFinDataOutputWriter(outputDirectory, lusidApiFactory);
+            }
+            else
+            {
+                return new LocalFilesystemFinDataOutputWriter(outputDirectory);
+            }
         }
         
         

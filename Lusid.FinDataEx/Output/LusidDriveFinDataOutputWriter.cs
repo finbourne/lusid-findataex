@@ -8,7 +8,7 @@ namespace Lusid.FinDataEx.Output
 {
     public class LusidDriveFinDataOutputWriter : LocalFilesystemFinDataOutputWriter
     {
-        private const string OutputFileEntrySeparator = "\n";
+        public const string OutputFileEntrySeparator = "\n";
 
         private readonly IFilesApi _filesApi;
 

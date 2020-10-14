@@ -537,5 +537,8 @@ Temporary Items
 # secrets
 **/secrets*
 
+# pk12 certs (dl cert for testing)
+**/DLWSCert.p12
+
 # Environments
 **/.env
