@@ -31,7 +31,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             // ensure only GetData file created and name is in correct format
             // more than one file is a contaminated test and should be investigated
             Assert.That(expectedDataFiles.Length, Is.EqualTo(1));
-            StringAssert.EndsWith(".GetData.csv", expectedDataFiles[0]);
+            StringAssert.EndsWith("_GetData.csv", expectedDataFiles[0]);
 
             // ensure file is properly populated
             var entries = File.ReadAllLines(expectedDataFiles[0]);

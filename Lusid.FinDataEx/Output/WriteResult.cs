@@ -9,22 +9,19 @@
     public class WriteResult
     {
         public readonly WriteResultStatus Status;
-        public readonly string Message;
-        public readonly Dictionary<string, object> Properties;
+        public readonly List<string> FilesWritten;
+        public readonly List<string> FailureMessages;
 
-        public WriteResult(WriteResultStatus status, string message) : 
-            this(status, message, new Dictionary<string,object>()) {}
-        
-        public WriteResult(WriteResultStatus status, string message, Dictionary<string,object> properties)
+        public WriteResult(WriteResultStatus status, List<string> filesWritten, List<string> failureMessages)
         {
             Status = status;
-            Message = message;
-            Properties = properties;
+            FilesWritten = filesWritten;
+            FailureMessages = failureMessages;
         }
 
         public override string ToString()
         {
-            return $"{nameof(Status)}: {Status}, {nameof(Message)}: {Message}, {nameof(Properties)}: {Properties}";
+            return $"{nameof(Status)}: {Status}, {nameof(FilesWritten)}: {FilesWritten}";
         }
     }
 

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
+using Lusid.FinDataEx.Util;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Vendor
@@ -112,7 +114,9 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
                                                 $"password. Ensure you've set environment variable {BbgDlPassEnvVar}");
             }
+            Console.WriteLine($"Retrieving BBG DL certificate {clientCertFilePath}");
             return new X509Certificate2(clientCertFilePath, clientCertPassword);
         }
+        
     }
 }

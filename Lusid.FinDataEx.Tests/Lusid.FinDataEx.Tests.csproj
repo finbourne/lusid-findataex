@@ -4,6 +4,8 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
 
         <IsPackable>false</IsPackable>
+
+        <LangVersion>8</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,6 +17,7 @@
 
     <ItemGroup>
         <None Include="Unit\DataLicense\Service\Call\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Unit\DataLicense\Service\Call\TestData\')" />
+        <None Include="secrets.json" CopyToOutputDirectory="Always" Condition="Exists('secrets.json')" />
     </ItemGroup>
     
     <ItemGroup>
