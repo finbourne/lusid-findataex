@@ -12,17 +12,17 @@ namespace Lusid.FinDataEx.Output
     public class LocalFilesystemFinDataOutputWriter : IFinDataOutputWriter
     {
 
-        private readonly string _outputDir;
+        protected readonly string OutputDir;
 
         public LocalFilesystemFinDataOutputWriter(string outputDir)
         {
-            _outputDir = outputDir;
+            OutputDir = outputDir;
         }
         
         public WriteResult Write(IEnumerable<FinDataOutput> finDataOutputs)
         {
          
-            var responseOkResults = new List<string>();
+            var filesWritten = new List<string>();
             var responseFailResults = new List<string>();
             foreach (var finDataOutput in finDataOutputs)
             {
@@ -43,15 +43,15 @@ namespace Lusid.FinDataEx.Output
                         }).ToList()
                 );
                 
-                var outputPath = _outputDir + Path.DirectorySeparatorChar + finDataOutput.Id + BbgDlOutputFileFormat;
                 try
                 {
-                    File.WriteAllLines(outputPath, finDataRecords);
-                    responseOkResults.Add($"SUCCESS : Completed write of {finDataOutput.Id} to {outputPath}");
+                    string outputPathWritten = WriteToFile(finDataOutput.Id + BbgDlOutputFileFormat, finDataRecords);
+                    // record the output path of files written
+                    filesWritten.Add(outputPathWritten);
                 }
                 catch (Exception e)
                 {
-                    responseFailResults.Add($"FAILURE : Did not write {finDataOutput.Id} to {outputPath} due to an exception. Cause of failure: {e}");
+                    responseFailResults.Add($"FAILURE : Did not write {finDataOutput.Id} to {OutputDir} due to an exception. Cause of failure: {e}");
                 }
             }
             
@@ -61,9 +61,16 @@ namespace Lusid.FinDataEx.Output
                 : WriteResultStatus.Ok;
             var responseResults = new List<string>();
             responseResults.AddRange(responseFailResults);
-            responseResults.AddRange(responseOkResults);
+            responseResults.AddRange(filesWritten);
 
-            return new WriteResult(status, string.Join(Environment.NewLine, responseResults));
+            return new WriteResult(status, filesWritten, responseFailResults);
+        }
+
+        protected virtual string WriteToFile(string outputFile, List<string> finDataRecords)
+        {
+            var outputPath = OutputDir + Path.DirectorySeparatorChar + outputFile;
+            File.WriteAllLines(outputPath, finDataRecords);
+            return outputPath;
         }
 
     }

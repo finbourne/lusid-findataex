@@ -54,7 +54,7 @@ namespace Lusid.FinDataEx
             }
             else
             {
-                Console.WriteLine(writeResult.Message);
+                Console.WriteLine(writeResult.FilesWritten);
             }
         }
     }

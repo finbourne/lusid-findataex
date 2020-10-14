@@ -37,6 +37,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
 
             var writeResult =  _outputWriter.Write(finDataOutputs);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
+            CollectionAssert.AreEqual(writeResult.FilesWritten, new List<string>(){"id_1.GetData", "id_2.GetData"});
             Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "id_1.GetData.csv", Does.Exist);
             Assert.That(_tempOutputDir + Path.DirectorySeparatorChar + "id_2.GetData.csv", Does.Exist);
             

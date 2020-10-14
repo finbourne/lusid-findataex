@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
+using Lusid.FinDataEx.Util;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Vendor
@@ -18,7 +20,11 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
         public const string BbgDlAddress = "https://dlws.bloomberg.com/dlps";
         public const string BbgDlCertEnvVar = "BBG_DL_CERT";
         public const string BbgDlPassEnvVar = "BBG_DL_PASS";
+        public const string BbgDlCertFileSystemEnvVar = "BBG_DL_CERT_FILESYSTEM";
 
+        private const string LusidDriveFileSystem = "LusidDrive";
+        private const string LocalFileSystem = "Local";
+        
         /// <summary>
         ///  Creates a default BBG DLWS client using default bbg ws address 
         ///  (https://dlws.bloomberg.com/dlps). Retrieves certificates and
@@ -112,7 +118,25 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
                                                 $"password. Ensure you've set environment variable {BbgDlPassEnvVar}");
             }
-            return new X509Certificate2(clientCertFilePath, clientCertPassword);
+
+            var certFileSystem = Environment.GetEnvironmentVariable(BbgDlCertFileSystemEnvVar) ?? LocalFileSystem;
+            Console.WriteLine($"Retrieving BBG DL certificate {clientCertFilePath} from {certFileSystem}");
+
+            if (certFileSystem.Equals(LusidDriveFileSystem))
+            {
+                return CreateCertificateFromLusidDrive(clientCertFilePath, clientCertPassword);
+            }
+            else
+            {
+                return new X509Certificate2(clientCertFilePath, clientCertPassword);
+            }
         }
+
+        private X509Certificate2 CreateCertificateFromLusidDrive(string clientCertLusidFileId, string clientCertPassword)
+        {
+            var certificateRawData = LusidDriveUtils.LoadFileFromLusidDrive(clientCertLusidFileId);
+            return new X509Certificate2(certificateRawData, clientCertPassword);
+        }
+        
     }
 }
