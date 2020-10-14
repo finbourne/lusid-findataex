@@ -18,7 +18,6 @@
     <ItemGroup>
         <None Include="Unit\DataLicense\Service\Call\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Unit\DataLicense\Service\Call\TestData\')" />
         <None Include="secrets.json" CopyToOutputDirectory="Always" Condition="Exists('secrets.json')" />
-        <None Include="DLWSCert.p12" CopyToOutputDirectory="Always" Condition="Exists('DLWSCert.p12')" />
     </ItemGroup>
     
     <ItemGroup>
