@@ -23,7 +23,8 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
-            FinDataEx.Main(new[] {"GetData", "EQ0010174300001000|EQ0021695200001000", _tempOutputDir});
+            var commandArgs = $"GetData -i EQ0010174300001000 EQ0021695200001000 -o {_tempOutputDir} -d ID_BB_UNIQUE PX_LAST";
+            FinDataEx.Main(commandArgs.Split(" "));
             
             //verify
             var expectedDataFiles = Directory.GetFiles(_tempOutputDir);

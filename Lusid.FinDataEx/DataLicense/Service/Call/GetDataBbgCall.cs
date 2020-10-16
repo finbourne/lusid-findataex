@@ -24,6 +24,9 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
 
         public GetDataBbgCall(PerSecurityWS perSecurityWs) : this(perSecurityWs, GetDefaultHeaders(),
             GetDefaultDataFields()) {}
+        
+        public GetDataBbgCall(PerSecurityWS perSecurityWs, string[] dataFields) : this(perSecurityWs, GetDefaultHeaders(),
+            dataFields) {}
 
         private GetDataBbgCall(PerSecurityWS perSecurityWs, GetDataHeaders dataHeaders, string[] dataFields)
         {
@@ -56,6 +59,11 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             DlUtils.PrintGetDataResponse(retrieveGetDataResponse);
             DlUtils.PrintJsonResponse(retrieveGetDataResponse);
             return retrieveGetDataResponse;
+        }
+
+        public DlTypes.DataTypes GetDlDataType()
+        {
+            return DlTypes.DataTypes.GetData;
         }
 
         private RetrieveGetDataResponse GetDataResponseSync(retrieveGetDataResponseRequest retrieveGetDataResponseRequest)

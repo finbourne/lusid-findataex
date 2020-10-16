@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Lusid.FinDataEx.DataLicense.Service;
+using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Util;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using NUnit.Framework;
@@ -14,18 +15,22 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         private DlDataService _dlDataService;
         private PerSecurityWS _perSecurityWs;
 
+        // BBG DL Calls
+        private GetDataBbgCall _getDataBbgCall;
+
         [SetUp]
         public void SetUp()
         {
             _perSecurityWs = new PerSecurityWsFactory().CreateDefault();
-            _dlDataService = new DlDataService(_perSecurityWs);
+            _getDataBbgCall = new GetDataBbgCall(_perSecurityWs);
+            _dlDataService = new DlDataService();
         }
 
         [Test]
         public void Get_OnAdhocGetData_ShouldReturnOutput()
         {
             var bbgIds = new List<string>{"EQ0010174300001000", "EQ0021695200001000"};
-            var finDataOutputs = _dlDataService.Get(bbgIds, DlTypes.ProgramTypes.Adhoc, DlTypes.DataTypes.GetData);
+            var finDataOutputs = _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Adhoc);
             
             Assert.That(finDataOutputs.Count, Is.EqualTo(1));
             CollectionAssert.AreEqual(finDataOutputs[0].Header, new List<string>(){"ID_BB_UNIQUE","PX_LAST"});
@@ -46,16 +51,8 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         [Test]
         public void Get_OnAdhocGetDataWithNoIds_ShouldReturnEmptyData()
         {
-            var finDataOutputs = _dlDataService.Get(new List<string>{}, DlTypes.ProgramTypes.Adhoc, DlTypes.DataTypes.GetData);
+            var finDataOutputs = _dlDataService.Get(_getDataBbgCall, new List<string>(), DlTypes.ProgramTypes.Adhoc);
             CollectionAssert.IsEmpty(finDataOutputs);
-        }
-        
-        [Test]
-        public void Get_OnAdhocGetAction_ShouldThrowUnsupportedException()
-        {
-            var bbgIds = new List<string>{"EQ0010174300001000", "EQ0021695200001000"};
-            Assert.Throws<NotSupportedException>(() =>
-                _dlDataService.Get(bbgIds, DlTypes.ProgramTypes.Adhoc, DlTypes.DataTypes.GetActions));
         }
         
         [Test]
@@ -63,7 +60,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         {
             var bbgIds = new List<string>{"EQ0010174300001000", "EQ0021695200001000"};
             Assert.Throws<NotSupportedException>(() =>
-                _dlDataService.Get(bbgIds, DlTypes.ProgramTypes.Scheduled, DlTypes.DataTypes.GetData));
+                _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Scheduled));
         }
 
     }

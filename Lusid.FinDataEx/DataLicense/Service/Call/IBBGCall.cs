@@ -1,4 +1,5 @@
-﻿using PerSecurity_Dotnet;
+﻿using Lusid.FinDataEx.DataLicense.Util;
+using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Call
 {
@@ -18,5 +19,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         /// <param name="instruments">Instruments requesting data against.</param>
         /// <returns>Response with requested data for the instruments if it could be provided.</returns>
         T Get(Instruments instruments);
+
+        DlTypes.DataTypes GetDlDataType();
     }
 }

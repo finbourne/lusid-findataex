@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CommandLine;
 using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.DataLicense.Service;
+using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using Lusid.FinDataEx.Output;
 using static Lusid.FinDataEx.DataLicense.Util.DlTypes;
@@ -14,27 +16,28 @@ namespace Lusid.FinDataEx
         private static readonly string LusidFileSystem = "lusid";
         public static void Main(string[] args)
         {
-            // TODO move to CommandLineParser library
-            // parse required arguments
-            var dlDataType = Enum.Parse<DataTypes>(args[0]);
-            var bbgIds = GetBbgIds(args[1]);
-            var outputDirectory = args[2];
-            var fileSystem = (args.Length > 3) ? args[3] : "";
+            Parser.Default.ParseArguments<GetDataOptions>(args)
+                .WithParsed<GetDataOptions>(ExecuteGetData);
+            
+        }
 
+        private static void ExecuteGetData(GetDataOptions getDataOptions)
+        {
+            var bbgIds = getDataOptions.BbgIds;
+            var outputDirectory = getDataOptions.OutputDirectory;
+            var fileSystem = getDataOptions.FileSystem;
+            var dataFields = getDataOptions.DataFields;
+            
             // prepare DL service and output writer
-            var dlDataService = CreateDlDataService();
+            var dlDataService = new DlDataService();
+            var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
+            var bbgCall = new GetDataBbgCall(perSecurityWs, dataFields.ToArray());
             var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory, fileSystem);
             
             // call DL and write results to specified output
-            var finDataOutputs =  dlDataService.Get(bbgIds, ProgramTypes.Adhoc, dlDataType);
+            var finDataOutputs =  dlDataService.Get(bbgCall, bbgIds, ProgramTypes.Adhoc);
             var writeResult =  finDataOutputWriter.Write(finDataOutputs);
             LogWriteResult(writeResult);
-        }
-
-        private static DlDataService CreateDlDataService()
-        {
-            var perSecurityWsFactory = new PerSecurityWsFactory();
-            return new DlDataService(perSecurityWsFactory.CreateDefault());
         }
 
         private static IFinDataOutputWriter CreateFinDataOutputWriter(string outputDirectory, string fileSystem)
@@ -50,12 +53,6 @@ namespace Lusid.FinDataEx
             }
         }
         
-        
-        private static List<string> GetBbgIds(string bbgIdArg)
-        {
-            return bbgIdArg.Split("|").ToList();
-        }
-        
         private static void LogWriteResult(WriteResult writeResult)
         {
             if (writeResult.Status != WriteResultStatus.Ok)
@@ -68,5 +65,33 @@ namespace Lusid.FinDataEx
                 Console.WriteLine(writeResult.FilesWritten);
             }
         }
+    }
+
+    class BaseOptions
+    {
+        [Option('i', "instruments", Required = true,
+            HelpText = "Instruments Ids querying DL for. Currently only BBG IDs (Figis) are supported.")]
+        public IEnumerable<String> BbgIds { get; set; }
+        
+        [Option('o', "output", Required = true, HelpText = "Output directory to write DL results.")]
+        public string OutputDirectory { get; set; }
+        
+        [Option('f', "filesystem", Required = false, Default ="Local", 
+            HelpText = "Filesystems to write DL results (Lusid or Local")]
+        public string FileSystem { get; set; }
+        
+        /*[Option("datatype", Required = false, HelpText = "BBG DL datatype. Supported types GetData or GetActions.")]
+        public string DataType { get; set; }
+        
+        [Option("datafields", Required = false, HelpText = "BBG DL fields to retrieve. Only relevant for GetData requests.")]
+        public IEnumerable<String> DataFields { get; set; }*/
+        
+    }
+
+    [Verb ("getdata", HelpText = "BBG DL request to retrieve data for requested set of fields and insturments.")]
+    class GetDataOptions : BaseOptions
+    {
+        [Option('d', "datafields", Required = true, HelpText = "BBG DL fields to retrieve. Only relevant for GetData requests.")]
+        public IEnumerable<String> DataFields { get; set; }
     }
 }

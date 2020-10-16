@@ -25,13 +25,6 @@ namespace Lusid.FinDataEx.DataLicense.Service
         public const string InstrumentSuccessCode = "0";
         public const int NoCorpActionCode = 300;
 
-        private readonly PerSecurityWS _perSecurityWs;
-
-        public DlDataService(PerSecurityWS perSecurityWs)
-        {
-            _perSecurityWs = perSecurityWs;
-        }
-
         /// <summary>
         ///  Executes a request to BBG DLWS for a given set of BB_UNIQUE_IDs and a given data type. On response
         /// will return a standardised output as a FinDataOutput.
@@ -42,21 +35,20 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="dataType">Type of call to BBG DLWS (e.g. GetData, GetActions). Different data types retrieve
         ///  different sets of data. </param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public List<FinDataOutput> Get(List<string> bbgIds, ProgramTypes programType, DataTypes dataType)
+        public List<FinDataOutput> Get(IBbgCall<PerSecurityResponse> bbgCall, IEnumerable<string> bbgIds, ProgramTypes programType)
         {
             // validate inputs
             if(!bbgIds.Any()) return new List<FinDataOutput>();
-            VerifyBblFlags(programType, dataType);
+            VerifyBblFlags(programType, bbgCall.GetDlDataType());
             
             // construct bbg instruments
             var instruments = CreateInstruments(bbgIds);
             
             // create relevant action and call to DLWS
-            var bbgCall = CreateBbgCall(instruments, programType, dataType);
             var perSecurityResponse = bbgCall.Get(instruments);
             
             // parse and transform dl response to standard output
-            var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataType);
+            var finDataOutputs = TransformBbgResponse(perSecurityResponse, bbgCall.GetDlDataType());
             return finDataOutputs;
         }
 
@@ -66,17 +58,6 @@ namespace Lusid.FinDataEx.DataLicense.Service
             {
                 case DataTypes.GetData:
                     return new GetDataResponseTransformer().Transform((RetrieveGetDataResponse) perSecurityResponse);
-                default:
-                    throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.");
-            }
-        }
-
-        private IBbgCall<PerSecurityResponse> CreateBbgCall(Instruments instruments, ProgramTypes programType, DataTypes dataType)
-        {
-            switch (dataType)
-            {
-                case DataTypes.GetData:
-                    return new GetDataBbgCall(_perSecurityWs);
                 default:
                     throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.");
             }
