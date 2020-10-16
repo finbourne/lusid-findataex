@@ -48,24 +48,24 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
-            var commandArgs = $"GetData -i EQ0010174300001000 EQ0021695200001000 -o {_lusidOutputDirPath} -f lusid -d ID_BB_UNIQUE PX_LAST";
+            var commandArgs = $"GetData -i BBG000BPHFS9 BBG000BVPV84 -o {_lusidOutputDirPath} -f lusid -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
 
             //verify
             var priceEntries = GetFileAsStringsFromFolderInDrive(outputDirId);
             
             // check headers
-            Assert.That(priceEntries[0], Is.EqualTo("ID_BB_UNIQUE|PX_LAST"));
+            Assert.That(priceEntries[0], Is.EqualTo("ID_BB_GLOBAL|PX_LAST"));
 
             // check instrument 1 entry
             var instrumentEntry1 = priceEntries[1].Split("|");
-            Assert.That(instrumentEntry1[0], Is.EqualTo("EQ0010174300001000"));
+            Assert.That(instrumentEntry1[0], Is.EqualTo("BBG000BPHFS9"));
             // price will change with each call so just check not empty
             Assert.That(instrumentEntry1[0], Is.Not.Empty);
             
             // check instrument 2 entry
             var instrumentEntry2 = priceEntries[2].Split("|");
-            Assert.That(instrumentEntry2[0], Is.EqualTo("EQ0021695200001000"));
+            Assert.That(instrumentEntry2[0], Is.EqualTo("BBG000BVPV84"));
             // price will change with each call so just check not empty
             Assert.That(instrumentEntry2[0], Is.Not.Empty);
         }

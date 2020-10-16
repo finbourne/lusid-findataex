@@ -29,21 +29,21 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         [Test]
         public void Get_OnAdhocGetData_ShouldReturnOutput()
         {
-            var bbgIds = new List<string>{"EQ0010174300001000", "EQ0021695200001000"};
+            var bbgIds = new List<string>{"BBG000BPHFS9", "BBG000BVPV84"};
             var finDataOutputs = _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Adhoc);
             
             Assert.That(finDataOutputs.Count, Is.EqualTo(1));
-            CollectionAssert.AreEqual(finDataOutputs[0].Header, new List<string>(){"ID_BB_UNIQUE","PX_LAST"});
+            CollectionAssert.AreEqual(finDataOutputs[0].Header, new List<string>(){"ID_BB_GLOBAL","PX_LAST"});
 
             // check data in records (changing prices mean just need to check its populated and not the exact number)
             Assert.That(finDataOutputs[0].Records.Count, Is.EqualTo(2));
-            finDataOutputs[0].Records[0].TryGetValue("ID_BB_UNIQUE", out string bbdId1); 
-            Assert.That(bbdId1, Is.EqualTo("EQ0010174300001000"));
+            finDataOutputs[0].Records[0].TryGetValue("ID_BB_GLOBAL", out string bbdId1); 
+            Assert.That(bbdId1, Is.EqualTo("BBG000BPHFS9"));
             finDataOutputs[0].Records[0].TryGetValue("PX_LAST", out string lastPrice1); 
             Assert.That(lastPrice1, Is.Not.Empty);
             
-            finDataOutputs[0].Records[1].TryGetValue("ID_BB_UNIQUE", out string bbdId2); 
-            Assert.That(bbdId2, Is.EqualTo("EQ0021695200001000"));
+            finDataOutputs[0].Records[1].TryGetValue("ID_BB_GLOBAL", out string bbdId2); 
+            Assert.That(bbdId2, Is.EqualTo("BBG000BVPV84"));
             finDataOutputs[0].Records[1].TryGetValue("PX_LAST", out string lastPrice2); 
             Assert.That(lastPrice2, Is.Not.Empty);
         }
@@ -58,7 +58,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         [Test]
         public void Get_OnAScheduledGetData_ShouldThrowUnsupportedException()
         {
-            var bbgIds = new List<string>{"EQ0010174300001000", "EQ0021695200001000"};
+            var bbgIds = new List<string>{"BBG000BPHFS9", "BBG000BVPV84"};
             Assert.Throws<NotSupportedException>(() =>
                 _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Scheduled));
         }

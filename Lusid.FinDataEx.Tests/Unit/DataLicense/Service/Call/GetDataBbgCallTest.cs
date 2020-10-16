@@ -64,8 +64,8 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             Assert.That(retrieveGetDataResponse.responseId, Is.EqualTo(responseId));
             Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DlDataService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(2));
-            AssertBbUniqueQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[0], "EQ0010174300001000", "209.830000");
-            AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "EQ0021695200001000", "3195.690000");
+            AssertBbUniqueQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[0], "BBG000BPHFS9", "209.830000");
+            AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "BBG000BVPV84", "3195.690000");
         }
         
         [Test]
@@ -116,7 +116,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DlDataService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(2));
             AssertBadInstrumentIsNotPopulated(getDataFields, instrumentDatas[0], "TestBadUniqueId");
-            AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "EQ0021695200001000", "3195.690000");
+            AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "BBG000BVPV84", "3195.690000");
         }
 
         private void AssertBbUniqueQueriedInstrumentIsPopulated(string[] getDataFields, InstrumentData instrumentData, string bbUid, string lastPrice)
@@ -125,7 +125,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             Assert.That(instrumentData.instrument.id, Is.EqualTo(bbUid));
             Assert.That(instrumentData.instrument.yellowkey, Is.EqualTo(MarketSector.Govt));
             
-            Assert.That(getDataFields[0], Is.EqualTo("ID_BB_UNIQUE"));
+            Assert.That(getDataFields[0], Is.EqualTo("ID_BB_GLOBAL"));
             Assert.That(instrumentData.data[0].value, Is.EqualTo(bbUid));
             
             Assert.That(getDataFields[1], Is.EqualTo("PX_LAST"));
@@ -138,7 +138,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             Assert.That(instrumentData.instrument.id, Is.EqualTo(isin));
             Assert.That(instrumentData.instrument.yellowkey, Is.EqualTo(MarketSector.Govt));
             
-            Assert.That(getDataFields[0], Is.EqualTo("ID_BB_UNIQUE"));
+            Assert.That(getDataFields[0], Is.EqualTo("ID_BB_GLOBAL"));
             Assert.That(instrumentData.data[0].value, Is.EqualTo(bbUid));
             
             Assert.That(getDataFields[1], Is.EqualTo("PX_LAST"));
@@ -150,7 +150,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             Assert.That(instrumentData.code, Is.Not.EqualTo(DlDataService.InstrumentSuccessCode));
             Assert.That(instrumentData.instrument.id, Is.EqualTo(bbUid));
             
-            Assert.That(getDataFields[0], Is.EqualTo("ID_BB_UNIQUE"));
+            Assert.That(getDataFields[0], Is.EqualTo("ID_BB_GLOBAL"));
             Assert.That(instrumentData.data[0].value, Is.Empty);
             
             Assert.That(getDataFields[1], Is.EqualTo("PX_LAST"));
@@ -161,7 +161,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
         {
             var bbUniqueId1 = new Instrument
             {
-                id = "EQ0010174300001000", type = InstrumentType.BB_UNIQUE, typeSpecified = true
+                id = "BBG000BPHFS9", type = InstrumentType.BB_GLOBAL, typeSpecified = true
             };
 
             var bbUniqueId2 = new Instrument
@@ -176,7 +176,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
         {
             var bbUniqueId1 = new Instrument
             {
-                id = "TestBadUniqueId", type = InstrumentType.BB_UNIQUE, typeSpecified = true
+                id = "TestBadUniqueId", type = InstrumentType.BB_GLOBAL, typeSpecified = true
             };
 
             var bbUniqueId2 = new Instrument

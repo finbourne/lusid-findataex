@@ -118,7 +118,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         {
             return new[]
             {
-                "ID_BB_UNIQUE", "PX_LAST"
+                "ID_BB_GLOBAL", "PX_LAST"
             };
         }
         

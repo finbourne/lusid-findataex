@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.8.0" />
+        <PackageReference Include="Lusid.Sdk.Preview" Version="0.11.2163" />
         <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />
         <PackageReference Include="System.ServiceModel.Primitives" Version="4.7.0" />
         <PackageReference Include="System.ServiceModel.Security" Version="4.7.0" />

@@ -65,10 +65,10 @@ namespace Lusid.FinDataEx.DataLicense.Service
 
         private Instruments CreateInstruments(IEnumerable<string> bbgIds)
         {
-            var instruments = bbgIds.Select(id => new Instrument()
+            var instruments = bbgIds.Select(id => new PerSecurity_Dotnet.Instrument()
             {
                 id = id,
-                type = InstrumentType.BB_UNIQUE,
+                type = InstrumentType.BB_GLOBAL,
                 typeSpecified = true
             }).ToArray();
             return new Instruments()

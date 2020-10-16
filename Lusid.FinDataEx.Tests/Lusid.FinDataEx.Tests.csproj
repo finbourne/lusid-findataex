@@ -17,7 +17,7 @@
 
     <ItemGroup>
         <None Include="Unit\DataLicense\Service\Call\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Unit\DataLicense\Service\Call\TestData\')" />
-        <None Include="secrets.json" CopyToOutputDirectory="Always" Condition="Exists('secrets.json')" />
+        <None Include="secrets*.json" CopyToOutputDirectory="Always" Condition="Exists('secrets.json')" />
     </ItemGroup>
     
     <ItemGroup>

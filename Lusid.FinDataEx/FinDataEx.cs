@@ -21,6 +21,14 @@ namespace Lusid.FinDataEx
             
         }
 
+        /// <summary>
+        /// Execute a GetData call to BBG DL and persist output
+        ///
+        /// GetData calls will retrieve instrument data for the requested data fields and
+        /// output a csv to the selected file system output directory.
+        /// 
+        /// </summary>
+        /// <param name="getDataOptions"></param>
         private static void ExecuteGetData(GetDataOptions getDataOptions)
         {
             var bbgIds = getDataOptions.BbgIds;
@@ -67,6 +75,10 @@ namespace Lusid.FinDataEx
         }
     }
 
+    /// <summary>
+    /// Base Options for all BBG DL calls
+    /// 
+    /// </summary>
     class BaseOptions
     {
         [Option('i', "instruments", Required = true,
@@ -88,6 +100,9 @@ namespace Lusid.FinDataEx
         
     }
 
+    /// <summary>
+    /// Options for GetData calls to BBG
+    /// </summary>
     [Verb ("getdata", HelpText = "BBG DL request to retrieve data for requested set of fields and insturments.")]
     class GetDataOptions : BaseOptions
     {

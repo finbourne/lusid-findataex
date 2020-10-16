@@ -28,17 +28,17 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
             
             //verify
             Assert.That(getDataOutputs.Count, Is.EqualTo(1));
-            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"ID_BB_UNIQUE","PX_LAST"});
+            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"ID_BB_GLOBAL","PX_LAST"});
             
             Assert.That(getDataOutput.Records.Count, Is.EqualTo(2));
             CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
             {
-                {"ID_BB_UNIQUE" , "EQ0010174300001000"},
+                {"ID_BB_GLOBAL" , "BBG000BPHFS9"},
                 {"PX_LAST", "209.830000"}
             });
             CollectionAssert.AreEquivalent(getDataOutput.Records[1], new Dictionary<string,string>
             {
-                {"ID_BB_UNIQUE" , "EQ0021695200001000"},
+                {"ID_BB_GLOBAL" , "BBG000BVPV84"},
                 {"PX_LAST", "3195.690000"}
             });
         }
@@ -56,12 +56,12 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
             
             //verify
             Assert.That(getDataOutputs.Count, Is.EqualTo(1));
-            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"ID_BB_UNIQUE","PX_LAST"});
+            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"ID_BB_GLOBAL","PX_LAST"});
             
             Assert.That(getDataOutput.Records.Count, Is.EqualTo(1));
             CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
             {
-                {"ID_BB_UNIQUE" , "EQ0021695200001000"},
+                {"ID_BB_GLOBAL" , "BBG000BVPV84"},
                 {"PX_LAST", "3195.690000"}
             });
         }
