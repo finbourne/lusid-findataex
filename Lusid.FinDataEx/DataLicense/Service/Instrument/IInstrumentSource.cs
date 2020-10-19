@@ -4,6 +4,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
     public interface IInstrumentSource
     {
-        Instruments Get();
+        #nullable enable
+        Instruments? Get();
     }
 }

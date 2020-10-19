@@ -34,7 +34,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="programType">Program type of the given call (e.g. Adhoc, Scheduled)</param>
         /// <param name="dataType">Type of call to BBG DLWS (e.g. GetData, GetActions). Different data types retrieve
         ///  different sets of data. </param>
-        /// <returns>FinDataOutput of data returned for instruments requested</returns>
+        /// <returns>FinDataOutput of data returned for instrumenDts requested</returns>
         public List<FinDataOutput> Get(IBbgCall<PerSecurityResponse> bbgCall, IEnumerable<string> bbgIds, ProgramTypes programType)
         {
             // validate inputs
