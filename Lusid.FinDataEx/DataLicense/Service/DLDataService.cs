@@ -35,17 +35,14 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="dataType">Type of call to BBG DLWS (e.g. GetData, GetActions). Different data types retrieve
         ///  different sets of data. </param>
         /// <returns>FinDataOutput of data returned for instrumenDts requested</returns>
-        public List<FinDataOutput> Get(IBbgCall<PerSecurityResponse> bbgCall, IEnumerable<string> bbgIds, ProgramTypes programType)
+        public List<FinDataOutput> Get(IBbgCall<PerSecurityResponse> bbgCall, Instruments dlInstruments, ProgramTypes programType)
         {
             // validate inputs
-            if(!bbgIds.Any()) return new List<FinDataOutput>();
+            if(!dlInstruments.instrument.Any()) return new List<FinDataOutput>();
             VerifyBblFlags(programType, bbgCall.GetDlDataType());
             
-            // construct bbg instruments
-            var instruments = CreateInstruments(bbgIds);
-            
             // create relevant action and call to DLWS
-            var perSecurityResponse = bbgCall.Get(instruments);
+            var perSecurityResponse = bbgCall.Get(dlInstruments);
             
             // parse and transform dl response to standard output
             var finDataOutputs = TransformBbgResponse(perSecurityResponse, bbgCall.GetDlDataType());
@@ -61,20 +58,6 @@ namespace Lusid.FinDataEx.DataLicense.Service
                 default:
                     throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.");
             }
-        }
-
-        private Instruments CreateInstruments(IEnumerable<string> bbgIds)
-        {
-            var instruments = bbgIds.Select(id => new PerSecurity_Dotnet.Instrument()
-            {
-                id = id,
-                type = InstrumentType.BB_GLOBAL,
-                typeSpecified = true
-            }).ToArray();
-            return new Instruments()
-            {
-                instrument = instruments
-            };
         }
 
         private void VerifyBblFlags(ProgramTypes programType, DataTypes dataType)

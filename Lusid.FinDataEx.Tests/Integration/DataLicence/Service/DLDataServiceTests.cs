@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Util;
@@ -29,7 +30,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         [Test]
         public void Get_OnAdhocGetData_ShouldReturnOutput()
         {
-            var bbgIds = new List<string>{"BBG000BPHFS9", "BBG000BVPV84"};
+            var bbgIds = CreateInstruments(new List<string>{"BBG000BPHFS9", "BBG000BVPV84"});
             var finDataOutputs = _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Adhoc);
             
             Assert.That(finDataOutputs.Count, Is.EqualTo(1));
@@ -51,16 +52,30 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         [Test]
         public void Get_OnAdhocGetDataWithNoIds_ShouldReturnEmptyData()
         {
-            var finDataOutputs = _dlDataService.Get(_getDataBbgCall, new List<string>(), DlTypes.ProgramTypes.Adhoc);
+            var finDataOutputs = _dlDataService.Get(_getDataBbgCall, CreateInstruments(new List<string>()), DlTypes.ProgramTypes.Adhoc);
             CollectionAssert.IsEmpty(finDataOutputs);
         }
         
         [Test]
         public void Get_OnAScheduledGetData_ShouldThrowUnsupportedException()
         {
-            var bbgIds = new List<string>{"BBG000BPHFS9", "BBG000BVPV84"};
+            var bbgIds = CreateInstruments(new List<string>{"BBG000BPHFS9", "BBG000BVPV84"});
             Assert.Throws<NotSupportedException>(() =>
                 _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Scheduled));
+        }
+        
+        private Instruments CreateInstruments(IEnumerable<string> bbgIds)
+        {
+            var instruments = bbgIds.Select(id => new PerSecurity_Dotnet.Instrument()
+            {
+                id = id,
+                type = InstrumentType.BB_GLOBAL,
+                typeSpecified = true
+            }).ToArray();
+            return new Instruments()
+            {
+                instrument = instruments
+            };
         }
 
     }

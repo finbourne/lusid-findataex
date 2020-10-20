@@ -5,8 +5,10 @@ using CommandLine;
 using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Service.Call;
+using Lusid.FinDataEx.DataLicense.Service.Instrument;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using Lusid.FinDataEx.Output;
+using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.DataLicense.Util.DlTypes;
 
 namespace Lusid.FinDataEx
@@ -31,23 +33,32 @@ namespace Lusid.FinDataEx
         /// <param name="getDataOptions"></param>
         private static void ExecuteGetData(GetDataOptions getDataOptions)
         {
-            var bbgIds = getDataOptions.BbgIds;
             var outputDirectory = getDataOptions.OutputDirectory;
             var fileSystem = getDataOptions.FileSystem;
             var dataFields = getDataOptions.DataFields;
-            
+
             // prepare DL service and output writer
             var dlDataService = new DlDataService();
             var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
             var bbgCall = new GetDataBbgCall(perSecurityWs, dataFields.ToArray());
             var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory, fileSystem);
             
+            // construct instruments in DL format to be passed to DLWS
+            var instruments = CreateInstruments(getDataOptions);           
+            
             // call DL and write results to specified output
-            var finDataOutputs =  dlDataService.Get(bbgCall, bbgIds, ProgramTypes.Adhoc);
+            var finDataOutputs =  dlDataService.Get(bbgCall, instruments, ProgramTypes.Adhoc);
             var writeResult =  finDataOutputWriter.Write(finDataOutputs);
             LogWriteResult(writeResult);
         }
 
+        /// <summary>
+        /// Select and construct an output writer to store the returned data from a DLWS call.
+        /// 
+        /// </summary>
+        /// <param name="outputDirectory"></param>
+        /// <param name="fileSystem"></param>
+        /// <returns></returns>
         private static IFinDataOutputWriter CreateFinDataOutputWriter(string outputDirectory, string fileSystem)
         {
             if (fileSystem.Equals(LusidFileSystem))
@@ -61,6 +72,10 @@ namespace Lusid.FinDataEx
             }
         }
         
+        /// <summary>
+        ///  Log results of BBG response write.
+        /// </summary>
+        /// <param name="writeResult"></param>
         private static void LogWriteResult(WriteResult writeResult)
         {
             if (writeResult.Status != WriteResultStatus.Ok)
@@ -73,6 +88,60 @@ namespace Lusid.FinDataEx
                 Console.WriteLine(writeResult.FilesWritten);
             }
         }
+
+        /// <summary>
+        /// Select an create an instrument source to build instruments passed to BBG.
+        ///
+        /// Instrument sources build DLWS compatible instruments from an underlying source (e.g
+        /// instruments from holdings in a portfolio, or figis passed in as args).
+        ///
+        /// </summary>
+        /// <param name="dataOptions"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        private static Instruments CreateInstruments(BaseOptions dataOptions)
+        {
+            var instruments = CreateInstrumentSource(dataOptions).Get();
+            if (instruments is {} dlInstruments)
+            {
+                return dlInstruments;
+            }
+            throw new ArgumentException($"No DL instruments could be created from the instruments or " +
+                                        $"portfolios provided. Check portfolios provided have existing holdings or" +
+                                        $" the instruments arguments are legal . Inputs={dataOptions}");
+        }
+
+        private static IInstrumentSource CreateInstrumentSource(BaseOptions dataOptions)
+        {
+            var portfolios = dataOptions.Portfolios;
+            var bbgIds = dataOptions.BbgIds;
+
+            if (portfolios.Any())
+            {
+                DateTimeOffset effectiveAt = DateTimeOffset.UtcNow;
+                Console.WriteLine($"Retrieving instruments from holdings effectiveAt {effectiveAt} for portfolios {portfolios}");
+                ISet<Tuple<string,string>> scopesAndPortfolios = portfolios.Select(p =>
+                {
+                    string[] scopeAndPortfolio = p.Split("|");
+                    if (scopeAndPortfolio.Length != 2)
+                    {
+                        throw new ArgumentException($"Unexpected scope and portfolio entry for {p}. Should be " +
+                                                    $"in form TestScope|UK_EQUITY");
+                    }
+                    return new Tuple<string,string>(scopeAndPortfolio[0], scopeAndPortfolio[1]);
+                }).ToHashSet();
+                
+                return new LusidPortfolioInstrumentSource(scopesAndPortfolios, effectiveAt);
+            } 
+            if (bbgIds.Any())
+            {
+                Console.WriteLine($"Constructing DL instrument requests from Figis: {bbgIds}");
+                return new FigiInstrumentSource(new HashSet<string>(bbgIds));
+            }
+            // should not be possible if commandlineparser runs proper checks
+            throw new ArgumentException($"No input portfolios or instruments were provided. Pleas check input " +
+                                        $"options {dataOptions}");
+        }
     }
 
     /// <summary>
@@ -81,10 +150,6 @@ namespace Lusid.FinDataEx
     /// </summary>
     class BaseOptions
     {
-        [Option('i', "instruments", Required = true,
-            HelpText = "Instruments Ids querying DL for. Currently only BBG IDs (Figis) are supported.")]
-        public IEnumerable<String> BbgIds { get; set; }
-        
         [Option('o', "output", Required = true, HelpText = "Output directory to write DL results.")]
         public string OutputDirectory { get; set; }
         
@@ -92,11 +157,17 @@ namespace Lusid.FinDataEx
             HelpText = "Filesystems to write DL results (Lusid or Local")]
         public string FileSystem { get; set; }
         
-        /*[Option("datatype", Required = false, HelpText = "BBG DL datatype. Supported types GetData or GetActions.")]
-        public string DataType { get; set; }
+        // Instrument Sources : instruments and portfolio options in different sets as only one type of input is allowed
+        [Option( 'i', "instruments", Required = true, SetName = "instruments",
+            HelpText = "Instruments Ids querying DL. Currently only BBG IDs (Figis) are supported.")]
+        public IEnumerable<String> BbgIds { get; set; }
         
-        [Option("datafields", Required = false, HelpText = "BBG DL fields to retrieve. Only relevant for GetData requests.")]
-        public IEnumerable<String> DataFields { get; set; }*/
+        [Option( 'p', "portfolio_and_scopes", Required = true, SetName = "portfolios",
+            HelpText = "Portfolios and scopes to retrieve instrument ids from for querying DL. The instruments are returned from " +
+                       "the holdings of the portfolios at execution time. Entry should be a portfolio scope pair split by " +
+                       "\"|\" e.g. (TestScope|UK_EQUITY)")]
+        public IEnumerable<String> Portfolios { get; set; }
+
         
     }
 
