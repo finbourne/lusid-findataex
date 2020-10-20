@@ -135,7 +135,7 @@ namespace Lusid.FinDataEx
             } 
             if (bbgIds.Any())
             {
-                Console.WriteLine($"Constructing DL instrument requests from Figis: {bbgIds}");
+                Console.WriteLine($"Constructing DL instrument requests from Figis: {String.Join(',',bbgIds)}");
                 return new FigiInstrumentSource(new HashSet<string>(bbgIds));
             }
             // should not be possible if commandlineparser runs proper checks
