@@ -101,5 +101,75 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.That(instrumentEntry2[9], Is.EqualTo("")); 
             Assert.That(instrumentEntry2[10], Is.EqualTo("AMZN"));
         }
+        
+        [Test]
+        public void FinDataEx_GetData_ForBondnstrumentMaster_ShouldProduceBondInsMasterFile()
+        {
+            var commandArgs = $"GetData -i BBG00HPJL7D0 BBG00RN2M5S4 -o {_tempOutputDir} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
+                              $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
+            FinDataEx.Main(commandArgs.Split(" "));
+            
+            //verify
+            var expectedDataFiles = Directory.GetFiles(_tempOutputDir);
+            
+            // ensure only GetData file created and name is in correct format
+            // more than one file is a contaminated test and should be investigated
+            Assert.That(expectedDataFiles.Length, Is.EqualTo(1));
+            StringAssert.EndsWith("_GetData.csv", expectedDataFiles[0]);
+
+            // ensure file is properly populated
+            var entries = File.ReadAllLines(expectedDataFiles[0]);
+            
+            // check headers
+            Assert.That(entries[0], Is.EqualTo("ID_BB_GLOBAL|TICKER|ID_ISIN|ID_CUSIP|SECURITY_TYP|CRNCY|COUNTRY_ISO|" +
+                                               "EXCH_CODE|INDUSTRY_SECTOR|AMT_ISSUED|SECURITY_DES|ISSUE_DT|MATURITY|" +
+                                               "CPN|PAR_AMT|CPN_CRNCY|CPN_FREQ|DAY_CNT_DES|FLT_CPN_CONVENTION"));
+
+            // check instrument 1 entry
+            var instrumentEntry1 = entries[1].Split("|");
+            Assert.That(instrumentEntry1[0], Is.EqualTo("BBG00HPJL7D0"));
+            Assert.That(instrumentEntry1[1], Is.EqualTo("SOFTBK"));
+            Assert.That(instrumentEntry1[2], Is.EqualTo("XS1684385161"));
+            Assert.That(instrumentEntry1[3], Is.EqualTo("AP1167257"));
+            Assert.That(instrumentEntry1[4], Is.EqualTo("EURO NON-DOLLAR"));
+            Assert.That(instrumentEntry1[5], Is.EqualTo("EUR"));
+            Assert.That(instrumentEntry1[6], Is.EqualTo("JP"));
+            Assert.That(instrumentEntry1[7], Is.EqualTo("SGX-ST"));
+            Assert.That(instrumentEntry1[8], Is.EqualTo("Communications"));
+            Assert.That(instrumentEntry1[9], Is.EqualTo("1500000000.00")); 
+            Assert.That(instrumentEntry1[10], Is.EqualTo("SOFTBK 3 1/8 09/19/25"));
+            Assert.That(instrumentEntry1[11], Is.EqualTo("09/19/2017"));
+            Assert.That(instrumentEntry1[12], Is.EqualTo("09/19/2025"));
+            Assert.That(instrumentEntry1[13], Is.EqualTo("3.125000"));
+            Assert.That(instrumentEntry1[14], Is.EqualTo("1000.000000000"));
+            Assert.That(instrumentEntry1[15], Is.EqualTo("EUR"));
+            Assert.That(instrumentEntry1[16], Is.EqualTo("2"));
+            Assert.That(instrumentEntry1[17], Is.EqualTo("ISMA-30/360"));
+            Assert.That(instrumentEntry1[18], Is.EqualTo(""));
+
+            // check instrument 2 entry
+            var instrumentEntry2 = entries[2].Split("|");
+            Assert.That(instrumentEntry2[0], Is.EqualTo("BBG00RN2M5S4"));
+            Assert.That(instrumentEntry2[1], Is.EqualTo("T"));
+            Assert.That(instrumentEntry2[2], Is.EqualTo("US912828Z864"));
+            Assert.That(instrumentEntry2[3], Is.EqualTo("912828Z86"));
+            Assert.That(instrumentEntry2[4], Is.EqualTo("US GOVERNMENT"));
+            Assert.That(instrumentEntry2[5], Is.EqualTo("USD"));
+            Assert.That(instrumentEntry2[6], Is.EqualTo("US"));
+            Assert.That(instrumentEntry2[7], Is.EqualTo("FRANKFURT"));
+            Assert.That(instrumentEntry2[8], Is.EqualTo("Government"));
+            Assert.That(instrumentEntry2[9], Is.EqualTo("54900000000")); 
+            Assert.That(instrumentEntry2[10], Is.EqualTo("T 1 3/8 02/15/23"));
+            Assert.That(instrumentEntry2[11], Is.EqualTo("02/18/2020"));
+            Assert.That(instrumentEntry2[12], Is.EqualTo("02/15/2023"));
+            Assert.That(instrumentEntry2[13], Is.EqualTo("1.375000"));
+            Assert.That(instrumentEntry2[14], Is.EqualTo("100"));
+            Assert.That(instrumentEntry2[15], Is.EqualTo("USD"));
+            Assert.That(instrumentEntry2[16], Is.EqualTo("2"));
+            Assert.That(instrumentEntry2[17], Is.EqualTo("ACT/ACT"));
+            Assert.That(instrumentEntry1[18], Is.EqualTo(""));
+        }
+        
+        
     }
 }
