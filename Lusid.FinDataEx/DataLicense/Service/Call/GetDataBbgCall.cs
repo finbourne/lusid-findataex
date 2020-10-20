@@ -101,6 +101,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             return retrieveGetDataResponseRequest;
         }
 
+        /// <summary>
+        ///  Return default headers for a GetData Request.
+        ///
+        /// For details on header options see https://eap.bloomberg.com/docs/data-license/
+        /// </summary>
+        /// <returns></returns>
         private static GetDataHeaders GetDefaultHeaders()
         {
             return new GetDataHeaders

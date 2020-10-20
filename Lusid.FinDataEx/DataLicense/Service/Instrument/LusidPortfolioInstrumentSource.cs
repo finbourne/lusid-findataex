@@ -10,30 +10,33 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
     public class LusidPortfolioInstrumentSource : IInstrumentSource
     {
-        private const string FigiInstrumentProperty = "Instrument/default/Figi";
+        private readonly InstrumentType _instrumentType;
+        private readonly string _instrumentTypeLusidPropertyKey;
         private readonly ISet<Tuple<string, string>> _scopesAndPortfolios;
         private readonly DateTimeOffset _effectiveAt;
 
-        public LusidPortfolioInstrumentSource(ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
+        public LusidPortfolioInstrumentSource(InstrumentType instrumentType, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
-            this._scopesAndPortfolios = scopesAndPortfolios;
-            this._effectiveAt = effectiveAt;
+            _instrumentType = instrumentType;
+            _instrumentTypeLusidPropertyKey = getLusidInstrumentIdPropertyAddress(instrumentType);
+            _scopesAndPortfolios = scopesAndPortfolios;
+            _effectiveAt = effectiveAt;
         }
 
         #nullable enable
         public Instruments? Get()
         {
             var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets_api.json");
-            var portfolioIntrumentFigis = GetHoldingsInstrumentFigis(lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
-            return portfolioIntrumentFigis.Any() ? ToBbgDlInstruments(portfolioIntrumentFigis) : null;
+            var portfolioIntrumentIds = GetHoldingsInstrumentIds(lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
+            return portfolioIntrumentIds.Any() ? ToBbgDlInstruments(portfolioIntrumentIds) : null;
         }
 
-        private Instruments ToBbgDlInstruments(ISet<string> figis)
+        private Instruments ToBbgDlInstruments(ISet<string> ids)
         {
-            var instruments = figis.Select(figi => new PerSecurity_Dotnet.Instrument()
+            var instruments = ids.Select(figi => new PerSecurity_Dotnet.Instrument()
             {
                 id = figi,
-                type = InstrumentType.BB_GLOBAL,
+                type = _instrumentType,
                 typeSpecified = true
             }).ToArray();
             return new Instruments()
@@ -42,10 +45,10 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             };
         }
 
-        private ISet<string> GetHoldingsInstrumentFigis(ILusidApiFactory lusidApiFactory, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
+        private ISet<string> GetHoldingsInstrumentIds(ILusidApiFactory lusidApiFactory, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
             var transactionPortfoliosApi = lusidApiFactory.Api<TransactionPortfoliosApi>();
-            ISet<string> figis = new HashSet<string>();
+            ISet<string> instrumentIds = new HashSet<string>();
             foreach (Tuple<string, string> scopeAndPortfolio in scopesAndPortfolios)
             {
                 string scope = scopeAndPortfolio.Item1;
@@ -53,16 +56,16 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                 try
                 {
                     var holdings = transactionPortfoliosApi.GetHoldings(scope, portfolio, effectiveAt,
-                        propertyKeys: new List<string>() {FigiInstrumentProperty});
-                    ISet<string> portfolioFigis = holdings.Values
-                        .Where(h => h.Properties.ContainsKey(FigiInstrumentProperty))
-                        .Select(h => h.Properties[FigiInstrumentProperty].Value.LabelValue)
+                        propertyKeys: new List<string>() {_instrumentTypeLusidPropertyKey});
+                    ISet<string> validPortfolioInstrumentIds = holdings.Values
+                        .Where(h => h.Properties.ContainsKey(_instrumentTypeLusidPropertyKey))
+                        .Select(h => h.Properties[_instrumentTypeLusidPropertyKey].Value.LabelValue)
                         .ToHashSet();
 
-                    Console.WriteLine($"Retrieving figis for instruments of positions for scope={scope}, " +
-                                      $"portfolio={portfolio}, effectiveAt={effectiveAt}. Figis={portfolioFigis}");
+                    Console.WriteLine($"Retrieving ids for instruments of positions for scope={scope}, " +
+                                      $"portfolio={portfolio}, effectiveAt={effectiveAt}. InstrumentId={_instrumentType}, instrument Ids={validPortfolioInstrumentIds}");
 
-                    figis.UnionWith(portfolioFigis);
+                    instrumentIds.UnionWith(validPortfolioInstrumentIds);
                 }
                 catch (ApiException e)
                 {
@@ -72,7 +75,23 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                 }
             }
 
-            return figis;
+            return instrumentIds;
+        }
+
+        private string getLusidInstrumentIdPropertyAddress(InstrumentType instrumentType)
+        {
+            switch (instrumentType)
+            {
+                case InstrumentType.BB_GLOBAL:
+                    return "Instrument/default/Figi";
+                case InstrumentType.ISIN:
+                    return "Instrument/default/Isin";
+                case InstrumentType.CUSIP:
+                    return "Instrument/default/Cusip";
+                default:
+                    throw new ArgumentException(
+                        $"Only Figi, Isin and Cusips are currently supported. {instrumentType} not yet supported.");
+            }
         }
     }
 }

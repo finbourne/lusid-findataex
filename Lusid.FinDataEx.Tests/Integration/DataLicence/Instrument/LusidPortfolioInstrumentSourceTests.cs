@@ -20,7 +20,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Instrument
                 new Tuple<string, string>(Scope, PortfolioNoHoldings),
             };
             
-            var instrumentSource = new LusidPortfolioInstrumentSource(scopesAndPortfolios, EffectiveAt);
+            var instrumentSource = new LusidPortfolioInstrumentSource(InstrumentType.BB_GLOBAL, scopesAndPortfolios, EffectiveAt);
             var instruments = instrumentSource.Get();
             
             Assert.That(instruments.instrument.Length, Is.EqualTo(2));
@@ -39,7 +39,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Instrument
                 new Tuple<string, string>(Scope, "portfolio_does_not_exist"),
             };
             
-            var instrumentSource = new LusidPortfolioInstrumentSource(scopesAndPortfolios, EffectiveAt);
+            var instrumentSource = new LusidPortfolioInstrumentSource(InstrumentType.BB_GLOBAL, scopesAndPortfolios, EffectiveAt);
             var instruments = instrumentSource.Get();
             
             Assert.That(instruments.instrument.Length, Is.EqualTo(1));
@@ -56,7 +56,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Instrument
                 new Tuple<string, string>(Scope, PortfolioSameHoldingAsP1),
             };
 
-            var instrumentSource = new LusidPortfolioInstrumentSource(scopesAndPortfolios, EffectiveAt);
+            var instrumentSource = new LusidPortfolioInstrumentSource(InstrumentType.BB_GLOBAL, scopesAndPortfolios, EffectiveAt);
             var instruments = instrumentSource.Get();
 
             Assert.That(instruments.instrument.Length, Is.EqualTo(1));
@@ -65,6 +65,20 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Instrument
         }
 
         [Test]
+        public void Get_OnPortfoliosWithUnknownInstrument_ShouldReturnNull()
+        {
+            var scopesAndPortfolios = new HashSet<Tuple<string,string>>()
+            {
+                new Tuple<string, string>(Scope, PortfolioWithUnknownInstrument)
+            };
+            
+            var instrumentSource = new LusidPortfolioInstrumentSource(InstrumentType.BB_GLOBAL, scopesAndPortfolios, EffectiveAt);
+            var instruments = instrumentSource.Get();
+            
+            Assert.IsNull(instruments);
+        }
+        
+        [Test]
         public void Get_OnPortfoliosWithoutHoldings_ShouldReturnNull()
         {
             var scopesAndPortfolios = new HashSet<Tuple<string,string>>()
@@ -72,7 +86,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Instrument
                 new Tuple<string, string>(Scope, PortfolioNoHoldings)
             };
             
-            var instrumentSource = new LusidPortfolioInstrumentSource(scopesAndPortfolios, EffectiveAt);
+            var instrumentSource = new LusidPortfolioInstrumentSource(InstrumentType.BB_GLOBAL, scopesAndPortfolios, EffectiveAt);
             var instruments = instrumentSource.Get();
             
             Assert.IsNull(instruments);
@@ -87,13 +101,29 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Instrument
                 new Tuple<string, string>(Scope, "neither_does_this_portfolio")
             };
             
-            var instrumentSource = new LusidPortfolioInstrumentSource(scopesAndPortfolios, EffectiveAt);
+            var instrumentSource = new LusidPortfolioInstrumentSource(InstrumentType.BB_GLOBAL, scopesAndPortfolios, EffectiveAt);
             var instruments = instrumentSource.Get();
             
             Assert.IsNull(instruments);
         }
         
-        
+        // Test with different instrument identifiers
+        [Test]
+        public void Get_OnPortfoliosUsingIsins_ShouldDlInstruments()
+        {
+            var scopesAndPortfolios = new HashSet<Tuple<string,string>>()
+            {
+                new Tuple<string, string>(Scope, Portfolio)
+            };
+            
+            var instrumentSource = new LusidPortfolioInstrumentSource(InstrumentType.ISIN, scopesAndPortfolios, EffectiveAt);
+            var instruments = instrumentSource.Get();
+            
+            // only one instrument with ISIN attached
+            Assert.That(instruments.instrument.Length, Is.EqualTo(1));
+            Assert.That(instruments.instrument[0].id, Is.EqualTo("US0231351067"));
+            Assert.That(instruments.instrument[0].type, Is.EqualTo(InstrumentType.ISIN));
+        }
 
     }
 }

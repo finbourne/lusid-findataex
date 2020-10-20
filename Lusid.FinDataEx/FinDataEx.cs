@@ -115,7 +115,7 @@ namespace Lusid.FinDataEx
         {
             var portfolios = dataOptions.Portfolios;
             var bbgIds = dataOptions.BbgIds;
-
+            var instrumentIdType = dataOptions.InstrumentIdType;
             if (portfolios.Any())
             {
                 DateTimeOffset effectiveAt = DateTimeOffset.UtcNow;
@@ -131,12 +131,12 @@ namespace Lusid.FinDataEx
                     return new Tuple<string,string>(scopeAndPortfolio[0], scopeAndPortfolio[1]);
                 }).ToHashSet();
                 
-                return new LusidPortfolioInstrumentSource(scopesAndPortfolios, effectiveAt);
+                return new LusidPortfolioInstrumentSource(instrumentIdType, scopesAndPortfolios, effectiveAt);
             } 
             if (bbgIds.Any())
             {
                 Console.WriteLine($"Constructing DL instrument requests from Figis: {String.Join(',',bbgIds)}");
-                return new FigiInstrumentSource(new HashSet<string>(bbgIds));
+                return new BasicInstrumentSource(instrumentIdType, new HashSet<string>(bbgIds));
             }
             // should not be possible if commandlineparser runs proper checks
             throw new ArgumentException($"No input portfolios or instruments were provided. Pleas check input " +
@@ -154,8 +154,12 @@ namespace Lusid.FinDataEx
         public string OutputDirectory { get; set; }
         
         [Option('f', "filesystem", Required = false, Default ="Local", 
-            HelpText = "Filesystems to write DL results (Lusid or Local")]
+            HelpText = "Filesystems to write DL results (Lusid or Local)")]
         public string FileSystem { get; set; }
+        
+        [Option('t', "instrument id type", Required = false, Default = InstrumentType.BB_GLOBAL, 
+        HelpText = "Type of instrument ids being input (BB_GLOBAL (Figi), ISIN, CUSIP)")]
+        public InstrumentType InstrumentIdType { get; set; }
         
         // Instrument Sources : instruments and portfolio options in different sets as only one type of input is allowed
         [Option( 'i', "instruments", Required = true, SetName = "instruments",

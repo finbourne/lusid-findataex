@@ -18,12 +18,15 @@ namespace Lusid.FinDataEx.Tests.Integration
         protected string Portfolio2 = "port_02";
         protected string PortfolioNoHoldings = "port_no_holding";
         protected string PortfolioSameHoldingAsP1 = "port_same_holdings_as_p1";
+        protected string PortfolioWithUnknownInstrument = "port_unknown_instrument";
         protected DateTimeOffset EffectiveAt = new DateTimeOffset(2020, 06, 30, 0, 0, 0, TimeSpan.Zero);
         protected DateTimeOffset EffectiveAtTMinus1 = new DateTimeOffset(2020, 06, 29, 0, 0, 0, TimeSpan.Zero);
         
         // bbg ids for remote bbg calls with test account
         private const string AmznFigi = "BBG000BVPV84";
         private const string MicFigi = "BBG000BPHFS9";
+        // treasury bond unknown instrument (not real)
+        private const string UnknownFigi = "BBG123AAA456";
 
         [SetUp]
         public virtual void SetUp()
@@ -39,9 +42,13 @@ namespace Lusid.FinDataEx.Tests.Integration
             // Create Portfolio with MSFT
             CreateTransactionPortfolio(transactionPortfoliosApi, Portfolio2);
             UpsertTestTransactionsMsft(transactionPortfoliosApi, Portfolio2);
-
             // Create a portfolio with no holdings
             CreateTransactionPortfolio(transactionPortfoliosApi, PortfolioNoHoldings);
+            
+            // Create a portfolio with holdings in a instrument that does not exist in LUSID
+            CreateTransactionPortfolio(transactionPortfoliosApi, PortfolioWithUnknownInstrument);
+            UpsertTestTransactionsUnknownInstrument(transactionPortfoliosApi, PortfolioWithUnknownInstrument);
+
         }
         
         [TearDown]
@@ -51,6 +58,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioSameHoldingAsP1);
             _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, Portfolio2);
             _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioNoHoldings);
+            _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioWithUnknownInstrument);
         }
         
         private string CreateTransactionPortfolio(TransactionPortfoliosApi transactionPortfoliosApi, string portfolioCode)
@@ -79,6 +87,15 @@ namespace Lusid.FinDataEx.Tests.Integration
             var transactions = new List<TransactionRequest>()
             {
                 BuildTransactionRequest(AmznFigi, 100, 3292.01M, "USD", EffectiveAtTMinus1, "Buy"),
+            };
+            transactionPortfoliosApi.UpsertTransactions(Scope, transactionPortfolio, transactions);
+        }
+        
+        private void UpsertTestTransactionsUnknownInstrument(TransactionPortfoliosApi transactionPortfoliosApi, string transactionPortfolio)
+        {
+            var transactions = new List<TransactionRequest>()
+            {
+                BuildTransactionRequest(UnknownFigi, 10, 200.01M, "USD", EffectiveAtTMinus1, "Buy"),
             };
             transactionPortfoliosApi.UpsertTransactions(Scope, transactionPortfolio, transactions);
         }
