@@ -4,7 +4,7 @@ using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Service.Transform;
 using PerSecurity_Dotnet;
-using static Lusid.FinDataEx.DataLicense.Util.DlTypes;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
 namespace Lusid.FinDataEx.DataLicense.Service
 {
@@ -14,7 +14,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
     /// into a standard FinDataOutput.
     /// 
     /// </summary>
-    public class DlDataService
+    public class DataLicenseService
     {
         /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
@@ -35,17 +35,17 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="dataType">Type of call to BBG DLWS (e.g. GetData, GetActions). Different data types retrieve
         ///  different sets of data. </param>
         /// <returns>FinDataOutput of data returned for instrumenDts requested</returns>
-        public List<FinDataOutput> Get(IBbgCall<PerSecurityResponse> bbgCall, Instruments dlInstruments, ProgramTypes programType)
+        public List<FinDataOutput> Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType)
         {
             // validate inputs
             if(!dlInstruments.instrument.Any()) return new List<FinDataOutput>();
-            VerifyBblFlags(programType, bbgCall.GetDlDataType());
+            VerifyBblFlags(programType, dataLicenseCall.GetDlDataType());
             
             // create relevant action and call to DLWS
-            var perSecurityResponse = bbgCall.Get(dlInstruments);
+            var perSecurityResponse = dataLicenseCall.Get(dlInstruments);
             
             // parse and transform dl response to standard output
-            var finDataOutputs = TransformBbgResponse(perSecurityResponse, bbgCall.GetDlDataType());
+            var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataLicenseCall.GetDlDataType());
             return finDataOutputs;
         }
 

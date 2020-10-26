@@ -12,7 +12,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
     ///  a given set of instruments
     /// 
     /// </summary>
-    public class GetDataBbgCall : IBbgCall<RetrieveGetDataResponse>
+    public class GetDataLicenseCall : IDataLicenseCall<RetrieveGetDataResponse>
     {
         /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
@@ -22,24 +22,24 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         private readonly GetDataHeaders _getDataHeaders;
         private readonly string[] _getDataFields;
 
-        public GetDataBbgCall(PerSecurityWS perSecurityWs) : this(perSecurityWs, GetDefaultHeaders(),
+        public GetDataLicenseCall(PerSecurityWS perSecurityWs) : this(perSecurityWs, GetDefaultHeaders(),
             GetDefaultDataFields()) {}
 
-        public GetDataBbgCall(PerSecurityWS perSecurityWs, int pollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
+        public GetDataLicenseCall(PerSecurityWS perSecurityWs, int pollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
             GetDefaultDataFields())
         {
             _pollingInterval = pollingInterval;
         }
         
-        public GetDataBbgCall(PerSecurityWS perSecurityWs, string[] dataFields) : this(perSecurityWs, GetDefaultHeaders(),
+        public GetDataLicenseCall(PerSecurityWS perSecurityWs, string[] dataFields) : this(perSecurityWs, GetDefaultHeaders(),
             dataFields) {}
 
-        private GetDataBbgCall(PerSecurityWS perSecurityWs, GetDataHeaders dataHeaders, string[] dataFields)
+        private GetDataLicenseCall(PerSecurityWS perSecurityWs, GetDataHeaders dataHeaders, string[] dataFields)
         {
             _perSecurityWs = perSecurityWs;
             _getDataHeaders = dataHeaders;
             _getDataFields = dataFields;
-            _pollingInterval = DlDataService.PollInterval;
+            _pollingInterval = DataLicenseService.PollInterval;
         }
 
         /// <summary>
@@ -63,14 +63,14 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
 
             // log output
             Console.WriteLine($"GetData response for id={retrieveGetDataResponse.responseId} and response-level status code={retrieveGetDataResponse.statusCode.code}({retrieveGetDataResponse.statusCode.description})");
-            DlUtils.PrintGetDataResponse(retrieveGetDataResponse);
-            DlUtils.PrintJsonResponse(retrieveGetDataResponse);
+            DataLicenseUtils.PrintGetDataResponse(retrieveGetDataResponse);
+            DataLicenseUtils.PrintJsonResponse(retrieveGetDataResponse);
             return retrieveGetDataResponse;
         }
 
-        public DlTypes.DataTypes GetDlDataType()
+        public DataLicenseTypes.DataTypes GetDlDataType()
         {
-            return DlTypes.DataTypes.GetData;
+            return DataLicenseTypes.DataTypes.GetData;
         }
 
         private RetrieveGetDataResponse GetDataResponseSync(retrieveGetDataResponseRequest retrieveGetDataResponseRequest)
@@ -84,7 +84,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
                 var retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
                 getDataResponse = retrieveGetDataResponse.retrieveGetDataResponse;
             }
-            while (getDataResponse.statusCode.code == DlDataService.DataNotAvailable);
+            while (getDataResponse.statusCode.code == DataLicenseService.DataNotAvailable);
             return getDataResponse;
         }
 

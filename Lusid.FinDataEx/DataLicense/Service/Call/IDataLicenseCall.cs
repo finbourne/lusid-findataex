@@ -9,7 +9,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IBbgCall<out T> where T : PerSecurityResponse 
+    public interface IDataLicenseCall<out T> where T : PerSecurityResponse 
     {
         /// <summary>
         /// Executes a call against DLWS and returns a BBG DL security response for
@@ -20,6 +20,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         /// <returns>Response with requested data for the instruments if it could be provided.</returns>
         T Get(Instruments instruments);
 
-        DlTypes.DataTypes GetDlDataType();
+        DataLicenseTypes.DataTypes GetDlDataType();
     }
 }

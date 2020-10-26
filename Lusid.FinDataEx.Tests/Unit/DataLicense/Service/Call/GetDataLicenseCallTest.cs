@@ -7,16 +7,16 @@ using PerSecurity_Dotnet;
 namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
 {
     [TestFixture]
-    public class GetDataBbgCallTest
+    public class GetDataLicenseCallTest
     {
 
-        private GetDataBbgCall _getDataBbgCall;
+        private GetDataLicenseCall _getDataLicenseCall;
         private PerSecurityWS _perSecurityWs;
         [SetUp]
         public void SetUp()
         {
             _perSecurityWs = Mock.Of<PerSecurityWS>();
-            _getDataBbgCall = new GetDataBbgCall(_perSecurityWs, 10);
+            _getDataLicenseCall = new GetDataLicenseCall(_perSecurityWs, 10);
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
                 .Callback<retrieveGetDataResponseRequest>(r => retrieveGetDataResponseRequest = r);
             
             //execute test
-            var retrieveGetDataResponse =  _getDataBbgCall.Get(testInstruments);
+            var retrieveGetDataResponse =  _getDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetDataResponse.instrumentDatas;
             var getDataFields = retrieveGetDataResponse.fields;
 
@@ -61,7 +61,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             
             //verify response as expected
             Assert.That(retrieveGetDataResponse.responseId, Is.EqualTo(responseId));
-            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DlDataService.Success));
+            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DataLicenseService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(2));
             AssertBbUniqueQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[0], "BBG000BPHFS9", "209.830000");
             AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "BBG000BVPV84", "3195.690000");
@@ -99,7 +99,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
                 .Callback<retrieveGetDataResponseRequest>(r => retrieveGetDataResponseRequest = r);
             
             //execute test
-            var retrieveGetDataResponse =  _getDataBbgCall.Get(testInstruments);
+            var retrieveGetDataResponse =  _getDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetDataResponse.instrumentDatas;
             var getDataFields = retrieveGetDataResponse.fields;
 
@@ -112,7 +112,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             
             //verify response as expected
             Assert.That(retrieveGetDataResponse.responseId, Is.EqualTo(responseId));
-            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DlDataService.Success));
+            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DataLicenseService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(2));
             AssertBadInstrumentIsNotPopulated(getDataFields, instrumentDatas[0], "TestBadUniqueId");
             AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "BBG000BVPV84", "3195.690000");
@@ -120,7 +120,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
 
         private void AssertBbUniqueQueriedInstrumentIsPopulated(string[] getDataFields, InstrumentData instrumentData, string bbUid, string lastPrice)
         {
-            Assert.That(instrumentData.code, Is.EqualTo(DlDataService.InstrumentSuccessCode));
+            Assert.That(instrumentData.code, Is.EqualTo(DataLicenseService.InstrumentSuccessCode));
             Assert.That(instrumentData.instrument.id, Is.EqualTo(bbUid));
             Assert.That(instrumentData.instrument.yellowkey, Is.EqualTo(MarketSector.Govt));
             
@@ -133,7 +133,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
         
         private void AssertIsinQueriedInstrumentIsPopulated(string[] getDataFields, InstrumentData instrumentData, string isin, string bbUid, string lastPrice)
         {
-            Assert.That(instrumentData.code, Is.EqualTo(DlDataService.InstrumentSuccessCode));
+            Assert.That(instrumentData.code, Is.EqualTo(DataLicenseService.InstrumentSuccessCode));
             Assert.That(instrumentData.instrument.id, Is.EqualTo(isin));
             Assert.That(instrumentData.instrument.yellowkey, Is.EqualTo(MarketSector.Govt));
             
@@ -146,7 +146,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
         
         private void AssertBadInstrumentIsNotPopulated(string[] getDataFields, InstrumentData instrumentData, string bbUid)
         {
-            Assert.That(instrumentData.code, Is.Not.EqualTo(DlDataService.InstrumentSuccessCode));
+            Assert.That(instrumentData.code, Is.Not.EqualTo(DataLicenseService.InstrumentSuccessCode));
             Assert.That(instrumentData.instrument.id, Is.EqualTo(bbUid));
             
             Assert.That(getDataFields[0], Is.EqualTo("ID_BB_GLOBAL"));

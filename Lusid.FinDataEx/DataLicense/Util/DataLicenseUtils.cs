@@ -5,7 +5,7 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Util
 {
-    public class DlUtils
+    public class DataLicenseUtils
     {
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Lusid.FinDataEx.DataLicense.Util
         public static void PrintGetDataResponse(RetrieveGetDataResponse retrieveGetDataResponse)
         {
             // Code taken from BBG DL Samples
-            if (retrieveGetDataResponse.statusCode.code == DlDataService.Success)
+            if (retrieveGetDataResponse.statusCode.code == DataLicenseService.Success)
             {
                 // Displaying the RetrieveGetDataResponse
                 for (int i = 0; i < retrieveGetDataResponse.instrumentDatas.Length; i++)

@@ -10,28 +10,28 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
 {
-    public class DlDataServiceTests
+    public class DataLicenseServiceTests
     {
 
-        private DlDataService _dlDataService;
+        private DataLicenseService _dataLicenseService;
         private PerSecurityWS _perSecurityWs;
 
         // BBG DL Calls
-        private GetDataBbgCall _getDataBbgCall;
+        private GetDataLicenseCall _getDataLicenseCall;
 
         [SetUp]
         public void SetUp()
         {
             _perSecurityWs = new PerSecurityWsFactory().CreateDefault();
-            _getDataBbgCall = new GetDataBbgCall(_perSecurityWs);
-            _dlDataService = new DlDataService();
+            _getDataLicenseCall = new GetDataLicenseCall(_perSecurityWs);
+            _dataLicenseService = new DataLicenseService();
         }
 
         [Test]
         public void Get_OnAdhocGetData_ShouldReturnOutput()
         {
             var bbgIds = CreateInstruments(new List<string>{"BBG000BPHFS9", "BBG000BVPV84"});
-            var finDataOutputs = _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Adhoc);
+            var finDataOutputs = _dataLicenseService.Get(_getDataLicenseCall, bbgIds, DataLicenseTypes.ProgramTypes.Adhoc);
             
             Assert.That(finDataOutputs.Count, Is.EqualTo(1));
             CollectionAssert.AreEqual(finDataOutputs[0].Header, new List<string>(){"ID_BB_GLOBAL","PX_LAST"});
@@ -52,7 +52,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         [Test]
         public void Get_OnAdhocGetDataWithNoIds_ShouldReturnEmptyData()
         {
-            var finDataOutputs = _dlDataService.Get(_getDataBbgCall, CreateInstruments(new List<string>()), DlTypes.ProgramTypes.Adhoc);
+            var finDataOutputs = _dataLicenseService.Get(_getDataLicenseCall, CreateInstruments(new List<string>()), DataLicenseTypes.ProgramTypes.Adhoc);
             CollectionAssert.IsEmpty(finDataOutputs);
         }
         
@@ -61,7 +61,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
         {
             var bbgIds = CreateInstruments(new List<string>{"BBG000BPHFS9", "BBG000BVPV84"});
             Assert.Throws<NotSupportedException>(() =>
-                _dlDataService.Get(_getDataBbgCall, bbgIds, DlTypes.ProgramTypes.Scheduled));
+                _dataLicenseService.Get(_getDataLicenseCall, bbgIds, DataLicenseTypes.ProgramTypes.Scheduled));
         }
         
         private Instruments CreateInstruments(IEnumerable<string> bbgIds)

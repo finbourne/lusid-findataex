@@ -7,7 +7,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
     ///  Transformer of BBG DL responses into standardised FinDataOutput
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IBbgResponseTransformer<in T> where T : PerSecurityResponse
+    public interface IDataLicenseResponseTransformer<in T> where T : PerSecurityResponse
     {
         /// <summary>
         ///  Transform a specific security repsonse from BBG DL (e.g. corp action response, prices response) into

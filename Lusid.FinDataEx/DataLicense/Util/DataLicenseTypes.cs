@@ -3,7 +3,7 @@
     /// <summary>
     ///  Container class for BBG DLWS related enums
     /// </summary>
-    public class DlTypes
+    public class DataLicenseTypes
     {
         /// <summary>
         ///  Different sets of data types supported by BBG DL and FinDataEx (e.g. Corporate Actions

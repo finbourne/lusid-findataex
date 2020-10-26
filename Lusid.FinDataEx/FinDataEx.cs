@@ -9,7 +9,7 @@ using Lusid.FinDataEx.DataLicense.Service.Instrument;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using Lusid.FinDataEx.Output;
 using PerSecurity_Dotnet;
-using static Lusid.FinDataEx.DataLicense.Util.DlTypes;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
 namespace Lusid.FinDataEx
 {
@@ -38,9 +38,9 @@ namespace Lusid.FinDataEx
             var dataFields = getDataOptions.DataFields;
 
             // prepare DL service and output writer
-            var dlDataService = new DlDataService();
+            var dlDataService = new DataLicenseService();
             var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
-            var bbgCall = new GetDataBbgCall(perSecurityWs, dataFields.ToArray());
+            var bbgCall = new GetDataLicenseCall(perSecurityWs, dataFields.ToArray());
             var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory, fileSystem);
             
             // construct instruments in DL format to be passed to DLWS

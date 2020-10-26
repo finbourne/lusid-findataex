@@ -9,7 +9,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
     ///  Transformer for BBG DL GetData Calls.
     ///
     /// </summary>
-    public class GetDataResponseTransformer : IBbgResponseTransformer<RetrieveGetDataResponse>
+    public class GetDataResponseTransformer : IDataLicenseResponseTransformer<RetrieveGetDataResponse>
     {
         /// <summary>
         /// Transform a a GetData response from BBG DLWS to FinDataOutput. Typically expect
@@ -27,7 +27,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
             {
                 Dictionary<string,string> instrumentRecord = new Dictionary<string, string>();
                 // instruments with errors should be logged and ignored
-                if (instrumentData.code != DlDataService.InstrumentSuccessCode)
+                if (instrumentData.code != DataLicenseService.InstrumentSuccessCode)
                 {
                     Console.WriteLine($"Error in GetData instrument for {instrumentData.instrument.id}. " +
                                       $"Check GetData response log above. Continuing to remaining instruments...");

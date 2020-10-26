@@ -3,21 +3,21 @@ using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
-using static Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call.GetDataBbgCallTest;
+using static Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call.GetDataLicenseCallTest;
 
 namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
 {
     [TestFixture]
-    public class GetDataBbgCallTests
+    public class GetDataLicenseCallTests
     {
 
-        private GetDataBbgCall _getDataBbgCall;
+        private GetDataLicenseCall _getDataLicenseCall;
 
         [SetUp]
         public void SetUp()
         {
             var perSecurityWs = new PerSecurityWsFactory().CreateDefault(PerSecurityWsFactory.BbgDlAddress);
-            _getDataBbgCall = new GetDataBbgCall(perSecurityWs);
+            _getDataLicenseCall = new GetDataLicenseCall(perSecurityWs);
         }
 
         [Test]
@@ -27,12 +27,12 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
             var testInstruments = CreateTestInstruments();
             
             //execute
-            var retrieveGetDataResponse =  _getDataBbgCall.Get(testInstruments);
+            var retrieveGetDataResponse =  _getDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetDataResponse.instrumentDatas;
             var getDataFields = retrieveGetDataResponse.fields;
 
             //verify
-            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DlDataService.Success));
+            Assert.That(retrieveGetDataResponse.statusCode.code, Is.EqualTo(DataLicenseService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(2));
             AssertBbUniqueQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[0], "BBG000BPHFS9");
             AssertIsinQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[1], "US0231351067", "BBG000BVPV84");
