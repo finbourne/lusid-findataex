@@ -16,9 +16,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
     /// </summary>
     public class DataLicenseService
     {
-        /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
-         or worse if poll interval against actual servers*/
-        public const int PollInterval = 30000;
+        
         public const int DataNotAvailable = 100;
         public const int Success = 0;
         public const int RequestError = 200;
@@ -30,34 +28,32 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// will return a standardised output as a FinDataOutput.
         /// 
         /// </summary>
-        /// <param name="bbgIds"></param>
+        /// <param name="dataLicenseCall">Data type call to BBG DL (e.g. GetData, GetAction)</param>
+        /// <param name="dlInstruments">DLWS representation of instruments to pass to BBG DL</param>
         /// <param name="programType">Program type of the given call (e.g. Adhoc, Scheduled)</param>
-        /// <param name="dataType">Type of call to BBG DLWS (e.g. GetData, GetActions). Different data types retrieve
-        ///  different sets of data. </param>
-        /// <returns>FinDataOutput of data returned for instrumenDts requested</returns>
+        /// <returns>FinDataOutput of data returned for instruments requested</returns>
         public List<FinDataOutput> Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType)
         {
             // validate inputs
             if(!dlInstruments.instrument.Any()) return new List<FinDataOutput>();
-            VerifyBblFlags(programType, dataLicenseCall.GetDlDataType());
+            VerifyBblFlags(programType, dataLicenseCall.GetDataLicenseDataType());
             
             // create relevant action and call to DLWS
             var perSecurityResponse = dataLicenseCall.Get(dlInstruments);
             
             // parse and transform dl response to standard output
-            var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataLicenseCall.GetDlDataType());
+            var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataLicenseCall.GetDataLicenseDataType());
             return finDataOutputs;
         }
 
         private List<FinDataOutput> TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
         {
-            switch (dataType)
+            return dataType switch
             {
-                case DataTypes.GetData:
-                    return new GetDataResponseTransformer().Transform((RetrieveGetDataResponse) perSecurityResponse);
-                default:
-                    throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.");
-            }
+                DataTypes.GetData => new GetDataResponseTransformer().Transform(
+                    (RetrieveGetDataResponse) perSecurityResponse),
+                _ => throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.")
+            };
         }
 
         private void VerifyBblFlags(ProgramTypes programType, DataTypes dataType)

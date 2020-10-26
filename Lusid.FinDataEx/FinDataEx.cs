@@ -19,7 +19,7 @@ namespace Lusid.FinDataEx
         public static void Main(string[] args)
         {
             Parser.Default.ParseArguments<GetDataOptions>(args)
-                .WithParsed<GetDataOptions>(ExecuteGetData);
+                .WithParsed(ExecuteGetData);
             
         }
 

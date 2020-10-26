@@ -7,6 +7,8 @@ namespace Lusid.FinDataEx.DataLicense.Util
 {
     public class DataLicenseUtils
     {
+        
+        public const int DefaultPollingInterval = 30000;
 
         /// <summary>
         /// Print the BBG DL response as JSON to allow the response to be reconstructed

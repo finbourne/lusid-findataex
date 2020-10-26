@@ -12,14 +12,14 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
     public interface IDataLicenseCall<out T> where T : PerSecurityResponse 
     {
         /// <summary>
-        /// Executes a call against DLWS and returns a BBG DL security response for
-        /// a list of instruments. Responses include security data and status codes
+        /// Executes a call against DLWS and returns a BBG DL response for
+        /// a list of instruments. Responses include instrument data and status codes
         /// depending on the results of the call 
         /// </summary>
         /// <param name="instruments">Instruments requesting data against.</param>
         /// <returns>Response with requested data for the instruments if it could be provided.</returns>
         T Get(Instruments instruments);
 
-        DataLicenseTypes.DataTypes GetDlDataType();
+        DataLicenseTypes.DataTypes GetDataLicenseDataType();
     }
 }

@@ -14,7 +14,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
     /// </summary>
     public class GetDataLicenseCall : IDataLicenseCall<RetrieveGetDataResponse>
     {
-        /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
+        /* DO NOT change _PollingInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
         private readonly int _pollingInterval;
         
@@ -22,24 +22,25 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         private readonly GetDataHeaders _getDataHeaders;
         private readonly string[] _getDataFields;
 
-        public GetDataLicenseCall(PerSecurityWS perSecurityWs) : this(perSecurityWs, GetDefaultHeaders(),
-            GetDefaultDataFields()) {}
-
-        public GetDataLicenseCall(PerSecurityWS perSecurityWs, int pollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
+        public GetDataLicenseCall(PerSecurityWS perSecurityWs, int pollingInterval=DataLicenseUtils.DefaultPollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
             GetDefaultDataFields())
         {
             _pollingInterval = pollingInterval;
         }
-        
-        public GetDataLicenseCall(PerSecurityWS perSecurityWs, string[] dataFields) : this(perSecurityWs, GetDefaultHeaders(),
-            dataFields) {}
+
+        public GetDataLicenseCall(PerSecurityWS perSecurityWs, string[] dataFields,
+            int pollingInterval = DataLicenseUtils.DefaultPollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
+            dataFields)
+        {
+            _pollingInterval = pollingInterval;
+        }
 
         private GetDataLicenseCall(PerSecurityWS perSecurityWs, GetDataHeaders dataHeaders, string[] dataFields)
         {
             _perSecurityWs = perSecurityWs;
             _getDataHeaders = dataHeaders;
             _getDataFields = dataFields;
-            _pollingInterval = DataLicenseService.PollInterval;
+            _pollingInterval = DataLicenseUtils.DefaultPollingInterval;
         }
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             return retrieveGetDataResponse;
         }
 
-        public DataLicenseTypes.DataTypes GetDlDataType()
+        public DataLicenseTypes.DataTypes GetDataLicenseDataType()
         {
             return DataLicenseTypes.DataTypes.GetData;
         }
