@@ -16,8 +16,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
         public void SetUp()
         {
             _perSecurityWs = Mock.Of<PerSecurityWS>();
-            _getDataBbgCall = new GetDataBbgCall(_perSecurityWs);
-            _getDataBbgCall.PollingInterval = 10;
+            _getDataBbgCall = new GetDataBbgCall(_perSecurityWs, 10);
         }
 
         [Test]

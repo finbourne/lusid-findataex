@@ -16,7 +16,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
     {
         /* DO NOT change PollInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
-        public int PollingInterval { get; set; } = DlDataService.PollInterval;
+        private readonly int _pollingInterval;
         
         private readonly PerSecurityWS _perSecurityWs;
         private readonly GetDataHeaders _getDataHeaders;
@@ -24,6 +24,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
 
         public GetDataBbgCall(PerSecurityWS perSecurityWs) : this(perSecurityWs, GetDefaultHeaders(),
             GetDefaultDataFields()) {}
+
+        public GetDataBbgCall(PerSecurityWS perSecurityWs, int pollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
+            GetDefaultDataFields())
+        {
+            _pollingInterval = pollingInterval;
+        }
         
         public GetDataBbgCall(PerSecurityWS perSecurityWs, string[] dataFields) : this(perSecurityWs, GetDefaultHeaders(),
             dataFields) {}
@@ -33,6 +39,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             _perSecurityWs = perSecurityWs;
             _getDataHeaders = dataHeaders;
             _getDataFields = dataFields;
+            _pollingInterval = DlDataService.PollInterval;
         }
 
         /// <summary>
@@ -73,7 +80,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             RetrieveGetDataResponse getDataResponse;
             do
             {
-                Thread.Sleep(PollingInterval);
+                Thread.Sleep(_pollingInterval);
                 var retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
                 getDataResponse = retrieveGetDataResponse.retrieveGetDataResponse;
             }
