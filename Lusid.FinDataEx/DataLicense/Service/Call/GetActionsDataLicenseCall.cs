@@ -7,19 +7,20 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Call
 {
-    public class GetActionsBbgCall : IBbgCall<RetrieveGetActionsResponse>
+    public class GetActionsBbgCall : IDataLicenseCall<RetrieveGetActionsResponse>
     {
-        /// <summary>Polling interval for BBG requests. Should only change from
-        /// default for mock testing purposes</summary>
-        public int GetActionsBbgPollingInterval { get; set; } = DlDataService.PollInterval;
+        /* DO NOT change _PollingInterval except for testing with Mocks. BBG DL will throttle
+         or worse if poll interval against actual servers*/
+        private readonly int _pollingInterval;
         
         private readonly PerSecurityWS _perSecurityWs;
-        private readonly List<DlTypes.CorpActionTypes> _corporateActions;
+        private readonly List<DataLicenseTypes.CorpActionTypes> _corporateActions;
 
-        public GetActionsBbgCall(PerSecurityWS perSecurityWs, List<DlTypes.CorpActionTypes> corporateActions)
+        public GetActionsBbgCall(PerSecurityWS perSecurityWs, List<DataLicenseTypes.CorpActionTypes> corporateActions, int pollingInterval=DataLicenseUtils.DefaultPollingInterval)
         {
             _corporateActions = corporateActions;
             _perSecurityWs = perSecurityWs;
+            _pollingInterval = pollingInterval;
         }
 
         public RetrieveGetActionsResponse Get(Instruments instruments)
@@ -35,9 +36,14 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
 
             //log output
             Console.WriteLine($"GetActions response for id={retrieveGetActionsResponse.responseId} and response-level status code={retrieveGetActionsResponse.statusCode.code}({retrieveGetActionsResponse.statusCode.description})");
-            DlUtils.PrintGetActionsResponse(retrieveGetActionsResponse);
-            DlUtils.PrintJsonResponse(retrieveGetActionsResponse);
+            DataLicenseUtils.PrintGetActionsResponse(retrieveGetActionsResponse);
+            DataLicenseUtils.PrintJsonResponse(retrieveGetActionsResponse);
             return retrieveGetActionsResponse;
+        }
+        
+        public DataLicenseTypes.DataTypes GetDataType()
+        {
+            return DataLicenseTypes.DataTypes.GetActions;
         }
         
         private RetrieveGetActionsResponse GetActionsResponseSync(retrieveGetActionsResponseRequest getActionsRespReq)
@@ -47,11 +53,11 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             RetrieveGetActionsResponse getActionsResponse;
             do
             {
-                Thread.Sleep(GetActionsBbgPollingInterval);
+                Thread.Sleep(_pollingInterval);
                 var retrieveGetActionsResponse = _perSecurityWs.retrieveGetActionsResponse(getActionsRespReq);
                 getActionsResponse = retrieveGetActionsResponse.retrieveGetActionsResponse;
             }
-            while (getActionsResponse.statusCode.code == DlDataService.DataNotAvailable);
+            while (getActionsResponse.statusCode.code == DataLicenseService.DataNotAvailable);
             return getActionsResponse;
         }
         
@@ -59,7 +65,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         {
             SubmitGetActionsRequest submitGetActionsRequest = new SubmitGetActionsRequest
             {
-                headers = CreateDefaultHeaders(), instruments = instruments
+                headers = GetDefaultHeaders(), instruments = instruments
             };
 
             return new submitGetActionsRequestRequest(submitGetActionsRequest);
@@ -72,7 +78,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             return new retrieveGetActionsResponseRequest(retrieveGetActionsRequest);
         }
 
-        private GetActionsHeaders CreateDefaultHeaders()
+        private GetActionsHeaders GetDefaultHeaders()
         {
             return new GetActionsHeaders
             {
@@ -85,16 +91,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         private string[] GetCorporateActionsForRequest()
         {
             return _corporateActions.Select(a => a.ToString()).ToArray();
-        }
-        
-        private GetActionsHeaders GetDefaultHeaders()
-        {
-            return new GetActionsHeaders
-            {
-                actions_date = ActionsDate.entry,
-                actions_dateSpecified = true,
-                actions = GetCorporateActionsForRequest()
-            };
         }
     }
 

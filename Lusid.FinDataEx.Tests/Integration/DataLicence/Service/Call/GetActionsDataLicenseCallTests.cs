@@ -5,7 +5,6 @@ using Lusid.FinDataEx.DataLicense.Util;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
-using static Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call.GetDataBbgCallTest;
 
 namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
 {
@@ -14,7 +13,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
     {
 
         private PerSecurityWS _perSecurityWs;
-        private GetActionsBbgCall _getActionsBbgCall;
+        private GetActionsDataLicenseCall _getActionsDataLicenseCall;
 
         [SetUp]
         public void SetUp()
@@ -26,16 +25,16 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
         public void Get_OnValidInstrumentsAndMultipleCorpActions_ShouldReturnCorpActions()
         {
             //when
-            _getActionsBbgCall = new GetActionsBbgCall(_perSecurityWs, 
-                new List<DlTypes.CorpActionTypes>() {DlTypes.CorpActionTypes.DVD_CASH});
+            _getActionsDataLicenseCall = new GetActionsDataLicenseCall(_perSecurityWs, 
+                new List<DataLicenseTypes.CorpActionTypes>() {DataLicenseTypes.CorpActionTypes.DVD_CASH});
             var testInstruments = CreateCorpActionTestInstrument();
             
             //execute
-            var retrieveGetActionsResponse =  _getActionsBbgCall.Get(testInstruments);
+            var retrieveGetActionsResponse =  _getActionsDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetActionsResponse.instrumentDatas;
 
             //verify
-            Assert.That(retrieveGetActionsResponse.statusCode.code, Is.EqualTo(DlDataService.Success));
+            Assert.That(retrieveGetActionsResponse.statusCode.code, Is.EqualTo(DataLicenseService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(1));
             //AssertBbUniqueQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[0], "EQ0010174300001000");
         }
@@ -54,15 +53,15 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
 
         private Instruments CreateCorpActionTestInstrument()
         {
-            Instruments instruments = new Instruments();
-            Instrument instr = new Instrument();
-            instr.id = "COP US";
-            instr.yellowkeySpecified = true;
-            instr.typeSpecified = true;
-            instr.yellowkey = MarketSector.Equity;
-            instr.type = InstrumentType.TICKER;
-            instruments.instrument = new Instrument[] { instr };
-            return instruments;
+            var corporateActionInstrument = new PerSecurity_Dotnet.Instrument
+            {
+                id = "COP US",
+                yellowkeySpecified = true,
+                typeSpecified = true,
+                yellowkey = MarketSector.Equity,
+                type = InstrumentType.TICKER
+            };
+            return new Instruments {instrument = new[] {corporateActionInstrument}};
         }
 
     }
