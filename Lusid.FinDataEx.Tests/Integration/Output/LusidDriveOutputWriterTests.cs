@@ -10,10 +10,10 @@ using NUnit.Framework;
 namespace Lusid.FinDataEx.Tests.Integration.Output
 {
     [TestFixture]
-    public class LusidDriveFinDataOutputWriterTests
+    public class LusidDriveOutputWriterTests
     {
 
-        private LusidDriveFinDataOutputWriter _outputWriter;
+        private LusidDriveOutputWriter _outputWriter;
         
         private string _lusidOutputDirPath;
         private string _lusidOutputDirName;
@@ -39,7 +39,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             _outputDirId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidOutputDirName}'").Values.SingleOrDefault()?.Id;
             var createFolder = new CreateFolder("/", _lusidOutputDirName);
             _outputDirId ??= _foldersApi.CreateFolder(createFolder).Id;
-            _outputWriter = new LusidDriveFinDataOutputWriter(_lusidOutputDirPath, _factory);
+            _outputWriter = new LusidDriveOutputWriter(_lusidOutputDirPath, _factory);
         }
         
         [TearDown]
@@ -54,7 +54,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         public void Write_OnValidFinData_ShouldWriteToOutputDir()
         {
             //when
-            var finDataOutputs = new List<FinDataOutput>
+            var finDataOutputs = new List<DataLicenseOutput>
             {
                 CreateFinDataEntry("id_1_GetData")
             };
@@ -71,7 +71,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         public void Write_OnNoFinData_ShouldDoNothingButReturnOk()
         {
             //when
-            var finDataOutputs = new List<FinDataOutput>();
+            var finDataOutputs = new List<DataLicenseOutput>();
             
             //execute
             var writeResult =  _outputWriter.Write(finDataOutputs);
@@ -103,7 +103,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             CollectionAssert.IsEmpty(contents.Values);
         }
         
-        private FinDataOutput CreateFinDataEntry(string id)
+        private DataLicenseOutput CreateFinDataEntry(string id)
         {
             var headers = new List<string>{"h1","h2","h3"};
             var records = new List<Dictionary<string,string>>
@@ -121,7 +121,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
                     ["h3"] = "entry3Record2",
                 }
             };
-            return new FinDataOutput(id, headers, records);
+            return new DataLicenseOutput(id, headers, records);
         } 
         
     }

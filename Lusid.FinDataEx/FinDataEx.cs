@@ -8,14 +8,15 @@ using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Service.Instrument;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using Lusid.FinDataEx.Output;
+using Lusid.FinDataEx.Util;
 using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
+using ILusidApiFactory = Lusid.Sdk.Utilities.ILusidApiFactory;
 
 namespace Lusid.FinDataEx
 {
     public class FinDataEx
     {
-        private static readonly string LusidFileSystem = "lusid";
         public static void Main(string[] args)
         {
             Parser.Default.ParseArguments<GetDataOptions>(args)
@@ -59,17 +60,15 @@ namespace Lusid.FinDataEx
         /// <param name="outputDirectory"></param>
         /// <param name="fileSystem"></param>
         /// <returns></returns>
-        private static IFinDataOutputWriter CreateFinDataOutputWriter(string outputDirectory, string fileSystem)
+        private static IOutputWriter CreateFinDataOutputWriter(string outputDirectory, FileSystem fileSystem)
         {
-            if (fileSystem.Equals(LusidFileSystem))
+            return fileSystem switch
             {
-                var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
-                return new LusidDriveFinDataOutputWriter(outputDirectory, lusidApiFactory);
-            }
-            else
-            {
-                return new LocalFilesystemFinDataOutputWriter(outputDirectory);
-            }
+                FileSystem.Lusid => new LusidDriveOutputWriter(outputDirectory,
+                    LusidApiFactoryBuilder.Build("secrets.json")),
+                FileSystem.Local => new LocalFilesystemOutputWriter(outputDirectory),
+                _ => throw new ArgumentOutOfRangeException(nameof(fileSystem), fileSystem, null)
+            };
         }
         
         /// <summary>
@@ -99,7 +98,7 @@ namespace Lusid.FinDataEx
         /// <param name="dataOptions"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        private static Instruments CreateInstruments(BaseOptions dataOptions)
+        private static Instruments CreateInstruments(DataLicenseOptions dataOptions)
         {
             var instruments = CreateInstrumentSource(dataOptions).Get();
             if (instruments is {} dlInstruments)
@@ -111,18 +110,20 @@ namespace Lusid.FinDataEx
                                         $" the instruments arguments are legal . Inputs={dataOptions}");
         }
 
-        private static IInstrumentSource CreateInstrumentSource(BaseOptions dataOptions)
+        private static IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions)
         {
             var portfolios = dataOptions.Portfolios;
             var bbgIds = dataOptions.BbgIds;
             var instrumentIdType = dataOptions.InstrumentIdType;
             if (portfolios.Any())
             {
-                DateTimeOffset effectiveAt = DateTimeOffset.UtcNow;
+                // setup LusidApiFactory
+                var lusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets_api.json");
+                var effectiveAt = DateTimeOffset.UtcNow;
                 Console.WriteLine($"Retrieving instruments from holdings effectiveAt {effectiveAt} for portfolios {portfolios}");
                 ISet<Tuple<string,string>> scopesAndPortfolios = portfolios.Select(p =>
                 {
-                    string[] scopeAndPortfolio = p.Split("|");
+                    var scopeAndPortfolio = p.Split("|");
                     if (scopeAndPortfolio.Length != 2)
                     {
                         throw new ArgumentException($"Unexpected scope and portfolio entry for {p}. Should be " +
@@ -131,7 +132,7 @@ namespace Lusid.FinDataEx
                     return new Tuple<string,string>(scopeAndPortfolio[0], scopeAndPortfolio[1]);
                 }).ToHashSet();
                 
-                return new LusidPortfolioInstrumentSource(instrumentIdType, scopesAndPortfolios, effectiveAt);
+                return new LusidPortfolioInstrumentSource(lusidApiFactory, instrumentIdType, scopesAndPortfolios, effectiveAt);
             } 
             if (bbgIds.Any())
             {
@@ -148,14 +149,14 @@ namespace Lusid.FinDataEx
     /// Base Options for all BBG DL calls
     /// 
     /// </summary>
-    class BaseOptions
+    class DataLicenseOptions
     {
         [Option('o', "output", Required = true, HelpText = "Output directory to write DL results.")]
         public string OutputDirectory { get; set; }
         
-        [Option('f', "filesystem", Required = false, Default ="Local", 
+        [Option('f', "filesystem", Required = false, Default =FileSystem.Local, 
             HelpText = "Filesystems to write DL results (Lusid or Local)")]
-        public string FileSystem { get; set; }
+        public FileSystem FileSystem { get; set; }
         
         [Option('t', "instrument id type", Required = false, Default = InstrumentType.BB_GLOBAL, 
         HelpText = "Type of instrument ids being input (BB_GLOBAL (Figi), ISIN, CUSIP)")]
@@ -179,7 +180,7 @@ namespace Lusid.FinDataEx
     /// Options for GetData calls to BBG
     /// </summary>
     [Verb ("getdata", HelpText = "BBG DL request to retrieve data for requested set of fields and insturments.")]
-    class GetDataOptions : BaseOptions
+    class GetDataOptions : DataLicenseOptions
     {
         [Option('d', "datafields", Required = true, HelpText = "BBG DL fields to retrieve. Only relevant for GetData requests.")]
         public IEnumerable<String> DataFields { get; set; }

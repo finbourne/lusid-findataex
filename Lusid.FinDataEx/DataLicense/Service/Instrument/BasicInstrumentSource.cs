@@ -15,6 +15,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             _instrumentIds = instrumentIds;
         }
 
+        #nullable enable
         public Instruments? Get()
         {
             return CreateInstruments(_instrumentIds);

@@ -10,7 +10,7 @@ namespace Lusid.FinDataEx.Tests.Integration
     [TestFixture]
     public class BaseLusidPortfolioTests
     {
-        private ILusidApiFactory _lusidApiFactory;
+        protected ILusidApiFactory LusidApiFactory;
         
         // test portfolio params
         protected string Scope = "findataex-dl-instrument-source-test";
@@ -31,8 +31,8 @@ namespace Lusid.FinDataEx.Tests.Integration
         [SetUp]
         public virtual void SetUp()
         {
-            _lusidApiFactory = LusidApiFactoryBuilder.Build("secrets_api.json");
-            var transactionPortfoliosApi = _lusidApiFactory.Api<TransactionPortfoliosApi>();
+            LusidApiFactory = LusidApiFactoryBuilder.Build("secrets_api.json");
+            var transactionPortfoliosApi = LusidApiFactory.Api<TransactionPortfoliosApi>();
             
             // Create Portfolio with AMZN
             CreateTransactionPortfolio(transactionPortfoliosApi, Portfolio);
@@ -54,11 +54,11 @@ namespace Lusid.FinDataEx.Tests.Integration
         [TearDown]
         public virtual void TearDown()
         {
-            _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, Portfolio);
-            _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioSameHoldingAsP1);
-            _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, Portfolio2);
-            _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioNoHoldings);
-            _lusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioWithUnknownInstrument);
+            LusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, Portfolio);
+            LusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioSameHoldingAsP1);
+            LusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, Portfolio2);
+            LusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioNoHoldings);
+            LusidApiFactory.Api<PortfoliosApi>().DeletePortfolio(Scope, PortfolioWithUnknownInstrument);
         }
         
         private string CreateTransactionPortfolio(TransactionPortfoliosApi transactionPortfoliosApi, string portfolioCode)

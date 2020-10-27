@@ -9,10 +9,10 @@
     public class WriteResult
     {
         public readonly WriteResultStatus Status;
-        public readonly List<string> FilesWritten;
-        public readonly List<string> FailureMessages;
+        public readonly IList<string> FilesWritten;
+        public readonly IList<string> FailureMessages;
 
-        public WriteResult(WriteResultStatus status, List<string> filesWritten, List<string> failureMessages)
+        public WriteResult(WriteResultStatus status, IList<string> filesWritten, IList<string> failureMessages)
         {
             Status = status;
             FilesWritten = filesWritten;

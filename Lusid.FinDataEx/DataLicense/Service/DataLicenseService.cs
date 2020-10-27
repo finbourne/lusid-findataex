@@ -32,10 +32,10 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="dlInstruments">DLWS representation of instruments to pass to BBG DL</param>
         /// <param name="programType">Program type of the given call (e.g. Adhoc, Scheduled)</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public List<FinDataOutput> Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType)
+        public IList<DataLicenseOutput> Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType)
         {
             // validate inputs
-            if(!dlInstruments.instrument.Any()) return new List<FinDataOutput>();
+            if(!dlInstruments.instrument.Any()) return new List<DataLicenseOutput>();
             VerifyBblFlags(programType, dataLicenseCall.GetDataLicenseDataType());
             
             // create relevant action and call to DLWS
@@ -46,7 +46,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
             return finDataOutputs;
         }
 
-        private List<FinDataOutput> TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
+        private IList<DataLicenseOutput> TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
         {
             return dataType switch
             {

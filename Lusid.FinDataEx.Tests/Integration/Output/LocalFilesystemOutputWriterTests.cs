@@ -8,16 +8,16 @@ using static Lusid.FinDataEx.Tests.Unit.TestUtils;
 namespace Lusid.FinDataEx.Tests.Integration.Output
 {
     [TestFixture]
-    public class LocalFilesystemFinDataOutputWriterTests
+    public class LocalFilesystemOutputWriterTests
     {
         
         private readonly string _tempOutputDir = $"TempTestDir_{nameof(FinDataExTests)}";
-        private LocalFilesystemFinDataOutputWriter _outputWriter;
+        private LocalFilesystemOutputWriter _outputWriter;
         [SetUp]
         public void SetUp()
         {
             SetupTempTestDirectory(_tempOutputDir);
-            _outputWriter = new LocalFilesystemFinDataOutputWriter(_tempOutputDir);
+            _outputWriter = new LocalFilesystemOutputWriter(_tempOutputDir);
         }
         
         [TearDown]
@@ -29,7 +29,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnValidFinData_ShouldWriteToOutputDir()
         {
-            var finDataOutputs = new List<FinDataOutput>
+            var finDataOutputs = new List<DataLicenseOutput>
             {
                 CreateFinDataEntry("id_1_GetData"),
                 CreateFinDataEntry("id_2_GetData")
@@ -52,10 +52,10 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnEmptyInput_ShouldWriteFileWithHeaderOnly()
         {
-            var finDataOutputs = new List<FinDataOutput>();
+            var finDataOutputs = new List<DataLicenseOutput>();
             var headers = new List<string>{"h1","h2","h3"};
             var records = new List<Dictionary<string, string>>();
-            finDataOutputs.Add(new FinDataOutput("id_GetData", headers, records));
+            finDataOutputs.Add(new DataLicenseOutput("id_GetData", headers, records));
 
             var writeResult =  _outputWriter.Write(finDataOutputs);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
@@ -72,7 +72,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnNoFinData_ShouldDoNothingButReturnOk()
         {
-            var finDataOutputs = new List<FinDataOutput>();
+            var finDataOutputs = new List<DataLicenseOutput>();
 
             var writeResult =  _outputWriter.Write(finDataOutputs);
             
@@ -84,9 +84,9 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         public void Write_OnNonExistingOutputDir_ShouldReturnFail()
         {
             var nonExistingPath = Path.Combine(new[]{"this","Should","Not","Exist123"});
-            _outputWriter = new LocalFilesystemFinDataOutputWriter(nonExistingPath);
+            _outputWriter = new LocalFilesystemOutputWriter(nonExistingPath);
             
-            List<FinDataOutput> finDataOutputs = new List<FinDataOutput>
+            List<DataLicenseOutput> finDataOutputs = new List<DataLicenseOutput>
             {
                 CreateFinDataEntry("id_1_GetData"),
                 CreateFinDataEntry("id_2_GetData")
@@ -97,7 +97,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Fail));
         }
 
-        private FinDataOutput CreateFinDataEntry(string id)
+        private DataLicenseOutput CreateFinDataEntry(string id)
         {
             var headers = new List<string>{"h1","h2","h3"};
             var records = new List<Dictionary<string,string>>
@@ -115,7 +115,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
                     ["h3"] = "entry3Record2",
                 }
             };
-            return new FinDataOutput(id, headers, records);
+            return new DataLicenseOutput(id, headers, records);
         }            
         
     }

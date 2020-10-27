@@ -18,7 +18,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         /// </summary>
         /// <param name="perSecurityResponse">GetData response from BBG DLWS</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public List<FinDataOutput> Transform(RetrieveGetDataResponse perSecurityResponse)
+        public List<DataLicenseOutput> Transform(RetrieveGetDataResponse perSecurityResponse)
         {
             var headers = perSecurityResponse.fields.ToList();
             var finDataRecords = new List<Dictionary<string, string>>(); 
@@ -42,8 +42,8 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
             }
 
             var finDataOutputId = $"{perSecurityResponse.responseId}_GetData"; 
-            var getDataOutput = new FinDataOutput(finDataOutputId, headers, finDataRecords);
-            return new List<FinDataOutput>{getDataOutput};
+            var getDataOutput = new DataLicenseOutput(finDataOutputId, headers, finDataRecords);
+            return new List<DataLicenseOutput>{getDataOutput};
         }
         
     }

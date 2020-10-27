@@ -10,13 +10,15 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
     public class LusidPortfolioInstrumentSource : IInstrumentSource
     {
+        private readonly ILusidApiFactory _lusidApiFactory;
         private readonly InstrumentType _instrumentType;
         private readonly string _instrumentTypeLusidPropertyKey;
         private readonly ISet<Tuple<string, string>> _scopesAndPortfolios;
         private readonly DateTimeOffset _effectiveAt;
 
-        public LusidPortfolioInstrumentSource(InstrumentType instrumentType, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
+        public LusidPortfolioInstrumentSource(ILusidApiFactory lusidApiFactory, InstrumentType instrumentType, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
+            _lusidApiFactory = lusidApiFactory;
             _instrumentType = instrumentType;
             _instrumentTypeLusidPropertyKey = getLusidInstrumentIdPropertyAddress(instrumentType);
             _scopesAndPortfolios = scopesAndPortfolios;
@@ -26,8 +28,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         #nullable enable
         public Instruments? Get()
         {
-            var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets_api.json");
-            var portfolioIntrumentIds = GetHoldingsInstrumentIds(lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
+            var portfolioIntrumentIds = GetHoldingsInstrumentIds(_lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
             return portfolioIntrumentIds.Any() ? ToBbgDlInstruments(portfolioIntrumentIds) : null;
         }
 

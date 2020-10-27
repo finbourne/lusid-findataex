@@ -6,18 +6,18 @@ using Lusid.Drive.Sdk.Utilities;
 
 namespace Lusid.FinDataEx.Output
 {
-    public class LusidDriveFinDataOutputWriter : LocalFilesystemFinDataOutputWriter
+    public class LusidDriveOutputWriter : LocalFilesystemOutputWriter
     {
         public const string OutputFileEntrySeparator = "\n";
 
         private readonly IFilesApi _filesApi;
 
-        public LusidDriveFinDataOutputWriter(string outputDir, ILusidApiFactory factory) : base(outputDir)
+        public LusidDriveOutputWriter(string outputDir, ILusidApiFactory factory) : base(outputDir)
         {
             _filesApi = factory.Api<IFilesApi>();
         }
 
-        protected override string WriteToFile(string outputFilename, List<string> finDataRecords)
+        protected override string WriteToFile(string outputFilename, IEnumerable<string> finDataRecords)
         {
             Console.WriteLine($"Attempting to write to LUSID drive filename={outputFilename}, folder={OutputDir}.");
             // convert records to byte array for upload into LUSID drive

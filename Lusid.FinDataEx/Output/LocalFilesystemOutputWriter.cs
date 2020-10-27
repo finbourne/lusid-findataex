@@ -2,24 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static Lusid.FinDataEx.Output.IFinDataOutputWriter;
+using static Lusid.FinDataEx.Output.IOutputWriter;
 
 namespace Lusid.FinDataEx.Output
 {
     /// <summary>
     ///  Writes FinDataOutput to local file system.
     /// </summary>
-    public class LocalFilesystemFinDataOutputWriter : IFinDataOutputWriter
+    public class LocalFilesystemOutputWriter : IOutputWriter
     {
 
         protected readonly string OutputDir;
 
-        public LocalFilesystemFinDataOutputWriter(string outputDir)
+        public LocalFilesystemOutputWriter(string outputDir)
         {
             OutputDir = outputDir;
         }
         
-        public WriteResult Write(IEnumerable<FinDataOutput> finDataOutputs)
+        public WriteResult Write(IEnumerable<DataLicenseOutput> finDataOutputs)
         {
          
             var filesWritten = new List<string>();
@@ -66,7 +66,7 @@ namespace Lusid.FinDataEx.Output
             return new WriteResult(status, filesWritten, responseFailResults);
         }
 
-        protected virtual string WriteToFile(string outputFile, List<string> finDataRecords)
+        protected virtual string WriteToFile(string outputFile, IEnumerable<string> finDataRecords)
         {
             var outputPath = OutputDir + Path.DirectorySeparatorChar + outputFile;
             File.WriteAllLines(outputPath, finDataRecords);

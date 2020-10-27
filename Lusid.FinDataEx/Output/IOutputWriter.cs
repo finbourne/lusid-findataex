@@ -6,7 +6,7 @@ namespace Lusid.FinDataEx.Output
     /// Writer of FinDataOutput to an output destination  
     /// 
     /// </summary>
-    public interface IFinDataOutputWriter
+    public interface IOutputWriter
     {
 
         public const char BbgDlDelimiter = '|';
@@ -19,7 +19,7 @@ namespace Lusid.FinDataEx.Output
         /// </summary>
         /// <param name="finDataOutputs">Financial data to write</param>
         /// <returns>Result status of the write</returns>
-        WriteResult Write(IEnumerable<FinDataOutput> finDataOutputs);
+        WriteResult Write(IEnumerable<DataLicenseOutput> finDataOutputs);
 
     }
 }
