@@ -7,16 +7,16 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Call
 {
-    public class GetActionsBbgCall : IDataLicenseCall<RetrieveGetActionsResponse>
+    public class GetActionsDataLicenseCall : IDataLicenseCall<RetrieveGetActionsResponse>
     {
         /* DO NOT change _PollingInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
         private readonly int _pollingInterval;
         
         private readonly PerSecurityWS _perSecurityWs;
-        private readonly List<DataLicenseTypes.CorpActionTypes> _corporateActions;
+        private readonly List<DataLicenseTypes.CorpActionType> _corporateActions;
 
-        public GetActionsBbgCall(PerSecurityWS perSecurityWs, List<DataLicenseTypes.CorpActionTypes> corporateActions, int pollingInterval=DataLicenseUtils.DefaultPollingInterval)
+        public GetActionsDataLicenseCall(PerSecurityWS perSecurityWs, List<DataLicenseTypes.CorpActionType> corporateActions, int pollingInterval=DataLicenseUtils.DefaultPollingInterval)
         {
             _corporateActions = corporateActions;
             _perSecurityWs = perSecurityWs;
@@ -82,7 +82,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         {
             return new GetActionsHeaders
             {
-                actions_date = ActionsDate.entry,
+                actions_date = ActionsDate.both,
                 actions_dateSpecified = true,
                 actions = GetCorporateActionsForRequest()
             };

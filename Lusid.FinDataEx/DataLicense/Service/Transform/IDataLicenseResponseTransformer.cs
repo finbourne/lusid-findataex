@@ -15,6 +15,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         /// </summary>
         /// <param name="perSecurityResponse">Response from BBG DLWS</param>
         /// <returns>FinDataOutput containing the BBG DL data from response</returns>
-        List<DataLicenseOutput> Transform(T perSecurityResponse);
+        DataLicenseOutput Transform(T perSecurityResponse);
     }
 }

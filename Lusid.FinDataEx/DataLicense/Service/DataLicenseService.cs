@@ -32,26 +32,28 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="dlInstruments">DLWS representation of instruments to pass to BBG DL</param>
         /// <param name="programType">Program type of the given call (e.g. Adhoc, Scheduled)</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public IList<DataLicenseOutput> Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType)
+        public DataLicenseOutput Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType)
         {
             // validate inputs
-            if(!dlInstruments.instrument.Any()) return new List<DataLicenseOutput>();
-            VerifyBblFlags(programType, dataLicenseCall.GetDataLicenseDataType());
+            if (!dlInstruments.instrument.Any()) return DataLicenseOutput.Empty();
+            VerifyBblFlags(programType, dataLicenseCall.GetDataType());
             
             // create relevant action and call to DLWS
             var perSecurityResponse = dataLicenseCall.Get(dlInstruments);
             
             // parse and transform dl response to standard output
-            var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataLicenseCall.GetDataLicenseDataType());
+            var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataLicenseCall.GetDataType());
             return finDataOutputs;
         }
 
-        private IList<DataLicenseOutput> TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
+        private DataLicenseOutput TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
         {
             return dataType switch
             {
                 DataTypes.GetData => new GetDataResponseTransformer().Transform(
                     (RetrieveGetDataResponse) perSecurityResponse),
+                DataTypes.GetActions => new GetActionResponseTransformer().Transform(
+                    (RetrieveGetActionsResponse) perSecurityResponse),
                 _ => throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.")
             };
         }

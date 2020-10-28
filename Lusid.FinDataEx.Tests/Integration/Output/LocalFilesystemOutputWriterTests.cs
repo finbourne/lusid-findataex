@@ -29,20 +29,15 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnValidFinData_ShouldWriteToOutputDir()
         {
-            var finDataOutputs = new List<DataLicenseOutput>
-            {
-                CreateFinDataEntry("id_1_GetData"),
-                CreateFinDataEntry("id_2_GetData")
-            };
+            var finDataOutputs = CreateFinDataEntry("id_1_GetData");
 
             var writeResult =  _outputWriter.Write(finDataOutputs);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            CollectionAssert.AreEqual(writeResult.FilesWritten, new List<string>(){"TempTestDir_FinDataExTests\\id_1_GetData.csv", "TempTestDir_FinDataExTests\\id_2_GetData.csv"});
-            Assert.That(writeResult.FilesWritten[0], Does.Exist);
-            Assert.That(writeResult.FilesWritten[1], Does.Exist);
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo("TempTestDir_FinDataExTests\\id_1_GetData.csv"));
+            Assert.That(writeResult.FileOutputPath, Does.Exist);
             
             // ensure file is properly populated
-            var entries = File.ReadAllLines(writeResult.FilesWritten[0]);
+            var entries = File.ReadAllLines(writeResult.FileOutputPath);
             // check headers
             Assert.That(entries[0], Is.EqualTo("h1|h2|h3"));
             Assert.That(entries[1], Is.EqualTo("entry1Record1|entry2Record1|entry3Record1"));
@@ -52,12 +47,11 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnEmptyInput_ShouldWriteFileWithHeaderOnly()
         {
-            var finDataOutputs = new List<DataLicenseOutput>();
             var headers = new List<string>{"h1","h2","h3"};
             var records = new List<Dictionary<string, string>>();
-            finDataOutputs.Add(new DataLicenseOutput("id_GetData", headers, records));
+            var finDataOutput = new DataLicenseOutput("id_GetData", headers, records);
 
-            var writeResult =  _outputWriter.Write(finDataOutputs);
+            var writeResult =  _outputWriter.Write(finDataOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             
             // ensure file is properly populated
@@ -72,11 +66,11 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         [Test]
         public void Write_OnNoFinData_ShouldDoNothingButReturnOk()
         {
-            var finDataOutputs = new List<DataLicenseOutput>();
+            var finDataOutput = DataLicenseOutput.Empty("requestId_that_returned_no_data");
 
-            var writeResult =  _outputWriter.Write(finDataOutputs);
+            var writeResult =  _outputWriter.Write(finDataOutput);
             
-            Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
+            Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
             Assert.False(Directory.EnumerateFileSystemEntries(_tempOutputDir).Any());
         }
         
@@ -85,13 +79,9 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         {
             var nonExistingPath = Path.Combine(new[]{"this","Should","Not","Exist123"});
             _outputWriter = new LocalFilesystemOutputWriter(nonExistingPath);
-            
-            List<DataLicenseOutput> finDataOutputs = new List<DataLicenseOutput>
-            {
-                CreateFinDataEntry("id_1_GetData"),
-                CreateFinDataEntry("id_2_GetData")
-            };
-            var writeResult =  _outputWriter.Write(finDataOutputs);
+
+            DataLicenseOutput finDataOutput = CreateFinDataEntry("id_1_GetData");
+            var writeResult =  _outputWriter.Write(finDataOutput);
             
             //verify
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Fail));

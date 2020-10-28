@@ -54,30 +54,27 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         public void Write_OnValidFinData_ShouldWriteToOutputDir()
         {
             //when
-            var finDataOutputs = new List<DataLicenseOutput>
-            {
-                CreateFinDataEntry("id_1_GetData")
-            };
+            var finDataOutput = CreateFinDataEntry("id_1_GetData");
             //execute
-            var writeResult = _outputWriter.Write(finDataOutputs);
+            var writeResult = _outputWriter.Write(finDataOutput);
             
             //verify
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FilesWritten.Count, Is.EqualTo(1));
-            AssertFileExistsInLusidDrive(writeResult.FilesWritten[0]);
+            Assert.That(writeResult.FileOutputPath, Is.Not.Empty);
+            AssertFileExistsInLusidDrive(writeResult.FileOutputPath);
         }
         
         [Test]
-        public void Write_OnNoFinData_ShouldDoNothingButReturnOk()
+        public void Write_OnEmptyFinData_ShouldDoNothingButReturnOk()
         {
             //when
-            var finDataOutputs = new List<DataLicenseOutput>();
+            var finDataOutputs = DataLicenseOutput.Empty();
             
             //execute
             var writeResult =  _outputWriter.Write(finDataOutputs);
             
             //verify
-            Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
+            Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
             AssertLusidDriveFolderIsEmpty(_outputDirId);
         }
 

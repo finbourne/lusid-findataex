@@ -19,7 +19,7 @@ namespace Lusid.FinDataEx.Output
         /// </summary>
         /// <param name="finDataOutputs">Financial data to write</param>
         /// <returns>Result status of the write</returns>
-        WriteResult Write(IEnumerable<DataLicenseOutput> finDataOutputs);
+        WriteResult Write(DataLicenseOutput finDataOutputs);
 
     }
 }

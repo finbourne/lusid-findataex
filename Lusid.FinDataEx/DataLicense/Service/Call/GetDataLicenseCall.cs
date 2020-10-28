@@ -69,7 +69,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             return retrieveGetDataResponse;
         }
 
-        public DataLicenseTypes.DataTypes GetDataLicenseDataType()
+        public DataLicenseTypes.DataTypes GetDataType()
         {
             return DataLicenseTypes.DataTypes.GetData;
         }

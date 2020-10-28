@@ -70,7 +70,7 @@ namespace Lusid.FinDataEx.DataLicense.Util
 
         public static void PrintGetActionsResponse(RetrieveGetActionsResponse retrieveGetActionsResponse)
         {
-            if (retrieveGetActionsResponse.statusCode.code == DlDataService.Success)
+            if (retrieveGetActionsResponse.statusCode.code == DataLicenseService.Success)
             {
                 Console.WriteLine("Retrieve get quotes request successful.  Response ID:" + retrieveGetActionsResponse.responseId);
                 for (int i = 0; i < retrieveGetActionsResponse.instrumentDatas.Length; i++)
@@ -94,7 +94,7 @@ namespace Lusid.FinDataEx.DataLicense.Util
 
                 }
             }
-            else if (retrieveGetActionsResponse.statusCode.code == DlDataService.RequestError)
+            else if (retrieveGetActionsResponse.statusCode.code == DataLicenseService.RequestError)
                 Console.WriteLine("Error in submitted request");
         }
 

@@ -200,7 +200,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
 
         private retrieveGetDataResponseResponse CreateRetrieveGetDataResponseResponse(string responseId)
         {
-            var retrieveGetDataResponse = TestUtils.LoadResponseFromFile(responseId);
+            var retrieveGetDataResponse = TestUtils.LoadGetDataResponseFromFile(responseId);
             var retrieveGetDataResponseResponse = new retrieveGetDataResponseResponse
             {
                 retrieveGetDataResponse = retrieveGetDataResponse

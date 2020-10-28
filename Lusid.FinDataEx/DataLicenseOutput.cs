@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Lusid.FinDataEx
 {
@@ -22,6 +24,39 @@ namespace Lusid.FinDataEx
             Id = id;
             Header = header;
             Records = records;
+        }
+
+        public static DataLicenseOutput Empty(string id)
+        {
+            return new DataLicenseOutput(id, new List<string>(), new List<Dictionary<string, string>>());
+        }
+        
+        public static DataLicenseOutput Empty()
+        {
+            return new DataLicenseOutput("-", new List<string>(), new List<Dictionary<string, string>>());
+        }
+
+        public bool IsEmpty()
+        {
+            return !Header.Any() && !Records.Any();
+        }
+
+        protected bool Equals(DataLicenseOutput other)
+        {
+            return Id == other.Id && Equals(Header, other.Header) && Equals(Records, other.Records);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((DataLicenseOutput) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, Header, Records);
         }
     }
 }

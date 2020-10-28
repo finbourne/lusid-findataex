@@ -30,7 +30,7 @@
         ///  Corporate Actions supported by BBG DLWS and FinDataEx.
         ///  Currently using BBG DL naming conventions so do NOT amend unless also amended by BBG DL.
         /// </summary>
-        public enum CorpActionTypes
+        public enum CorpActionType
         {    
             DVD_CASH,
             DVD_STOCK,

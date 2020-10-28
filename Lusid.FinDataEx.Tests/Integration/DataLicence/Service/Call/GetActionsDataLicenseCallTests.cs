@@ -9,7 +9,7 @@ using PerSecurity_Dotnet;
 namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
 {
     [TestFixture]
-    public class GetActionsBbgCallTests
+    public class GetActionsDataLicenseCallTests
     {
 
         private PerSecurityWS _perSecurityWs;
@@ -26,7 +26,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
         {
             //when
             _getActionsDataLicenseCall = new GetActionsDataLicenseCall(_perSecurityWs, 
-                new List<DataLicenseTypes.CorpActionTypes>() {DataLicenseTypes.CorpActionTypes.DVD_CASH});
+                new List<DataLicenseTypes.CorpActionType>() {DataLicenseTypes.CorpActionType.STOCK_SPLT, DataLicenseTypes.CorpActionType.DVD_CASH, DataLicenseTypes.CorpActionType.DVD_STOCK});
             var testInstruments = CreateCorpActionTestInstrument();
             
             //execute
@@ -36,20 +36,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
             //verify
             Assert.That(retrieveGetActionsResponse.statusCode.code, Is.EqualTo(DataLicenseService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(1));
-            //AssertBbUniqueQueriedInstrumentIsPopulated(getDataFields, instrumentDatas[0], "EQ0010174300001000");
         }
-        
-        /*private void AssertBbUniqueQueriedInstrumentIsPopulated(string[] getDataFields, InstrumentData instrumentData, string bbUid)
-        {
-            Assert.That(instrumentData.instrument.id, Is.EqualTo(bbUid));
-            Assert.That(instrumentData.instrument.yellowkey, Is.EqualTo(MarketSector.Govt));
-            
-            Assert.That(getDataFields[0], Is.EqualTo("ID_BB_UNIQUE"));
-            Assert.That(instrumentData.data[0].value, Is.EqualTo(bbUid));
-            
-            Assert.That(getDataFields[1], Is.EqualTo("PX_LAST"));
-            Assert.That(instrumentData.data[1].value, Is.Not.Null);
-        }*/
 
         private Instruments CreateCorpActionTestInstrument()
         {
