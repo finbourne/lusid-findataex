@@ -23,7 +23,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
-            var commandArgs = $"GetData -i BBG000BPHFS9 BBG000BVPV84 -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
             
             //verify
@@ -56,7 +56,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_ForEquityInstrumentMaster_ShouldProduceEqInsMasterFile()
         {
-            var commandArgs = $"GetData -i BBG000BPHFS9 BBG000BVPV84 -o {_tempOutputDir} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES";
+            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 -o {_tempOutputDir} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES";
             FinDataEx.Main(commandArgs.Split(" "));
             
             //verify
@@ -105,7 +105,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_ForBondnstrumentMaster_ShouldProduceBondInsMasterFile()
         {
-            var commandArgs = $"GetData -i BBG00HPJL7D0 BBG00RN2M5S4 -o {_tempOutputDir} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
+            var commandArgs = $"getdata -i BBG00HPJL7D0 BBG00RN2M5S4 -o {_tempOutputDir} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
                               $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
             FinDataEx.Main(commandArgs.Split(" "));
             
@@ -173,7 +173,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_ForMultiInstrumentMaster_ShouldProduceBondMultiInstrumentMasterFile()
         {
-            var commandArgs = $"GetData -i BBG000BPHFS9 BBG000BVPV84 BBG00HPJL7D0 BBG00RN2M5S4 -o {_tempOutputDir} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
+            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 BBG00HPJL7D0 BBG00RN2M5S4 -o {_tempOutputDir} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
                               $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
             FinDataEx.Main(commandArgs.Split(" "));
             
@@ -288,34 +288,15 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetAction_OnValidEquityBbgId_ShouldProduceCorpActionFile()
         {
-            var commandArgs = $"GetAction -i BBG000BPHFS9 BBG000BVPV84 -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getaction -i BBG000BPHFS9 BBG000BVPV84 -o {_tempOutputDir} -c DVD_CASH DVD_STOCK STOCK_SPLT";
             FinDataEx.Main(commandArgs.Split(" "));
             
             //verify
             var expectedDataFiles = Directory.GetFiles(_tempOutputDir);
             
-            // ensure only GetData file created and name is in correct format
-            // more than one file is a contaminated test and should be investigated
-            Assert.That(expectedDataFiles.Length, Is.EqualTo(1));
-            StringAssert.EndsWith("_GetAction.csv", expectedDataFiles[0]);
-
-            // ensure file is properly populated
-            var entries = File.ReadAllLines(expectedDataFiles[0]);
-            
-            // check headers
-            Assert.That(entries[0], Is.EqualTo("ID_BB_GLOBAL|PX_LAST"));
-
-            // check instrument 1 entry
-            var instrumentEntry1 = entries[1].Split("|");
-            Assert.That(instrumentEntry1[0], Is.EqualTo("BBG000BPHFS9"));
-            // price will change with each call so just check not empty
-            Assert.That(instrumentEntry1[0], Is.Not.Empty);
-            
-            // check instrument 2 entry
-            var instrumentEntry2 = entries[2].Split("|");
-            Assert.That(instrumentEntry2[0], Is.EqualTo("BBG000BVPV84"));
-            // price will change with each call so just check not empty
-            Assert.That(instrumentEntry2[0], Is.Not.Empty);
+            // Most days will have no corp actions and as test always uses latest date cannot check for file as will
+            // likely not exist. For tests on writing corp actions to file see GetActionsDataLicenseCallTest
+            // In this case an successful call to DLWS is enough
         }
         
         

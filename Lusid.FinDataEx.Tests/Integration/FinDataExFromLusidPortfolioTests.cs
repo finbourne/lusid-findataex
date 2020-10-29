@@ -28,7 +28,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             var scopePortfolio1 = $"{Scope}|{Portfolio}";
             var scopePortfolio2 = $"{Scope}|{Portfolio2}";
             var scopePortfolioSameHoldingP1 = $"{Scope}|{PortfolioSameHoldingAsP1}";
-            var commandArgs = $"GetData -p {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -p {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
             
             //verify
@@ -62,7 +62,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_OnValidPortfoliosUsingIsin_ShouldProduceDataFile()
         {
             var scopePortfolio1 = $"{Scope}|{Portfolio}";
-            var commandArgs = $"GetData -p {scopePortfolio1} -t ISIN -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -p {scopePortfolio1} -t ISIN -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
             
             //verify
