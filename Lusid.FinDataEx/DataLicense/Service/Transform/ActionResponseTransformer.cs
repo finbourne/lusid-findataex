@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Transform
@@ -43,11 +44,24 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                     continue;
                 }
 
+                
+                // Populate the data general to all corporate actions
+                var actionStandardFields = instrumentData.standardFields;
+                foreach (var standardFieldPropInfo in typeof(ActionStandardFields).GetProperties())
+                {
+                    var fieldValue = standardFieldPropInfo.GetValue(actionStandardFields, null);
+                    var fieldValueEntry = (fieldValue == null) ? "" : fieldValue.ToString();
+                    corpActionRecord.Add(standardFieldPropInfo.Name, fieldValueEntry);
+                    headers.Add(standardFieldPropInfo.Name);
+                }
+                
+                // Populate the data specific to the corporate action type
                 foreach (var corpActionData in instrumentData.data)
                 {
                     corpActionRecord.Add(corpActionData.field, corpActionData.value);
                     headers.Add(corpActionData.field);
                 }
+                
 
                 corpActionRecords.Add(corpActionRecord);
             }

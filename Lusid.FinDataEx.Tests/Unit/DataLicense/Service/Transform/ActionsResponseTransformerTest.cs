@@ -23,15 +23,20 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
             var retrieveGetActionResponse =  TestUtils.LoadGetActionsResponseFromFile(responseId);
             
             //execute
-            var getDataOutput = _transformer.Transform(retrieveGetActionResponse);
+            var getActionOutput = _transformer.Transform(retrieveGetActionResponse);
             
-            //verify
-            CollectionAssert.IsSupersetOf(getDataOutput.Header, new List<string>{"CP_RECORD_DT","CP_PAY_DT","CP_FREQ",
+            //verify data field headers from corp action (specific to corp action type)
+            CollectionAssert.IsSupersetOf(getActionOutput.Header, new List<string>{"CP_RECORD_DT","CP_PAY_DT","CP_FREQ",
                 "CP_NET_AMT","CP_TAX_AMT","CP_GROSS_AMT","CP_FRANKED_AMT", "CP_DVD_CRNCY", "CP_DVD_TYP","CP_ELECTION_DT", 
                 "CP_ACTION_STATUS"});
+            
+            //verify standard corp action field headers from corp action ( general to any corp action type)
+            CollectionAssert.IsSupersetOf(getActionOutput.Header, new List<string>{"announceDate","bbGlobal","companyName",
+                "currency","effectiveDate","mnemonic","CP_FRANKED_AMT", "CP_DVD_CRNCY", "CP_DVD_TYP","CP_ELECTION_DT", 
+                "CP_ACTION_STATUS"});
 
-            Assert.That(getDataOutput.Records.Count, Is.EqualTo(1));
-            var corpActionRecord = getDataOutput.Records[0];
+            Assert.That(getActionOutput.Records.Count, Is.EqualTo(1));
+            var corpActionRecord = getActionOutput.Records[0];
             Assert.That(corpActionRecord["CP_RECORD_DT"], Is.EqualTo("11/06/2020"));
             Assert.That(corpActionRecord["CP_PAY_DT"], Is.EqualTo("12/04/2020"));
             Assert.That(corpActionRecord["CP_FREQ"], Is.EqualTo("4"));
