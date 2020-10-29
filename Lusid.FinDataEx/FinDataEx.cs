@@ -19,38 +19,53 @@ namespace Lusid.FinDataEx
     {
         public static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<GetDataOptions>(args)
-                .WithParsed(ExecuteGetData);
+            Parser.Default.ParseArguments<GetDataOptions,GetActionsOptions>(args)
+                .WithParsed<GetDataOptions>(ExecuteGet)
+                .WithParsed<GetActionsOptions>(ExecuteGet);
             
         }
-
+        
         /// <summary>
-        /// Execute a GetData call to BBG DL and persist output
+        /// Execute a data license call to BBG DLWS and persists the output
         ///
-        /// GetData calls will retrieve instrument data for the requested data fields and
-        /// output a csv to the selected file system output directory.
+        /// Data license calls will specific data for requested instruments and
+        /// output that data to csv in the selected file system output directory.
         /// 
         /// </summary>
-        /// <param name="getDataOptions"></param>
-        private static void ExecuteGetData(GetDataOptions getDataOptions)
+        /// <param name="getOptions"></param>
+        private static void ExecuteGet(DataLicenseOptions getOptions)
         {
-            var outputDirectory = getDataOptions.OutputDirectory;
-            var fileSystem = getDataOptions.FileSystem;
-            var dataFields = getDataOptions.DataFields;
-
             // prepare DL service and output writer
             var dlDataService = new DataLicenseService();
-            var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
-            var bbgCall = new GetDataLicenseCall(perSecurityWs, dataFields.ToArray());
+
+            // construct the writer to persist any data retrieved from Bbg
+            var outputDirectory = getOptions.OutputDirectory;
+            var fileSystem = getOptions.FileSystem;
             var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory, fileSystem);
             
             // construct instruments in DL format to be passed to DLWS
-            var instruments = CreateInstruments(getDataOptions);           
+            var instruments = CreateInstruments(getOptions);
+            
+            // construct data license call
+            var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
+            var dataLicenseCall = CreateDataLicenseCall(getOptions, perSecurityWs);
             
             // call DL and write results to specified output
-            var finDataOutputs =  dlDataService.Get(bbgCall, instruments, ProgramTypes.Adhoc);
+            var finDataOutputs =  dlDataService.Get(dataLicenseCall, instruments, ProgramTypes.Adhoc);
             var writeResult =  finDataOutputWriter.Write(finDataOutputs);
             LogWriteResult(writeResult);
+        }
+
+        private static IDataLicenseCall<PerSecurityResponse> CreateDataLicenseCall(DataLicenseOptions getOptions, PerSecurityWS perSecurityWs)
+        {
+            return getOptions switch
+            {
+                GetActionsOptions getActionsOptions => new GetActionsDataLicenseCall(perSecurityWs,
+                    getActionsOptions.CorpActionTypes.ToList()),
+                GetDataOptions getDataOptions => new GetDataLicenseCall(perSecurityWs,
+                    getDataOptions.DataFields.ToArray()),
+                _ => throw new ArgumentOutOfRangeException(nameof(getOptions))
+            };
         }
 
         /// <summary>
@@ -184,5 +199,15 @@ namespace Lusid.FinDataEx
     {
         [Option('d', "datafields", Required = true, HelpText = "BBG DL fields to retrieve. Only relevant for GetData requests.")]
         public IEnumerable<String> DataFields { get; set; }
+    }
+    
+    /// <summary>
+    /// Options for GetAction calls to BBG
+    /// </summary>
+    [Verb ("getaction", HelpText = "BBG DL request to retrieve corporate actions for requested instruments.")]
+    class GetActionsOptions : DataLicenseOptions
+    {
+        [Option('c', "corpactions", Required = true, HelpText = "The corporate action types to retrieve (e.g. DVD_CASH, STOCK_SPLIT, etc...)")]
+        public IEnumerable<CorpActionType> CorpActionTypes { get; set; }
     }
 }
