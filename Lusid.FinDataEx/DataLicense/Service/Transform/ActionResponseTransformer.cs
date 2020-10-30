@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Transform
@@ -30,7 +29,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
 
             // headers from intersection of all fields (mainly required for requests that span multiple corporate
             // action types)
-            var headers = new HashSet<string>();
+            var headers = new HashSet<string>(){"timeStarted", "timeFinished"};
             var corpActionRecords = new List<Dictionary<string, string>>();
             foreach (var instrumentData in actionsInstrumentDatas)
             {
@@ -44,7 +43,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                     continue;
                 }
 
-                
                 // Populate the data general to all corporate actions
                 var actionStandardFields = instrumentData.standardFields;
                 foreach (var standardFieldPropInfo in typeof(ActionStandardFields).GetProperties())
@@ -65,6 +63,15 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
 
                 corpActionRecords.Add(corpActionRecord);
             }
+            
+            //populate all records with timestamp fields
+            var timeStarted = new DateTimeOffset(perSecurityResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString();
+            var timeFinished = new DateTimeOffset(perSecurityResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString();
+            corpActionRecords.ForEach(r =>
+            {
+                r.Add("timeStarted", timeStarted);
+                r.Add("timeFinished", timeFinished);
+            });
 
             // if failed to retrieve actions for all instruments then return empty output
             return corpActionRecords.Any()

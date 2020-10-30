@@ -48,6 +48,8 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
             Assert.That(corpActionRecord["CP_DVD_TYP"], Is.EqualTo("1000"));
             Assert.That(corpActionRecord["CP_ELECTION_DT"], Is.EqualTo("N.A."));
             Assert.That(corpActionRecord["CP_ACTION_STATUS"], Is.EqualTo("R"));
+            Assert.That(corpActionRecord["timeStarted"], Is.EqualTo("27/10/2020 18:06:20 +00:00"));
+            Assert.That(corpActionRecord["timeFinished"], Is.EqualTo("27/10/2020 18:06:22 +00:00"));
         }
         
         [Test]

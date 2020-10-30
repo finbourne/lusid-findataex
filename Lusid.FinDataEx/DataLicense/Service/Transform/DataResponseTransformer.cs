@@ -21,7 +21,11 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         public DataLicenseOutput Transform(RetrieveGetDataResponse perSecurityResponse)
         {
             var finDataOutputId = $"{perSecurityResponse.responseId}_GetData";
-            var headers = perSecurityResponse.fields.ToList();
+            // construct data headers
+            var headers = new List<string>(){"timeStarted", "timeFinished"}; 
+            headers.AddRange(perSecurityResponse.fields.ToList());
+            
+            // setup data records
             var finDataRecords = new List<Dictionary<string, string>>();
             var instrumentDatas = perSecurityResponse.instrumentDatas;
             foreach (var instrumentData in instrumentDatas)
@@ -41,6 +45,15 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                 }
                 finDataRecords.Add(instrumentRecord);
             }
+            
+            //populate all records with timestamp fields
+            var timeStarted = new DateTimeOffset(perSecurityResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString();
+            var timeFinished = new DateTimeOffset(perSecurityResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString();
+            finDataRecords.ForEach(r =>
+            {
+                r.Add("timeStarted", timeStarted);
+                r.Add("timeFinished", timeFinished);
+            });
 
             return finDataRecords.Any()
                 ? new DataLicenseOutput(finDataOutputId, headers, finDataRecords)

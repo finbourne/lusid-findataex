@@ -33,7 +33,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
             var bbgIds = CreateInstruments(new List<string>{"BBG000BPHFS9", "BBG000BVPV84"});
             var finDataOutput = _dataLicenseService.Get(_getDataLicenseCall, bbgIds, DataLicenseTypes.ProgramTypes.Adhoc);
             
-            CollectionAssert.AreEqual(finDataOutput.Header, new List<string>(){"ID_BB_GLOBAL","PX_LAST"});
+            CollectionAssert.AreEqual(finDataOutput.Header, new List<string>(){"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
 
             // check data in records (changing prices mean just need to check its populated and not the exact number)
             Assert.That(finDataOutput.Records.Count, Is.EqualTo(2));
@@ -41,11 +41,19 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
             Assert.That(bbdId1, Is.EqualTo("BBG000BPHFS9"));
             finDataOutput.Records[0].TryGetValue("PX_LAST", out string lastPrice1); 
             Assert.That(lastPrice1, Is.Not.Empty);
+            finDataOutput.Records[0].TryGetValue("timeStarted", out string timeStarted); 
+            Assert.That(timeStarted, Is.Not.Empty);
+            finDataOutput.Records[0].TryGetValue("timeFinished", out string timeFinished); 
+            Assert.That(timeFinished, Is.Not.Empty);
             
             finDataOutput.Records[1].TryGetValue("ID_BB_GLOBAL", out string bbdId2); 
             Assert.That(bbdId2, Is.EqualTo("BBG000BVPV84"));
             finDataOutput.Records[1].TryGetValue("PX_LAST", out string lastPrice2); 
             Assert.That(lastPrice2, Is.Not.Empty);
+            finDataOutput.Records[1].TryGetValue("timeStarted", out string timeStarted2); 
+            Assert.That(timeStarted2, Is.Not.Empty);
+            finDataOutput.Records[1].TryGetValue("timeFinished", out string timeFinished2); 
+            Assert.That(timeFinished2, Is.Not.Empty);
         }
         
         [Test]
