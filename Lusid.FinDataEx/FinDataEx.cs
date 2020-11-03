@@ -133,7 +133,7 @@ namespace Lusid.FinDataEx
             if (portfolios.Any())
             {
                 // setup LusidApiFactory
-                var lusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets_api.json");
+                var lusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets.json");
                 var effectiveAt = DateTimeOffset.UtcNow;
                 Console.WriteLine($"Retrieving instruments from holdings effectiveAt {effectiveAt} for portfolios {portfolios}");
                 ISet<Tuple<string,string>> scopesAndPortfolios = portfolios.Select(p =>
