@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using PerSecurity_Dotnet;
+﻿using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Transform
 {
     /// <summary>
     ///  Transformer of BBG DL responses into standardised FinDataOutput
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">BBG DL Response Type</typeparam>
     public interface IDataLicenseResponseTransformer<in T> where T : PerSecurityResponse
     {
         /// <summary>
@@ -16,5 +15,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         /// <param name="perSecurityResponse">Response from BBG DLWS</param>
         /// <returns>FinDataOutput containing the BBG DL data from response</returns>
         DataLicenseOutput Transform(T perSecurityResponse);
+        
     }
 }

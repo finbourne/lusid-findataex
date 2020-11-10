@@ -1,6 +1,4 @@
-﻿﻿using System.Collections.Generic;
-
- namespace Lusid.FinDataEx.Output
+﻿﻿ namespace Lusid.FinDataEx.Output
 {
     /// <summary>
     /// Contains status and any error messages of writing FinDataOutput
@@ -36,8 +34,9 @@
 
         public override string ToString()
         {
-            return $"{nameof(Status)}: {Status}, {nameof(FileOutputPath)}: {FileOutputPath}";
+            return $"{nameof(Status)}: {Status}, {nameof(FileOutputPath)}: {FileOutputPath}, {nameof(FailureMessage)}: {FailureMessage}";
         }
+        
     }
 
     public enum WriteResultStatus

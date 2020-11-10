@@ -11,7 +11,6 @@ namespace Lusid.FinDataEx.Output
     /// </summary>
     public class LocalFilesystemOutputWriter : IOutputWriter
     {
-
         protected readonly string OutputDir;
 
         public LocalFilesystemOutputWriter(string outputDir)
@@ -19,21 +18,21 @@ namespace Lusid.FinDataEx.Output
             OutputDir = outputDir;
         }
         
-        public WriteResult Write(DataLicenseOutput finDataOutput)
+        public WriteResult Write(DataLicenseOutput dataLicenseOutput)
         {
-            if (finDataOutput.IsEmpty())
+            if (dataLicenseOutput.IsEmpty())
             {
-                Console.WriteLine($"Attempting to write empty data license output : {finDataOutput}. Skipping...");
+                Console.WriteLine($"Attempting to write empty data license output : {dataLicenseOutput}. Skipping...");
                 return WriteResult.NotRun();
             }
             // prepare fin data as strings to be written to file
-            var headers = string.Join(BbgDlDelimiter, finDataOutput.Header);
+            var headers = string.Join(BbgDlDelimiter, dataLicenseOutput.Header);
             var finDataRecords = new List<string>{headers};
             finDataRecords.AddRange(
-            finDataOutput.Records.Select(dR =>
+            dataLicenseOutput.Records.Select(dR =>
                     {
-                        List<string> record = new List<string>();
-                        foreach (var header in finDataOutput.Header)
+                        var record = new List<string>();
+                        foreach (var header in dataLicenseOutput.Header)
                         {
                             dR.TryGetValue(header, out string recordEntry);
                             record.Add(recordEntry);
@@ -45,12 +44,12 @@ namespace Lusid.FinDataEx.Output
             
             try
             {
-                var outputPathWritten = WriteToFile(finDataOutput.Id + BbgDlOutputFileFormat, finDataRecords);
+                var outputPathWritten = WriteToFile(dataLicenseOutput.Id + BbgDlOutputFileFormat, finDataRecords);
                 return WriteResult.Ok(outputPathWritten);
             }
             catch (Exception e)
             {
-                return WriteResult.Fail($"FAILURE : Did not write {finDataOutput.Id} to {OutputDir} due to an exception. Cause of failure: {e}");
+                return WriteResult.Fail($"FAILURE : Did not write {dataLicenseOutput.Id} to {OutputDir} due to an exception. Cause of failure: {e}");
             }
         }
 

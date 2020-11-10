@@ -5,9 +5,8 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Util
 {
-    public class DataLicenseUtils
+    public static class DataLicenseUtils
     {
-        
         public const int DefaultPollingInterval = 30000;
 
         /// <summary>

@@ -17,9 +17,9 @@ namespace Lusid.FinDataEx.Output
         /// of FinDataOutputs to an output destination
         /// 
         /// </summary>
-        /// <param name="finDataOutputs">Financial data to write</param>
+        /// <param name="dataLicenseOutput">Financial data to write</param>
         /// <returns>Result status of the write</returns>
-        WriteResult Write(DataLicenseOutput finDataOutputs);
+        WriteResult Write(DataLicenseOutput dataLicenseOutput);
 
     }
 }

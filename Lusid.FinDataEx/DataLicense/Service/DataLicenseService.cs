@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Service.Transform;
@@ -21,8 +20,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
         public const int Success = 0;
         public const int RequestError = 200;
         public const string InstrumentSuccessCode = "0";
-        public const int NoCorpActionCode = 300;
-
+        
         /// <summary>
         ///  Executes a request to BBG DLWS for a given set of BB_UNIQUE_IDs and a given data type. On response
         /// will return a standardised output as a FinDataOutput.
@@ -46,7 +44,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
             return finDataOutputs;
         }
 
-        private DataLicenseOutput TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
+        private static DataLicenseOutput TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
         {
             return dataType switch
             {
@@ -58,7 +56,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
             };
         }
 
-        private void VerifyBblFlags(ProgramTypes programType, DataTypes dataType)
+        private static void VerifyBblFlags(ProgramTypes programType, DataTypes dataType)
         {
             if (programType != ProgramTypes.Adhoc)
             {

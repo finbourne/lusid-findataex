@@ -41,7 +41,7 @@ namespace Lusid.FinDataEx
             return !Header.Any() && !Records.Any();
         }
 
-        protected bool Equals(DataLicenseOutput other)
+        private bool Equals(DataLicenseOutput other)
         {
             return Id == other.Id && Equals(Header, other.Header) && Equals(Records, other.Records);
         }

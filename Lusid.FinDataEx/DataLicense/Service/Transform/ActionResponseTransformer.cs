@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using PerSecurity_Dotnet;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseConstants;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Transform
 {
@@ -15,25 +16,26 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         /// Transform a a GetAction response from BBG DLWS to a standardised output.
         /// 
         /// </summary>
-        /// <param name="perSecurityResponse">GetAction response from BBG DLWS</param>
+        /// <param name="getActionsResponse">GetAction response from BBG DLWS</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public DataLicenseOutput Transform(RetrieveGetActionsResponse perSecurityResponse)
+        public DataLicenseOutput Transform(RetrieveGetActionsResponse getActionsResponse)
         {
-            var corpActionOutputId = $"{perSecurityResponse.responseId}_GetActions";
-            var actionsInstrumentDatas = perSecurityResponse.instrumentDatas;
+            var corpActionOutputId = $"{getActionsResponse.responseId}_GetActions";
+            var actionsInstrumentDatas = getActionsResponse.instrumentDatas;
             // if no corporate actions are returned for the specific type than return an empty output.
             if (!actionsInstrumentDatas.Any())
             {
                 return DataLicenseOutput.Empty(corpActionOutputId);
             }
 
-            // headers from intersection of all fields (mainly required for requests that span multiple corporate
-            // action types)
-            var headers = new HashSet<string>(){"timeStarted", "timeFinished"};
+            // corporate action headers constructed from the intersection of all corporate action fields
+            // (mainly required for requests that span multiple corporate action types).
+            var headers = new HashSet<string>(){TimeStarted, TimeFinished};
+            // setup corp action records
             var corpActionRecords = new List<Dictionary<string, string>>();
             foreach (var instrumentData in actionsInstrumentDatas)
             {
-                Dictionary<string, string> corpActionRecord = new Dictionary<string, string>();
+                var corpActionRecord = new Dictionary<string, string>();
                 // corp action requests for individual instruments may have failed which need to be logged
                 // but should not result in entire failure of batch.
                 if (instrumentData.code != DataLicenseService.InstrumentSuccessCode)
@@ -43,7 +45,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                     continue;
                 }
 
-                // Populate the data general to all corporate actions
+                // Populate the data general to all corporate actions. Only focus on corporate action fields
                 var actionStandardFields = instrumentData.standardFields;
                 foreach (var standardFieldPropInfo in typeof(ActionStandardFields).GetProperties())
                 {
@@ -59,18 +61,16 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                     corpActionRecord.Add(corpActionData.field, corpActionData.value);
                     headers.Add(corpActionData.field);
                 }
-                
-
                 corpActionRecords.Add(corpActionRecord);
             }
             
-            //populate all records with timestamp fields
-            var timeStarted = new DateTimeOffset(perSecurityResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString();
-            var timeFinished = new DateTimeOffset(perSecurityResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString();
+            //populate all records with timestamp fields from corp actions response
+            var timeStarted = new DateTimeOffset(getActionsResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString();
+            var timeFinished = new DateTimeOffset(getActionsResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString();
             corpActionRecords.ForEach(r =>
             {
-                r.Add("timeStarted", timeStarted);
-                r.Add("timeFinished", timeFinished);
+                r.Add(TimeStarted, timeStarted);
+                r.Add(TimeFinished, timeFinished);
             });
 
             // if failed to retrieve actions for all instruments then return empty output

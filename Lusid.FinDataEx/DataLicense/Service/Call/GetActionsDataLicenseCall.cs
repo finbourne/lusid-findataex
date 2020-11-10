@@ -7,6 +7,12 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Call
 {
+    /// <summary>
+    /// GetActions BBG DWLS call.
+    ///
+    /// GetActions calls request corporate actions data for a given set of instruments.
+    /// 
+    /// </summary>
     public class GetActionsDataLicenseCall : IDataLicenseCall<RetrieveGetActionsResponse>
     {
         /* DO NOT change _PollingInterval except for testing with Mocks. BBG DL will throttle
@@ -23,6 +29,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             _pollingInterval = pollingInterval;
         }
 
+        /// <summary>
+        /// Execute a GetActions call for a given set of instruments.
+        /// 
+        /// </summary>
+        /// <param name="instruments">Instruments to retrieve corporate action data against.</param>
+        /// <returns>Response from BBG DLWS that should contain corporate actions data and relevant status codes.</returns>
         public RetrieveGetActionsResponse Get(Instruments instruments)
         {
             var getActionRequest = CreateGetActionsRequest(instruments);
@@ -63,7 +75,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         
         private submitGetActionsRequestRequest CreateGetActionsRequest(Instruments instruments)
         {
-            SubmitGetActionsRequest submitGetActionsRequest = new SubmitGetActionsRequest
+            var submitGetActionsRequest = new SubmitGetActionsRequest
             {
                 headers = GetDefaultHeaders(), instruments = instruments
             };

@@ -11,7 +11,6 @@ using Lusid.FinDataEx.Output;
 using Lusid.FinDataEx.Util;
 using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
-using ILusidApiFactory = Lusid.Sdk.Utilities.ILusidApiFactory;
 
 namespace Lusid.FinDataEx
 {
@@ -26,7 +25,7 @@ namespace Lusid.FinDataEx
         }
         
         /// <summary>
-        /// Execute a data license call to BBG DLWS and persists the output
+        /// Execute a data license call to BBG DLWS and persists the output.
         ///
         /// Data license calls will specific data for requested instruments and
         /// output that data to csv in the selected file system output directory.
@@ -51,11 +50,17 @@ namespace Lusid.FinDataEx
             var dataLicenseCall = CreateDataLicenseCall(getOptions, perSecurityWs);
             
             // call DL and write results to specified output
-            var finDataOutputs =  dlDataService.Get(dataLicenseCall, instruments, ProgramTypes.Adhoc);
-            var writeResult =  finDataOutputWriter.Write(finDataOutputs);
+            var dataLicenseOutput =  dlDataService.Get(dataLicenseCall, instruments, ProgramTypes.Adhoc);
+            var writeResult =  finDataOutputWriter.Write(dataLicenseOutput);
             LogWriteResult(writeResult);
         }
 
+        /// <summary>
+        ///  Create a BBG DL call depending on the arguments passed into the application.
+        /// </summary>
+        /// <param name="getOptions">Options taken from the user provided arguments</param>
+        /// <param name="perSecurityWs">BBG DLWS client</param>
+        /// <returns></returns>
         private static IDataLicenseCall<PerSecurityResponse> CreateDataLicenseCall(DataLicenseOptions getOptions, PerSecurityWS perSecurityWs)
         {
             return getOptions switch
@@ -154,6 +159,7 @@ namespace Lusid.FinDataEx
                 Console.WriteLine($"Constructing DL instrument requests from Figis: {String.Join(',',bbgIds)}");
                 return new BasicInstrumentSource(instrumentIdType, new HashSet<string>(bbgIds));
             }
+            
             // should not be possible if commandlineparser runs proper checks
             throw new ArgumentException($"No input portfolios or instruments were provided. Pleas check input " +
                                         $"options {dataOptions}");

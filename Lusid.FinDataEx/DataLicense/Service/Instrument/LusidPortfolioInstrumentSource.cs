@@ -20,7 +20,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         {
             _lusidApiFactory = lusidApiFactory;
             _instrumentType = instrumentType;
-            _instrumentTypeLusidPropertyKey = getLusidInstrumentIdPropertyAddress(instrumentType);
+            _instrumentTypeLusidPropertyKey = GetLusidInstrumentIdPropertyAddress(instrumentType);
             _scopesAndPortfolios = scopesAndPortfolios;
             _effectiveAt = effectiveAt;
         }
@@ -28,8 +28,8 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         #nullable enable
         public Instruments? Get()
         {
-            var portfolioIntrumentIds = GetHoldingsInstrumentIds(_lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
-            return portfolioIntrumentIds.Any() ? ToBbgDlInstruments(portfolioIntrumentIds) : null;
+            var holdingsInstrumentIds = GetHoldingsInstrumentIds(_lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
+            return holdingsInstrumentIds.Any() ? ToBbgDlInstruments(holdingsInstrumentIds) : null;
         }
 
         private Instruments ToBbgDlInstruments(ISet<string> ids)
@@ -49,16 +49,14 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         private ISet<string> GetHoldingsInstrumentIds(ILusidApiFactory lusidApiFactory, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
             var transactionPortfoliosApi = lusidApiFactory.Api<TransactionPortfoliosApi>();
-            ISet<string> instrumentIds = new HashSet<string>();
-            foreach (Tuple<string, string> scopeAndPortfolio in scopesAndPortfolios)
+            var instrumentIds = new HashSet<string>();
+            foreach (var (scope, portfolio) in scopesAndPortfolios)
             {
-                string scope = scopeAndPortfolio.Item1;
-                string portfolio = scopeAndPortfolio.Item2;
                 try
                 {
                     var holdings = transactionPortfoliosApi.GetHoldings(scope, portfolio, effectiveAt,
                         propertyKeys: new List<string>() {_instrumentTypeLusidPropertyKey});
-                    ISet<string> validPortfolioInstrumentIds = holdings.Values
+                    var validPortfolioInstrumentIds = holdings.Values
                         .Where(h => h.Properties.ContainsKey(_instrumentTypeLusidPropertyKey))
                         .Select(h => h.Properties[_instrumentTypeLusidPropertyKey].Value.LabelValue)
                         .ToHashSet();
@@ -79,20 +77,16 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             return instrumentIds;
         }
 
-        private string getLusidInstrumentIdPropertyAddress(InstrumentType instrumentType)
+        private static string GetLusidInstrumentIdPropertyAddress(InstrumentType instrumentType)
         {
-            switch (instrumentType)
+            return instrumentType switch
             {
-                case InstrumentType.BB_GLOBAL:
-                    return "Instrument/default/Figi";
-                case InstrumentType.ISIN:
-                    return "Instrument/default/Isin";
-                case InstrumentType.CUSIP:
-                    return "Instrument/default/Cusip";
-                default:
-                    throw new ArgumentException(
-                        $"Only Figi, Isin and Cusips are currently supported. {instrumentType} not yet supported.");
-            }
+                InstrumentType.BB_GLOBAL => "Instrument/default/Figi",
+                InstrumentType.ISIN => "Instrument/default/Isin",
+                InstrumentType.CUSIP => "Instrument/default/Cusip",
+                _ => throw new ArgumentException(
+                    $"Only Figi, Isin and Cusips are currently supported. {instrumentType} not yet supported.")
+            };
         }
     }
 }

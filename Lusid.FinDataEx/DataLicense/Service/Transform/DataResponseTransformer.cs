@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using PerSecurity_Dotnet;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseConstants;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Transform
 {
@@ -16,45 +17,47 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         /// only one set of FinDataOutput to be returned.
         /// 
         /// </summary>
-        /// <param name="perSecurityResponse">GetData response from BBG DLWS</param>
+        /// <param name="getDataResponse">GetData response from BBG DLWS</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public DataLicenseOutput Transform(RetrieveGetDataResponse perSecurityResponse)
+        public DataLicenseOutput Transform(RetrieveGetDataResponse getDataResponse)
         {
-            var finDataOutputId = $"{perSecurityResponse.responseId}_GetData";
+            var finDataOutputId = $"{getDataResponse.responseId}_GetData";
             // construct data headers
-            var headers = new List<string>(){"timeStarted", "timeFinished"}; 
-            headers.AddRange(perSecurityResponse.fields.ToList());
+            var headers = new List<string>(){TimeStarted, TimeFinished}; 
+            headers.AddRange(getDataResponse.fields.ToList());
             
             // setup data records
             var finDataRecords = new List<Dictionary<string, string>>();
-            var instrumentDatas = perSecurityResponse.instrumentDatas;
+            var instrumentDatas = getDataResponse.instrumentDatas;
             foreach (var instrumentData in instrumentDatas)
             {
-                Dictionary<string,string> instrumentRecord = new Dictionary<string, string>();
-                // instruments with errors should be logged and ignored
+                var instrumentRecord = new Dictionary<string, string>();
+                // errors for specific instruments should be logged only and not impact the rest of the batch
                 if (instrumentData.code != DataLicenseService.InstrumentSuccessCode)
                 {
                     Console.WriteLine($"Error in GetData instrument for {instrumentData.instrument.id}. " +
-                                      $"Check GetData response log above. Continuing to remaining instruments...");
+                                      "Check GetData response log above. Continuing to remaining instruments...");
                     continue;
                 }
 
-                for (var i = 0; i < perSecurityResponse.fields.Length; i++)
+                // populate instrument record map for each instrument response
+                for (var i = 0; i < getDataResponse.fields.Length; i++)
                 {
-                    instrumentRecord.Add(perSecurityResponse.fields[i], instrumentData.data[i].value);
+                    instrumentRecord.Add(getDataResponse.fields[i], instrumentData.data[i].value);
                 }
                 finDataRecords.Add(instrumentRecord);
             }
             
-            //populate all records with timestamp fields
-            var timeStarted = new DateTimeOffset(perSecurityResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString();
-            var timeFinished = new DateTimeOffset(perSecurityResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString();
+            //populate all records with timestamp fields from data response
+            var timeStarted = new DateTimeOffset(getDataResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString();
+            var timeFinished = new DateTimeOffset(getDataResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString();
             finDataRecords.ForEach(r =>
             {
-                r.Add("timeStarted", timeStarted);
-                r.Add("timeFinished", timeFinished);
+                r.Add(TimeStarted, timeStarted);
+                r.Add(TimeFinished, timeFinished);
             });
 
+            // if failed to retrieve data for all instruments then return empty output
             return finDataRecords.Any()
                 ? new DataLicenseOutput(finDataOutputId, headers, finDataRecords)
                 : DataLicenseOutput.Empty(finDataOutputId);
