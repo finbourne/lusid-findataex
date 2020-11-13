@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts 'k:a:c:t:i:p:o:d:c:' opt
+while getopts 'k:a:c:t:i:p:o:f:d:c:' opt
 do
     case $opt in
 		k)
@@ -21,6 +21,9 @@ do
         o)
           echo setting output_dir $OPTARG
           output_dir=$OPTARG ;;
+		f)
+          echo setting output filesystem $OPTARG
+          filesystem=$OPTARG ;;
         # program specific actions - standard data
         d)
           echo setting data_fields $OPTARG
@@ -46,7 +49,11 @@ fi
 
 # if the certificate_file is not passed as an arg use one from an env var or exit if not
 if [[ -z $certificate_file ]] ; then
-	echo using cert file $certificate_file
+	echo No certificate file provided... attempting to use DLWS cert file from env var BBG_DL_CERT_BIN_STR
+	if [[ -z $BBG_DL_CERT_BIN_STR ]] ; then
+		echo No env varaible BBG_DL_CERT_BIN_STR is set. Exiting as no certificate for DLWS calls is available...
+		exit 1
+	fi
     tmp_file=$(mktemp)
 cat >$tmp_file <<EOF
 $BBG_DL_CERT_BIN_STR
@@ -54,23 +61,37 @@ EOF
     certificate_file=$tmp_file
 fi
 
-# pipe cert to file and set location as env var
-#certificate_file=$(mktemp)
-#echo $BBG_DL_CERT_BIN_STR > $certificate_file
+# check certificate file is not empty
+if [[ ! -s $certificate_file ]] ; then
+	echo "$certificate_file cannot be empty. Ensure a certificate file is passed in via -k or contents are set via the env variable BBG_DL_CERT_BIN_STR"
+	exit 1
+fi
+
+echo $certificate_file output is...
+cat $certificate_file
+ls -ltr $certificate_file
+
+# set certificate file path as env var for use by findataex
 export BBG_DL_CERT=$certificate_file
+
+
+# if no filesystem provided set to local
+if [[ -z $filesystem ]] ; then
+  filesystem=Lusid
+fi
 
 if [[ $action = "getdata" ]] && [[ ! -z $portfolios ]]
 then
-  dotnet $LUSID_FINDATA_EX_DLL getdata -p $portfolios -o ${0} -d ${d}
+  dotnet $LUSID_FINDATA_EX_DLL getdata -p $portfolios -o ${0} -f $filesystem -d ${d}
 elif [[ $action = "getdata" ]] &&  [[ ! -z $intsrument_id_type ]]
 then
-  dotnet $LUSID_FINDATA_EX_DLL getdata -t $intsrument_id_type -i $instrument_ids -o $output_dir -d $data_fields
+  dotnet $LUSID_FINDATA_EX_DLL getdata -t $intsrument_id_type -i $instrument_ids -o $output_dir  -f $filesystem -d $data_fields
 elif [[ $action = "getaction" ]] &&  [[ ! -z $portfolios ]]
 then
-  dotnet $LUSID_FINDATA_EX_DLL getaction -p $portfolios -o $output_dir -c $corp_actions
+  dotnet $LUSID_FINDATA_EX_DLL getaction -p $portfolios -o $output_dir  -f $filesystem -c $corp_actions
 elif [[ $action = "getaction" ]] &&  [[ ! -z $intsrument_id_type ]]
 then
-  dotnet $LUSID_FINDATA_EX_DLL getaction -t $intsrument_id_type -i $instrument_ids -o $output_dir -c $corp_actions
+  dotnet $LUSID_FINDATA_EX_DLL getaction -t $intsrument_id_type -i $instrument_ids -o $output_dir  -f $filesystem -c $corp_actions
 fi
 
 # delete the tmp file for the identity file

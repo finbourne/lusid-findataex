@@ -12,7 +12,4 @@ COPY prebuild /usr/src/prebuild/
 COPY submit_dlws.sh /usr/src/
 ENV LUSID_FINDATA_EX_DLL=/usr/src/prebuild/Lusid.FinDataEx.dll
 
-# make sure delete this
-# COPY DLWSCert.p12 /usr/src/
-
 ENTRYPOINT ["./submit_dlws.sh"]
