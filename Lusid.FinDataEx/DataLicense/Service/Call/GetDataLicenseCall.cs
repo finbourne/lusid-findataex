@@ -123,8 +123,8 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
                 secmasterSpecified = true,
                 closingvalues = true,
                 closingvaluesSpecified = true,
-                derived = true,
-                derivedSpecified = true
+                derived = false,
+                derivedSpecified = false
             };
         }
 

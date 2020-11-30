@@ -48,13 +48,23 @@ namespace Lusid.FinDataEx
             // construct data license call
             var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
             var dataLicenseCall = CreateDataLicenseCall(getOptions, perSecurityWs);
-            
-            // call DL and write results to specified output
-            var dataLicenseOutput =  dlDataService.Get(dataLicenseCall, instruments, ProgramTypes.Adhoc);
-            var writeResult =  finDataOutputWriter.Write(dataLicenseOutput);
-            LogWriteResult(writeResult);
-        }
 
+            LogRequest(instruments, dataLicenseCall);
+            // call DL and write results to specified output (as long as not in safe mode)
+            if (getOptions.SafeMode)
+            {
+                Console.WriteLine("--- SAFE MODE --- ");
+                Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS. Remove -s flag to " +
+                                  "submit request.");
+            }
+            else
+            {
+                var dataLicenseOutput = dlDataService.Get(dataLicenseCall, instruments, ProgramTypes.Adhoc);
+                var writeResult = finDataOutputWriter.Write(dataLicenseOutput);
+                LogWriteResult(writeResult);
+            }
+        }
+    
         /// <summary>
         ///  Create a BBG DL call depending on the arguments passed into the application.
         /// </summary>
@@ -107,6 +117,12 @@ namespace Lusid.FinDataEx
                 Console.WriteLine(writeResult.FileOutputPath);
             }
         }
+        
+        private static void LogRequest(Instruments instruments, IDataLicenseCall<PerSecurityResponse> dataLicenseCall)
+        {
+            var instrumentsAndTypes = string.Join(",", instruments.instrument.Select(i => $"{i.type}={i.id}"));
+            Console.WriteLine($"Preparing a {dataLicenseCall.GetDataType()} call for instruments : {instrumentsAndTypes}");
+        }
 
         /// <summary>
         /// Select an create an instrument source to build instruments passed to BBG.
@@ -123,6 +139,13 @@ namespace Lusid.FinDataEx
             var instruments = CreateInstrumentSource(dataOptions).Get();
             if (instruments is {} dlInstruments)
             {
+                // check instruments in request does not exceed the allowed limit
+                if (dlInstruments.instrument.Length > dataOptions.MaxInstruments)
+                {
+                    throw new ArgumentException($"Breach maximum instrument limit. Attempted to request" +
+                                                $" {dlInstruments.instrument.Length} instruments but only {dataOptions.MaxInstruments} are allowed. " +
+                                                $"To increase the limit override the max allowed instruments with the -m argument parameter.");
+                }
                 return dlInstruments;
             }
             throw new ArgumentException($"No DL instruments could be created from the instruments or " +
@@ -193,8 +216,15 @@ namespace Lusid.FinDataEx
                        "the holdings of the portfolios at execution time. Entry should be a portfolio scope pair split by " +
                        "\"|\" e.g. (TestScope|UK_EQUITY)")]
         public IEnumerable<String> Portfolios { get; set; }
-
         
+        // Options around safety and controls
+        
+        [Option('s', "safemode", Default = false, HelpText = "Running in safe mode will simply print the DL request without making the actual call to BBG.")]
+        public bool SafeMode { get; set; }
+
+        [Option('m', "max_instruments", Default = 50, HelpText = "Set the maximum number of instruments allowed in a BBG DLWS call. Especially important in" +
+                                                                 " production environments that are billed per instrument.")]
+        public int MaxInstruments { get; set; }
     }
 
     /// <summary>
@@ -210,7 +240,7 @@ namespace Lusid.FinDataEx
     /// <summary>
     /// Options for GetAction calls to BBG
     /// </summary>
-    [Verb ("getaction", HelpText = "BBG DL request to retrieve corporate actions for requested instruments.")]
+    [Verb ("getactions", HelpText = "BBG DL request to retrieve corporate actions for requested instruments.")]
     class GetActionsOptions : DataLicenseOptions
     {
         [Option('c', "corpactions", Required = true, HelpText = "The corporate action types to retrieve (e.g. DVD_CASH, STOCK_SPLIT, etc...)")]

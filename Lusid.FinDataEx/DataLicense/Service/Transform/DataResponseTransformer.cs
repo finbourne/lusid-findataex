@@ -21,7 +21,9 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
         public DataLicenseOutput Transform(RetrieveGetDataResponse getDataResponse)
         {
-            var finDataOutputId = $"{getDataResponse.responseId}_GetData";
+            //var finDataOutputId = $"{getDataResponse.responseId}_GetData";
+            // temp change for end to end testing
+            var finDataOutputId = "GetData";
             // construct data headers
             var headers = new List<string>(){TimeStarted, TimeFinished}; 
             headers.AddRange(getDataResponse.fields.ToList());
