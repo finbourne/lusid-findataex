@@ -38,7 +38,7 @@ namespace Lusid.FinDataEx
             var dlDataService = new DataLicenseService();
 
             // construct the writer to persist any data retrieved from Bbg
-            var outputDirectory = getOptions.OutputDirectory;
+            var outputDirectory = getOptions.OutputFilePath;
             var fileSystem = getOptions.FileSystem;
             var finDataOutputWriter = CreateFinDataOutputWriter(outputDirectory, fileSystem);
             
@@ -54,8 +54,7 @@ namespace Lusid.FinDataEx
             if (getOptions.SafeMode)
             {
                 Console.WriteLine("--- SAFE MODE --- ");
-                Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS. Remove -s flag to " +
-                                  "submit request.");
+                Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS.");
             }
             else
             {
@@ -195,10 +194,13 @@ namespace Lusid.FinDataEx
     /// </summary>
     class DataLicenseOptions
     {
-        [Option('o', "output", Required = true, HelpText = "Output directory to write DL results.")]
-        public string OutputDirectory { get; set; }
+        [Option('f', "filepath", Required = true, 
+            HelpText = "File path to write DLWS output. Include  \"{REQUEST_ID}\" and/or \"{TIMESTAMP}\" in the filename " +
+                       " to include the DL request id and/or request timestamp respectively in the filename (e.g. " +
+                       "/home/dl_results/MySubmission_{REQUEST_ID}_{TIMESTAMP}.csv")]
+        public string OutputFilePath { get; set; }
         
-        [Option('f', "filesystem", Required = false, Default =FileSystem.Local, 
+        [Option('s', "filesystem", Required = false, Default = FileSystem.Local, 
             HelpText = "Filesystems to write DL results (Lusid or Local)")]
         public FileSystem FileSystem { get; set; }
         
@@ -219,7 +221,7 @@ namespace Lusid.FinDataEx
         
         // Options around safety and controls
         
-        [Option('s', "safemode", Default = false, HelpText = "Running in safe mode will simply print the DL request without making the actual call to BBG.")]
+        [Option("safemode", Default = false, HelpText = "Running in safe mode will simply print the DL request without making the actual call to BBG.")]
         public bool SafeMode { get; set; }
 
         [Option('m', "max_instruments", Default = 50, HelpText = "Set the maximum number of instruments allowed in a BBG DLWS call. Especially important in" +

@@ -13,19 +13,20 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
     public class LocalFilesystemOutputWriterTests
     {
         
-        private readonly string _tempOutputDir = $"TempTestDir_{nameof(FinDataExTests)}";
+        private static readonly string TempOutputDir = $"TempTestDir_{nameof(FinDataExTests)}";
+        private readonly string _outputFilePath = TempOutputDir + Path.DirectorySeparatorChar + "Output_{REQUEST_ID}.csv";
         private LocalFilesystemOutputWriter _outputWriter;
         [SetUp]
         public void SetUp()
         {
-            SetupTempTestDirectory(_tempOutputDir);
-            _outputWriter = new LocalFilesystemOutputWriter(_tempOutputDir);
+            SetupTempTestDirectory(TempOutputDir);
+            _outputWriter = new LocalFilesystemOutputWriter(_outputFilePath);
         }
         
         [TearDown]
         public void TearDown()
         {
-            TearDownTempTestDirectory(_tempOutputDir);
+            TearDownTempTestDirectory(TempOutputDir);
         }
 
         [Test]
@@ -35,7 +36,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
 
             var writeResult =  _outputWriter.Write(finDataOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FileOutputPath, Is.EqualTo("TempTestDir_FinDataExTests\\id_1_GetData.csv"));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo("TempTestDir_FinDataExTests\\Output_id_1_GetData.csv"));
             Assert.That(writeResult.FileOutputPath, Does.Exist);
             
             // ensure file is properly populated
@@ -55,7 +56,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
 
             var writeResult =  _outputWriter.Write(getActionOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FileOutputPath, Is.EqualTo("TempTestDir_FinDataExTests\\1603798418-1052073180_ValidActions_GetActions.csv"));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo("TempTestDir_FinDataExTests\\Output_1603798418-1052073180_ValidActions.csv"));
             Assert.That(writeResult.FileOutputPath, Does.Exist);
             
             // ensure file is properly populated
@@ -76,7 +77,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             
             // ensure file is properly populated
-            var entries = File.ReadAllLines(_tempOutputDir + Path.DirectorySeparatorChar + "id_GetData.csv");
+            var entries = File.ReadAllLines(TempOutputDir + Path.DirectorySeparatorChar + "Output_id_GetData.csv");
             // contains headers only
             Assert.That(entries.Length, Is.EqualTo(1));
             // check headers
@@ -92,7 +93,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             var writeResult =  _outputWriter.Write(finDataOutput);
             
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
-            Assert.False(Directory.EnumerateFileSystemEntries(_tempOutputDir).Any());
+            Assert.False(Directory.EnumerateFileSystemEntries(TempOutputDir).Any());
         }
         
         [Test]

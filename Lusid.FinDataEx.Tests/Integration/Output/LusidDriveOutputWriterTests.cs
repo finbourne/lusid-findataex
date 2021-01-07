@@ -21,7 +21,8 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         private IFoldersApi _foldersApi;
         private IFilesApi _filesApi;
         private string _outputDirId;
-        
+        private readonly string _outputFilename = "{REQUEST_ID}_dlws_output.csv";
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
@@ -39,7 +40,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             _outputDirId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidOutputDirName}'").Values.SingleOrDefault()?.Id;
             var createFolder = new CreateFolder("/", _lusidOutputDirName);
             _outputDirId ??= _foldersApi.CreateFolder(createFolder).Id;
-            _outputWriter = new LusidDriveOutputWriter(_lusidOutputDirPath, _factory);
+            _outputWriter = new LusidDriveOutputWriter(_lusidOutputDirPath + "/" + _outputFilename, _factory);
         }
         
         [TearDown]
@@ -54,7 +55,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         public void Write_OnValidFinData_ShouldWriteToOutputDir()
         {
             //when
-            var finDataOutput = CreateFinDataEntry("id_1_GetData");
+            var finDataOutput = CreateFinDataEntry("req_id_1");
             //execute
             var writeResult = _outputWriter.Write(finDataOutput);
             
@@ -84,7 +85,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             {
                 StorageObject storageObject = _filesApi.GetFile(lusidDriveFileId);
                 Assert.That(storageObject.Id, Is.EqualTo(lusidDriveFileId));
-                Assert.That(storageObject.Name, Is.EqualTo("id_1_GetData.csv"));
+                Assert.That(storageObject.Name, Is.EqualTo("req_id_1_dlws_output.csv"));
                 Assert.That(storageObject.Size, Is.EqualTo(92));
             }
             catch (Exception e)

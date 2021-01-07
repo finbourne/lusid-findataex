@@ -28,19 +28,12 @@ namespace Lusid.FinDataEx.Tests.Integration
             var scopePortfolio1 = $"{Scope}|{Portfolio}";
             var scopePortfolio2 = $"{Scope}|{Portfolio2}";
             var scopePortfolioSameHoldingP1 = $"{Scope}|{PortfolioSameHoldingAsP1}";
-            var commandArgs = $"getdata -p {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var commandArgs = $"getdata -p {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
-            
-            //verify
-            var expectedDataFiles = Directory.GetFiles(_tempOutputDir);
-            
-            // ensure only GetData file created and name is in correct format
-            // more than one file is a contaminated test and should be investigated
-            Assert.That(expectedDataFiles.Length, Is.EqualTo(1));
-            StringAssert.EndsWith("_GetData.csv", expectedDataFiles[0]);
 
             // ensure file is properly populated
-            var entries = File.ReadAllLines(expectedDataFiles[0]);
+            var entries = File.ReadAllLines(filepath);
             
             // check headers
             Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));
@@ -66,19 +59,12 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_OnValidPortfoliosUsingIsin_ShouldProduceDataFile()
         {
             var scopePortfolio1 = $"{Scope}|{Portfolio}";
-            var commandArgs = $"getdata -p {scopePortfolio1} -t ISIN -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var commandArgs = $"getdata -p {scopePortfolio1} -t ISIN -f {filepath} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
-            
-            //verify
-            var expectedDataFiles = Directory.GetFiles(_tempOutputDir);
-            
-            // ensure only GetData file created and name is in correct format
-            // more than one file is a contaminated test and should be investigated
-            Assert.That(expectedDataFiles.Length, Is.EqualTo(1));
-            StringAssert.EndsWith("_GetData.csv", expectedDataFiles[0]);
 
             // ensure file is properly populated
-            var entries = File.ReadAllLines(expectedDataFiles[0]);
+            var entries = File.ReadAllLines(filepath);
             
             // check headers - querying BBG with ISIN but returning BBG Global Id (Figi)
             Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));

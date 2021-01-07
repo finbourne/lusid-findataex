@@ -11,11 +11,11 @@ namespace Lusid.FinDataEx.Output
     /// </summary>
     public class LocalFilesystemOutputWriter : IOutputWriter
     {
-        protected readonly string OutputDir;
+        protected readonly string OutputFilePath;
 
-        public LocalFilesystemOutputWriter(string outputDir)
+        public LocalFilesystemOutputWriter(string outputFilePath)
         {
-            OutputDir = outputDir;
+            OutputFilePath = outputFilePath;
         }
         
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
@@ -44,20 +44,28 @@ namespace Lusid.FinDataEx.Output
             
             try
             {
-                var outputPathWritten = WriteToFile(dataLicenseOutput.Id + BbgDlOutputFileFormat, finDataRecords);
+                var modifiedFilepath = CreateFilepathWithAutoGenPatterns(dataLicenseOutput.Id);
+                var outputPathWritten = WriteToFile(modifiedFilepath, finDataRecords);
                 return WriteResult.Ok(outputPathWritten);
             }
             catch (Exception e)
             {
-                return WriteResult.Fail($"FAILURE : Did not write {dataLicenseOutput.Id} to {OutputDir} due to an exception. Cause of failure: {e}");
+                return WriteResult.Fail($"FAILURE : Did not write {dataLicenseOutput.Id} to {OutputFilePath} due to an exception. Cause of failure: {e}");
             }
         }
 
-        protected virtual string WriteToFile(string outputFile, IEnumerable<string> finDataRecords)
+        protected virtual string WriteToFile(string modifiedFilepath, IEnumerable<string> finDataRecords)
         {
-            var outputPath = OutputDir + Path.DirectorySeparatorChar + outputFile;
-            File.WriteAllLines(outputPath, finDataRecords);
-            return outputPath;
+            File.WriteAllLines(modifiedFilepath, finDataRecords);
+            return modifiedFilepath;
+        }
+
+        private string CreateFilepathWithAutoGenPatterns(string dataLicenseOutputId)
+        {
+            // check for and apply patterns to output filename
+            var modifiedOutputFilePath = OutputFilePath.Replace(TimestampPattern,
+                DateTime.Now.ToUniversalTime().ToString("yyyyMMddHHmmss"));
+            return modifiedOutputFilePath.Replace(RequestIdPattern, dataLicenseOutputId);
         }
 
     }

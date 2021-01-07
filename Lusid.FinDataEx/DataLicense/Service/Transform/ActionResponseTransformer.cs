@@ -20,9 +20,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
         public DataLicenseOutput Transform(RetrieveGetActionsResponse getActionsResponse)
         {
-            //var corpActionOutputId = $"{getActionsResponse.responseId}_GetActions";
-            // temp change for end to end testing
-            var corpActionOutputId = "GetActions";
+            var corpActionOutputId = getActionsResponse.responseId;
             var actionsInstrumentDatas = getActionsResponse.instrumentDatas;
             // if no corporate actions are returned for the specific type than return an empty output.
             if (!actionsInstrumentDatas.Any())

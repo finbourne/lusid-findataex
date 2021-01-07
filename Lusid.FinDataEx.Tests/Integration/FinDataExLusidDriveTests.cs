@@ -17,12 +17,14 @@ namespace Lusid.FinDataEx.Tests.Integration
         private IFoldersApi _foldersApi;
         private IFilesApi _filesApi;
         private string outputDirId;
+        private string _outputFilePath;
         
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             _lusidOutputDirName = ("Test_Dir_FDE_" + Guid.NewGuid()).Substring(0,49);
             _lusidOutputDirPath = "/" + _lusidOutputDirName;
+            _outputFilePath = _lusidOutputDirPath + "/test_request_output.csv"; 
             _factory = LusidApiFactoryBuilder.Build("secrets.json");
             _foldersApi = _factory.Api<IFoldersApi>();
             _filesApi = _factory.Api<IFilesApi>();
@@ -48,7 +50,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
-            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 -o {_lusidOutputDirPath} -f Lusid -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
 
             //verify
@@ -81,7 +83,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.That(contents.Values.Count, Is.EqualTo(1));
             
             var expectedPricesStorageObject = contents.Values[0];
-            StringAssert.EndsWith("_GetData.csv", expectedPricesStorageObject.Name);
+            StringAssert.EndsWith("test_request_output.csv", expectedPricesStorageObject.Name);
             
             return new StreamReader(_filesApi.DownloadFile(expectedPricesStorageObject.Id))
                 .ReadToEnd()
