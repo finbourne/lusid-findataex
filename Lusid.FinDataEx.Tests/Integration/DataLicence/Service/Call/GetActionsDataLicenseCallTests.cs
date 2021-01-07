@@ -34,6 +34,10 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
             var instrumentDatas = retrieveGetActionsResponse.instrumentDatas;
 
             //verify
+            //corp actions are time dependant and will most likely be empty. purpose of this integration 
+            // test is just to ensure validity of request and call to BBG DLWS with response.
+            // For testing of transformation of response see the corresponding unit test that includes
+            // dummy responses from BBG
             Assert.That(retrieveGetActionsResponse.statusCode.code, Is.EqualTo(DataLicenseService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(1));
         }

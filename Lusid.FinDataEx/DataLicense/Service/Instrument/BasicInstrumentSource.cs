@@ -4,6 +4,9 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
+    /// <summary>
+    ///  Instrument source based on a provided set of instrument identifiers of a given type.
+    /// </summary>
     public class BasicInstrumentSource : IInstrumentSource
     {
         private readonly InstrumentType _instrumentType;
@@ -15,6 +18,11 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             _instrumentIds = instrumentIds;
         }
 
+        /// <summary>
+        ///  Retrieve a BBG DLWS set of instruments based on the instrument ids and id type provided on constructing
+        /// the source.
+        /// </summary>
+        /// <returns>Set of BBG DLWS instruments</returns>
         #nullable enable
         public Instruments? Get()
         {

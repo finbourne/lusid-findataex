@@ -236,7 +236,7 @@ namespace Lusid.FinDataEx
     class GetDataOptions : DataLicenseOptions
     {
         [Option('d', "datafields", Required = true, HelpText = "BBG DL fields to retrieve. Only relevant for GetData requests.")]
-        public IEnumerable<String> DataFields { get; set; }
+        public IEnumerable<string> DataFields { get; set; }
     }
     
     /// <summary>

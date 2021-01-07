@@ -8,6 +8,10 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
+    /// <summary>
+    /// Instrument source based on holdings that exist at a given time for a given set of scopes and portfolios
+    /// within a LUSID domain. 
+    /// </summary>
     public class LusidPortfolioInstrumentSource : IInstrumentSource
     {
         private readonly ILusidApiFactory _lusidApiFactory;
@@ -25,6 +29,11 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             _effectiveAt = effectiveAt;
         }
 
+        /// <summary>
+        ///  Retrieves a BBG DL representation of a set of instruments that make up the holdings for the given portfolios at the given
+        ///  effectiveAt time. The LUSID domain used is configured in the ILusidApiFactory provided in the constructor.
+        /// </summary>
+        /// <returns>Set of BBG DLWS instruments</returns>
         #nullable enable
         public Instruments? Get()
         {
@@ -32,7 +41,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             return holdingsInstrumentIds.Any() ? ToBbgDlInstruments(holdingsInstrumentIds) : null;
         }
 
-        private Instruments ToBbgDlInstruments(ISet<string> ids)
+        private Instruments ToBbgDlInstruments(IEnumerable<string> ids)
         {
             var instruments = ids.Select(figi => new PerSecurity_Dotnet.Instrument()
             {
@@ -46,6 +55,10 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             };
         }
 
+        /// <summary>
+        ///  Calls LUSID to retrieve the instrument ids of holdings for the given portfolio and effectiveAt time.
+        /// </summary>
+        /// <returns></returns>
         private ISet<string> GetHoldingsInstrumentIds(ILusidApiFactory lusidApiFactory, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
             var transactionPortfoliosApi = lusidApiFactory.Api<TransactionPortfoliosApi>();
@@ -54,8 +67,10 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             {
                 try
                 {
+                    // retrieve holdings from LUSID with instrument id property attached.
                     var holdings = transactionPortfoliosApi.GetHoldings(scope, portfolio, effectiveAt,
                         propertyKeys: new List<string>() {_instrumentTypeLusidPropertyKey});
+                    // filter only entries with valid instrument ids and map to a set for unique instruments.
                     var validPortfolioInstrumentIds = holdings.Values
                         .Where(h => h.Properties.ContainsKey(_instrumentTypeLusidPropertyKey))
                         .Select(h => h.Properties[_instrumentTypeLusidPropertyKey].Value.LabelValue)
@@ -63,7 +78,8 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 
                     Console.WriteLine($"Retrieving ids for instruments of positions for scope={scope}, " +
                                       $"portfolio={portfolio}, effectiveAt={effectiveAt}. InstrumentId={_instrumentType}, instrument Ids={validPortfolioInstrumentIds}");
-
+                    
+                    // union with other portfolio holding instruments
                     instrumentIds.UnionWith(validPortfolioInstrumentIds);
                 }
                 catch (ApiException e)

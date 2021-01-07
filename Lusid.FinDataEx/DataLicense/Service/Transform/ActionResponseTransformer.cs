@@ -45,7 +45,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                     continue;
                 }
 
-                // Populate the data general to all corporate actions. Only focus on corporate action fields
+                // Populate the data general to all corporate actions.
                 var actionStandardFields = instrumentData.standardFields;
                 foreach (var standardFieldPropInfo in typeof(ActionStandardFields).GetProperties())
                 {
@@ -73,7 +73,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                 r.Add(TimeFinished, timeFinished);
             });
 
-            // if failed to retrieve actions for all instruments then return empty output
+            // retrieve actions for all instruments or if failed then return empty output
             return corpActionRecords.Any()
                 ? new DataLicenseOutput(corpActionOutputId, headers, corpActionRecords)
                 : DataLicenseOutput.Empty(corpActionOutputId);

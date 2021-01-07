@@ -11,11 +11,11 @@ namespace Lusid.FinDataEx.Output
     /// </summary>
     public class LocalFilesystemOutputWriter : IOutputWriter
     {
-        protected readonly string OutputFilePath;
+        private readonly string _outputFilePath;
 
         public LocalFilesystemOutputWriter(string outputFilePath)
         {
-            OutputFilePath = outputFilePath;
+            _outputFilePath = outputFilePath;
         }
         
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
@@ -50,7 +50,7 @@ namespace Lusid.FinDataEx.Output
             }
             catch (Exception e)
             {
-                return WriteResult.Fail($"FAILURE : Did not write {dataLicenseOutput.Id} to {OutputFilePath} due to an exception. Cause of failure: {e}");
+                return WriteResult.Fail($"FAILURE : Did not write {dataLicenseOutput.Id} to {_outputFilePath} due to an exception. Cause of failure: {e}");
             }
         }
 
@@ -63,7 +63,7 @@ namespace Lusid.FinDataEx.Output
         private string CreateFilepathWithAutoGenPatterns(string dataLicenseOutputId)
         {
             // check for and apply patterns to output filename
-            var modifiedOutputFilePath = OutputFilePath.Replace(TimestampPattern,
+            var modifiedOutputFilePath = _outputFilePath.Replace(TimestampPattern,
                 DateTime.Now.ToUniversalTime().ToString("yyyyMMddHHmmss"));
             return modifiedOutputFilePath.Replace(RequestIdPattern, dataLicenseOutputId);
         }

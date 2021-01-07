@@ -28,7 +28,6 @@ namespace Lusid.FinDataEx.DataLicense.Util
         ///
         /// NOTE : This code is copied straight from c# BBG samples and so remains untouched.
         /// </summary>
-        /// <param name="retrieveGetDataResponse"></param>
         public static void PrintGetDataResponse(RetrieveGetDataResponse retrieveGetDataResponse)
         {
             // Code taken from BBG DL Samples
@@ -67,6 +66,11 @@ namespace Lusid.FinDataEx.DataLicense.Util
                 Console.WriteLine($"Error in the submitted request with status code {retrieveGetDataResponse.statusCode.code}");
         }
 
+        /// <summary>
+        /// Utility method to print out response of a BBG DLWS GetActions call.
+        ///
+        /// NOTE : This code is copied straight from c# BBG samples and so remains untouched.
+        /// </summary>
         public static void PrintGetActionsResponse(RetrieveGetActionsResponse retrieveGetActionsResponse)
         {
             if (retrieveGetActionsResponse.statusCode.code == DataLicenseService.Success)

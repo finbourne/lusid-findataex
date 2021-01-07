@@ -57,7 +57,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                 r.Add(TimeFinished, timeFinished);
             });
 
-            // if failed to retrieve data for all instruments then return empty output
+            // retrieve data for all instruments or if failed then return empty output
             return finDataRecords.Any()
                 ? new DataLicenseOutput(finDataOutputId, headers, finDataRecords)
                 : DataLicenseOutput.Empty(finDataOutputId);
