@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using PerSecurity_Dotnet;
 
@@ -7,15 +8,23 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     /// <summary>
     ///  Instrument source based on a provided set of instrument identifiers of a given type.
     /// </summary>
-    public class BasicInstrumentSource : IInstrumentSource
+    public class InstrumentSource : IInstrumentSource
     {
         private readonly InstrumentType _instrumentType;
         private readonly ISet<string> _instrumentIds;
 
-        public BasicInstrumentSource(InstrumentType instrumentType, ISet<string> instrumentIds)
+        private InstrumentSource(InstrumentType instrumentType, ISet<string> instrumentIds)
         {
             _instrumentType = instrumentType;
             _instrumentIds = instrumentIds;
+        }
+        
+        public static IInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        {
+            var instrumentIds = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
+            Console.WriteLine($"Creating a basic instrument source using instrument id type {instrumentType} for the " +
+                              $"instrument ids: {string.Join(',',instrumentIds)}");                
+            return new InstrumentSource(instrumentType, new HashSet<string>(instrumentIds)); 
         }
 
         /// <summary>
@@ -28,7 +37,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         {
             return CreateInstruments(_instrumentIds);
         }
-
+        
         private Instruments CreateInstruments(IEnumerable<string> instrumentIds)
         {
             var instruments = instrumentIds.Select(id => new PerSecurity_Dotnet.Instrument()

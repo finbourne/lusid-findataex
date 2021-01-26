@@ -12,7 +12,7 @@
         <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />
         <PackageReference Include="System.ServiceModel.Primitives" Version="4.7.0" />
         <PackageReference Include="System.ServiceModel.Security" Version="4.7.0" />
-        <PackageReference Include="Lusid.Drive.Sdk.Preview" Version="0.1.93" />
+        <PackageReference Include="Lusid.Drive.Sdk.Preview" Version="0.1.168" />
     </ItemGroup>
 
 </Project>

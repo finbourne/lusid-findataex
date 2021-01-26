@@ -50,7 +50,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
-            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
 
             //verify

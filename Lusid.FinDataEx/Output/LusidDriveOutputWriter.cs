@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using Lusid.Drive.Sdk.Api;
 using Lusid.Drive.Sdk.Utilities;
+using Lusid.FinDataEx.Util;
 
 namespace Lusid.FinDataEx.Output
 {
     public class LusidDriveOutputWriter : LocalFilesystemOutputWriter
     {
         public const string OutputFileEntrySeparator = "\n";
-        private const string LusidDrivePathSeparator = "/";
 
         private readonly IFilesApi _filesApi;
 
@@ -26,9 +26,9 @@ namespace Lusid.FinDataEx.Output
             var finDataEntriesBytes = Encoding.UTF8.GetBytes(finDataEntriesStr);
             
             // upload to drive
-            var lusidDriveFilename = modifiedFilepath.Split(LusidDrivePathSeparator).Last();
+            var lusidDriveFilename = modifiedFilepath.Split(LusidDriveUtils.LusidDrivePathSeparator).Last();
             var lusidDriveFolderPath =
-                string.Join(LusidDrivePathSeparator, modifiedFilepath.Split(LusidDrivePathSeparator).SkipLast(1));
+                string.Join(LusidDriveUtils.LusidDrivePathSeparator, modifiedFilepath.Split(LusidDriveUtils.LusidDrivePathSeparator).SkipLast(1));
             Console.WriteLine($"Attempting to write to LUSID drive filename={lusidDriveFilename} in folder={lusidDriveFolderPath}.");
             var upload = _filesApi.CreateFile(lusidDriveFilename, lusidDriveFolderPath, finDataEntriesBytes.Length, finDataEntriesBytes);
             Console.WriteLine($"Completed write to LUSID drive for filename={lusidDriveFilename}, " +

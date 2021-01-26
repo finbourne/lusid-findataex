@@ -154,37 +154,16 @@ namespace Lusid.FinDataEx
 
         private static IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions)
         {
-            var portfolios = dataOptions.Portfolios;
-            var bbgIds = dataOptions.BbgIds;
-            var instrumentIdType = dataOptions.InstrumentIdType;
-            if (portfolios.Any())
+
+            return dataOptions.InstrumentSource switch
             {
-                // setup LusidApiFactory
-                var lusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets.json");
-                var effectiveAt = DateTimeOffset.UtcNow;
-                Console.WriteLine($"Retrieving instruments from holdings effectiveAt {effectiveAt} for portfolios {portfolios}");
-                ISet<Tuple<string,string>> scopesAndPortfolios = portfolios.Select(p =>
-                {
-                    var scopeAndPortfolio = p.Split("|");
-                    if (scopeAndPortfolio.Length != 2)
-                    {
-                        throw new ArgumentException($"Unexpected scope and portfolio entry for {p}. Should be " +
-                                                    $"in form TestScope|UK_EQUITY");
-                    }
-                    return new Tuple<string,string>(scopeAndPortfolio[0], scopeAndPortfolio[1]);
-                }).ToHashSet();
-                
-                return new LusidPortfolioInstrumentSource(lusidApiFactory, instrumentIdType, scopesAndPortfolios, effectiveAt);
-            } 
-            if (bbgIds.Any())
-            {
-                Console.WriteLine($"Constructing DL instrument requests from Figis: {String.Join(',',bbgIds)}");
-                return new BasicInstrumentSource(instrumentIdType, new HashSet<string>(bbgIds));
-            }
-            
-            // should not be possible if commandlineparser runs proper checks
-            throw new ArgumentException($"No input portfolios or instruments were provided. Pleas check input " +
-                                        $"options {dataOptions}");
+                nameof(InstrumentSource) =>
+                    InstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                nameof(LusidPortfolioInstrumentSource) =>
+                    LusidPortfolioInstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                _ => throw new ArgumentOutOfRangeException(
+                    $"{dataOptions.InstrumentSource} has no supported implementation.")
+            };
         }
     }
 
@@ -204,22 +183,31 @@ namespace Lusid.FinDataEx
             HelpText = "Filesystems to write DL results (Lusid or Local)")]
         public FileSystem FileSystem { get; set; }
         
-        [Option('t', "instrument id type", Required = false, Default = InstrumentType.BB_GLOBAL, 
+        [Option('t', "instrument_id_type", Required = false, Default = InstrumentType.BB_GLOBAL, 
         HelpText = "Type of instrument ids being input (BB_GLOBAL (Figi), ISIN, CUSIP)")]
         public InstrumentType InstrumentIdType { get; set; }
         
-        // Instrument Sources : instruments and portfolio options in different sets as only one type of input is allowed
-        [Option( 'i', "instruments", Required = true, SetName = "instruments",
-            HelpText = "Instruments Ids querying DL. Currently only BBG IDs (Figis) are supported.")]
-        public IEnumerable<String> BbgIds { get; set; }
+        /*
+         * Start Instrument Sources :
+         * Input arguments on where to source instruments to request data against.
+         * Using SetName mutual exclusivity as only one instrument source is supported per request.
+         */
         
-        [Option( 'p', "portfolio_and_scopes", Required = true, SetName = "portfolios",
-            HelpText = "Portfolios and scopes to retrieve instrument ids from for querying DL. The instruments are returned from " +
-                       "the holdings of the portfolios at execution time. Entry should be a portfolio scope pair split by " +
-                       "\"|\" e.g. (TestScope|UK_EQUITY)")]
-        public IEnumerable<String> Portfolios { get; set; }
+        [Option( 'i', "instrument-source", Required = true, Default = "InstrumentSource",
+            HelpText = "Instrument source to create the instruments to query against DataLicense. Supported types include" +
+                       " : [InstrumentSource, LusidPortfolioInstrumentSource, FromDriveCsvInstrumentSource, FromLocalCsvInstrumentSource]." +
+                       " Developers can add custom instrument sources as required, see FinDataEx readme for details.")]
+        public string InstrumentSource { get; set; }
         
-        // Options around safety and controls
+        [Option( 'a', "instrument-source-args", Required = false,
+            HelpText = "Arguments passed to the instrument source for retrieving instruments to query against DataLicense.")]
+        public IEnumerable<string> InstrumentSourceArguments { get; set; }
+
+        /*
+         *  Safety and Control Options :
+         *  Given DLWS charges per call adding features to allow restrictions in number of instruments to query.
+         *  Safemode allow request construction without sending to DL for testing and debugging.
+         */
         
         [Option("safemode", Default = false, HelpText = "Running in safe mode will simply print the DL request without making the actual call to BBG.")]
         public bool SafeMode { get; set; }

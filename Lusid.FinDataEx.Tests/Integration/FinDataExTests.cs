@@ -24,7 +24,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
             
             // ensure file is properly populated
@@ -54,7 +54,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_ForEquityInstrumentMaster_ShouldProduceEqInsMasterFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES";
             FinDataEx.Main(commandArgs.Split(" "));
             
             // ensure file is properly populated
@@ -100,7 +100,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_ForBondInstrumentMaster_ShouldProduceBondInsMasterFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
+            var commandArgs = $"getdata -i InstrumentSource -a BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
                               $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
             FinDataEx.Main(commandArgs.Split(" "));
 
@@ -165,7 +165,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_ForMultiInstrumentMaster_ShouldProduceBondMultiInstrumentMasterFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i BBG000BPHFS9 BBG000BVPV84 BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
                               $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
             FinDataEx.Main(commandArgs.Split(" "));
             
@@ -281,7 +281,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetAction_OnValidEquityBbgId_ShouldProduceCorpActionFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getaction -i BBG000BPHFS9 BBG000BVPV84 -f {filepath} -c DVD_CASH DVD_STOCK STOCK_SPLT";
+            var commandArgs = $"getaction -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -c DVD_CASH DVD_STOCK STOCK_SPLT";
             FinDataEx.Main(commandArgs.Split(" "));
             // Most days will have no corp actions and as test always uses latest date cannot check for file as will
             // likely not exist. For tests on writing corp actions to file see GetActionsDataLicenseCallTest
