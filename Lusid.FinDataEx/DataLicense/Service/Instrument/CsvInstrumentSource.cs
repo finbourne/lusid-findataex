@@ -9,7 +9,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     /// <summary>
     ///  Instruments loaded from csv on local filesystem
     /// </summary>
-    public class InstrumentFromCsvSource : IInstrumentSource
+    public class CsvInstrumentSource : IInstrumentSource
     {
         private readonly InstrumentType _instrumentType;
         private readonly string _filePath;
@@ -17,7 +17,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         private readonly int _instrumentIdColIdx;
         
 
-        protected InstrumentFromCsvSource(InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx)
+        protected CsvInstrumentSource(InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx)
         {
             _instrumentType = instrumentType;
             _filePath = filePath;
@@ -32,10 +32,10 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         /// <param name="instrumentSourceArgs">Application arguments passed in. Filepath (mandatory), delimitter (optional) and column number of the instrument id (optional)</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public static InstrumentFromCsvSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        public static CsvInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {
             var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentType, instrumentSourceArgs);
-            return new InstrumentFromCsvSource(instrumentType, filePath, delimiter, instrumentIdColIdx);
+            return new CsvInstrumentSource(instrumentType, filePath, delimiter, instrumentIdColIdx);
         }
 
         internal static Tuple<string, string, int> ParseInstrumentSourceArgs(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)

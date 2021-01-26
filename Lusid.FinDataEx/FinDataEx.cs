@@ -154,13 +154,16 @@ namespace Lusid.FinDataEx
 
         private static IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions)
         {
-
             return dataOptions.InstrumentSource switch
             {
                 nameof(InstrumentSource) =>
                     InstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
                 nameof(LusidPortfolioInstrumentSource) =>
                     LusidPortfolioInstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                nameof(CsvInstrumentSource) =>
+                    CsvInstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                nameof(DriveCsvInstrumentSource) =>
+                    DriveCsvInstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
                 _ => throw new ArgumentOutOfRangeException(
                     $"{dataOptions.InstrumentSource} has no supported implementation.")
             };

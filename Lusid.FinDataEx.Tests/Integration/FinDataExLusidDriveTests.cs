@@ -75,6 +75,39 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.That(instrumentEntry2[1], Is.Not.Empty);
             Assert.That(instrumentEntry2[3], Is.Not.Empty);
         }
+        
+        [Test]
+        public void FinDataEx_GetData_OnValidBbgIdFromCsvInstrumentSource_ShouldProduceDataFile()
+        {
+            const string instrumentSourceDriveCsvPath = "/findataex-tests/testdata/real_instruments.csv";
+            var commandArgs = $"getdata -i DriveCsvInstrumentSource -a {instrumentSourceDriveCsvPath} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
+
+            FinDataEx.Main(commandArgs.Split(" "));
+
+            //verify
+            var entries = GetFileAsStringsFromFolderInDrive(outputDirId);
+            
+            // check headers
+            Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));
+
+            // check instrument 1 entry
+            var instrumentEntry1 = entries[1].Split("|");
+            Assert.That(instrumentEntry1[2], Is.EqualTo("BBG000BPHFS9"));
+            // timestamps and price will change with each call so just check not empty
+            Assert.That(instrumentEntry1[0], Is.Not.Empty);
+            Assert.That(instrumentEntry1[1], Is.Not.Empty);
+            Assert.That(instrumentEntry1[3], Is.Not.Empty);
+            
+            // check instrument 2 entry
+            var instrumentEntry2 = entries[2].Split("|");
+            Assert.That(instrumentEntry2[2], Is.EqualTo("BBG000BVPV84"));
+            // price will change with each call so just check not empty
+            Assert.That(instrumentEntry2[0], Is.Not.Empty);
+            Assert.That(instrumentEntry2[1], Is.Not.Empty);
+            Assert.That(instrumentEntry2[3], Is.Not.Empty);
+        }
+        
+        
 
         private string[] GetFileAsStringsFromFolderInDrive(string lusdiDriveFolderId)
         {

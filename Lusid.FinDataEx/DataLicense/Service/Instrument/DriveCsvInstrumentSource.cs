@@ -11,18 +11,18 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
-    public class InstrumentFromDriveCsvSource : InstrumentFromCsvSource
+    public class DriveCsvInstrumentSource : CsvInstrumentSource
     {
         private readonly IFilesApi _filesApi;
         private readonly ISearchApi _searchApi;
-        protected InstrumentFromDriveCsvSource(IFilesApi filesApi, ISearchApi searchApi, InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx) : 
+        protected DriveCsvInstrumentSource(IFilesApi filesApi, ISearchApi searchApi, InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx) : 
             base(instrumentType, filePath, delimiter, instrumentIdColIdx)
         {
             _filesApi = filesApi;
             _searchApi = searchApi;
         }
         
-        public new static InstrumentFromCsvSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        public new static CsvInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {
             // LusidApiFactory to load instrument source file from drive.
             var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
@@ -30,7 +30,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             var searchApi = lusidApiFactory.Api<ISearchApi>();
             
             var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentType, instrumentSourceArgs);
-            return new InstrumentFromDriveCsvSource(filesApi, searchApi, instrumentType, filePath, delimiter, instrumentIdColIdx); 
+            return new DriveCsvInstrumentSource(filesApi, searchApi, instrumentType, filePath, delimiter, instrumentIdColIdx); 
         }
 
         protected override IEnumerable<string> LoadInstrumentsFromFile(string filePath, string delimiter, int instrumentIdColIdx)
