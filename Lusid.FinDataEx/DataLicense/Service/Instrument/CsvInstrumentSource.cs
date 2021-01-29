@@ -26,12 +26,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         }
         
         /// <summary>
-        ///  
+        ///  Creates an instrument source for a given instrument id type and a set of
+        ///  instrument ids.
         /// </summary>
-        /// <param name="instrumentType"></param>
-        /// <param name="instrumentSourceArgs">Application arguments passed in. Filepath (mandatory), delimitter (optional) and column number of the instrument id (optional)</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
+        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentSourceArgs">Application arguments passed in. Filepath (mandatory), delimiter (optional) and column number of the instrument id (optional)</param>
+        /// <returns>A CsvInstrumentSource instance</returns>
         public static CsvInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {
             var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentType, instrumentSourceArgs);
@@ -65,7 +65,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         public Instruments? Get()
         {
             IEnumerable<string> instrumentIds = LoadInstrumentsFromFile(_filePath, _delimiter, _instrumentIdColIdx);
-            return CreateInstruments(instrumentIds);
+            return IInstrumentSource.CreateInstruments(_instrumentType, instrumentIds);
         }
 
         protected virtual IEnumerable<string> LoadInstrumentsFromFile(string filepath, string delimiter, int instrumentIdColIdx)
@@ -74,20 +74,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                 .Skip(1)
                 .Select(e => e.Split(delimiter)[instrumentIdColIdx])
                 .ToHashSet();
-        }
-        
-        private Instruments CreateInstruments(IEnumerable<string> instrumentIds)
-        {
-            var instruments = instrumentIds.Select(id => new PerSecurity_Dotnet.Instrument()
-            {
-                id = id,
-                type = _instrumentType,
-                typeSpecified = true
-            }).ToArray();
-            return new Instruments()
-            {
-                instrument = instruments
-            };
         }
     }
 }

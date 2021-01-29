@@ -8,7 +8,7 @@ using Lusid.FinDataEx.DataLicense.Vendor;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
 
-namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service
+namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service
 {
     public class DataLicenseServiceTests
     {

@@ -15,14 +15,22 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     {
         private readonly IFilesApi _filesApi;
         private readonly ISearchApi _searchApi;
-        protected DriveCsvInstrumentSource(IFilesApi filesApi, ISearchApi searchApi, InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx) : 
+
+        private DriveCsvInstrumentSource(IFilesApi filesApi, ISearchApi searchApi, InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx) : 
             base(instrumentType, filePath, delimiter, instrumentIdColIdx)
         {
             _filesApi = filesApi;
             _searchApi = searchApi;
         }
         
-        public new static CsvInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        /// <summary>
+        ///  Creates an instrument source for a given instrument id type and a set of
+        ///  instrument ids.
+        /// </summary>
+        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentSourceArgs">Application arguments passed in. LUSID filepath (mandatory), delimiter (optional) and column number of the instrument id (optional)</param>
+        /// <returns>A DriveCsvInstrumentSource instance</returns>
+        public new static DriveCsvInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {
             // LusidApiFactory to load instrument source file from drive.
             var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
@@ -35,9 +43,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 
         protected override IEnumerable<string> LoadInstrumentsFromFile(string filePath, string delimiter, int instrumentIdColIdx)
         {
-            var (directoryName, fileName) = LusidDriveUtils.PathToFolderAndFile(filePath);   
-            //var directoryName = Path.GetDirectoryName(filePath);
-            //var fileName = Path.GetFileName(filePath);
+            var (directoryName, fileName) = LusidDriveUtils.PathToFolderAndFile(filePath);
             
             // Retrieve LUSID drive file id from path
             var fileId = _searchApi.Search(new SearchBody(directoryName, fileName)).Values.SingleOrDefault()?.Id;

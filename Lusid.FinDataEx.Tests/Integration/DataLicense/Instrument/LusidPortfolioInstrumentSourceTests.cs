@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Lusid.FinDataEx.DataLicense.Service.Instrument;
-using Lusid.Sdk.Utilities;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
 
-namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Instrument
+namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
 {
     [TestFixture]
     public class LusidPortfolioInstrumentSourceTests : BaseLusidPortfolioTests

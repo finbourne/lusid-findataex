@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
@@ -12,20 +12,30 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     public interface IInstrumentSource
     {
         /// <summary>
-        ///  Creates an instrument source for a given instrument id type (e.g. ISIN, FIGI) and a set of defined
-        ///  string arguments included as part of the request.
-        /// </summary>
-        /// <returns></returns>
-        static IInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         ///  Retrieve a set of instruments using the BBG DLWS representation.
         /// </summary>
         /// <returns></returns>
         #nullable enable
         Instruments? Get();
+        
+        /// <summary>
+        ///  Default implementation to construct DL instruments from a set of instrument ids and a given instrument type.
+        /// </summary>
+        /// <param name="instrumentType"></param>
+        /// <param name="instrumentIds"></param>
+        /// <returns></returns>
+        internal static Instruments CreateInstruments(InstrumentType instrumentType, IEnumerable<string> instrumentIds)
+        {
+            var instruments = instrumentIds.Select(id => new PerSecurity_Dotnet.Instrument()
+            {
+                id = id,
+                type = instrumentType,
+                typeSpecified = true
+            }).ToArray();
+            return new Instruments()
+            {
+                instrument = instruments
+            };
+        }
     }
 }

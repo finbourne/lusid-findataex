@@ -18,8 +18,15 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             _instrumentType = instrumentType;
             _instrumentIds = instrumentIds;
         }
-        
-        public static IInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+
+        /// <summary>
+        ///  Creates an instrument source for a given instrument id type and a set of
+        ///  instrument ids.
+        /// </summary>
+        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentSourceArgs">Set of instrument ids to create</param>
+        /// <returns>An InstrumentSource instance</returns>
+        public static InstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {
             var instrumentIds = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
             Console.WriteLine($"Creating a basic instrument source using instrument id type {instrumentType} for the " +
@@ -35,21 +42,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         #nullable enable
         public Instruments? Get()
         {
-            return CreateInstruments(_instrumentIds);
-        }
-        
-        private Instruments CreateInstruments(IEnumerable<string> instrumentIds)
-        {
-            var instruments = instrumentIds.Select(id => new PerSecurity_Dotnet.Instrument()
-            {
-                id = id,
-                type = _instrumentType,
-                typeSpecified = true
-            }).ToArray();
-            return new Instruments()
-            {
-                instrument = instruments
-            };
+            return IInstrumentSource.CreateInstruments(_instrumentType, _instrumentIds);
         }
     }
 }

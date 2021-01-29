@@ -31,7 +31,14 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             _effectiveAt = effectiveAt;
         }
 
-        public static IInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        /// <summary>
+        ///  Creates an instrument source for a given for instrument ids that are constructed from the holdings
+        /// of a portfolio within a given scope.
+        /// </summary>
+        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentSourceArgs">Set of | delimited pair of portfolio and scope (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])</param>
+        /// <returns>A LusidPortfolioInstrumentSource instance</returns>
+        public static LusidPortfolioInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {   
             // parse portfolio and scopes from request arguments (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])
             var portfoliosAndScopes = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
@@ -39,9 +46,8 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
             
             Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentType} for the " +
-                              $"portfolios and scopes: {string.Join(',',portfoliosAndScopes)}");       
-            
-            
+                              $"portfolios and scopes: {string.Join(',',portfoliosAndScopes)}");
+
             // parse the input arguments into set of portfolio/scope pairs.
             ISet<Tuple<string,string>> scopesAndPortfolios = portfoliosAndScopes.Select(p =>
             {
@@ -69,21 +75,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         public Instruments? Get()
         {
             var holdingsInstrumentIds = GetHoldingsInstrumentIds(_lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
-            return holdingsInstrumentIds.Any() ? ToBbgDlInstruments(holdingsInstrumentIds) : null;
-        }
-
-        private Instruments ToBbgDlInstruments(IEnumerable<string> ids)
-        {
-            var instruments = ids.Select(figi => new PerSecurity_Dotnet.Instrument()
-            {
-                id = figi,
-                type = _instrumentType,
-                typeSpecified = true
-            }).ToArray();
-            return new Instruments()
-            {
-                instrument = instruments
-            };
+            return holdingsInstrumentIds.Any() ? IInstrumentSource.CreateInstruments(_instrumentType, holdingsInstrumentIds) : null;
         }
 
         /// <summary>
