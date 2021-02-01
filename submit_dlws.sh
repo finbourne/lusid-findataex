@@ -1,37 +1,37 @@
 #!/bin/bash
 
 echo $*
-if [[ $* == *" -s "* ]]
+
+# check for safe mode
+if [[ $* == *" safemode"* ]]
 then
-  echo "running in safe mode"
+  echo "running in safe mode..."
+  safe_mode=true
 fi
-while getopts 'k:c:t:i:p:o:f:d:c:m:s:' opt
+
+while getopts 'k:c:t:i:a:f:s:d:c:m:' opt
 do
     echo "this opt is $opt"
     case $opt in
         m)
           echo setting max_instruments $OPTARG
           max_instruments=$OPTARG ;;
-		    s)
-          echo "setting safe_mode to true"
-          echo "note passing in any text -s (including 'false') will flag safe mode. remove -s to turn off."
-          safe_mode=true ;;
-		    k)
+		k)
           echo setting certificate_file $OPTARG
           certificate_file=$OPTARG ;;
         t)
           echo setting instrument_id_type $OPTARG
           instrument_id_type=$OPTARG ;;
         i)
-          echo setting instrument_ids $OPTARG
-          instrument_ids=$OPTARG ;;
-        p)
-          echo setting portfolios $OPTARG
-          portfolios=$OPTARG ;;
-        o)
-          echo setting output_dir $OPTARG
-          output_dir=$OPTARG ;;
-		    f)
+          echo setting instrument_source $OPTARG
+          instrument_source=$OPTARG ;;
+        a)
+          echo setting insturments source arguments $OPTARG
+          instrument_source_args=$OPTARG ;;
+        f)
+          echo setting output file name $OPTARG
+          output_filename=$OPTARG ;;
+		s)
           echo setting output filesystem $OPTARG
           filesystem=$OPTARG ;;
         # program specific actions - standard data
@@ -86,26 +86,25 @@ base64 -d $certificate_file > $pk12_cert_file
 # set decoded certificate file path as env var for use by findataex
 export BBG_DL_CERT=$pk12_cert_file
 
-# if no filesystem provided set to lusid drive as default
-if [[ -z $filesystem ]] ; then
-  filesystem=Lusid
-fi
-
 # being constructing findataex cmd request
-base_request="-t $instrument_id_type -o $output_dir -f $filesystem"
+base_request="-t $instrument_id_type -f $output_filename"
 
-# check for the source of instruments to request (from portfolio or provided ids)
-if [[ ! -z "$portfolios" ]]
+# check instrument source provided
+if [[ ! -z "$instrument_source" ]]
 then
-  base_request="$base_request -p $portfolios"
-elif [[ ! -z "$instrument_ids" ]]
-then
-  base_request="$base_request -i $instrument_ids"
+  base_request="$base_request -i $instrument_source"
 else
-  echo "Ensure portfolios or instrument_ids have been provided"
+  echo "Ensure instrument_source has been provided"
   exit 1
 fi
 
+# add insturment source optional arguments
+if [[ ! -z "$instrument_source_args" ]]
+then
+  base_request="$base_request -a $instrument_source_args"
+fi
+
+# populate data fields if pricing request (getdata action) or corp action types if corp action request (getactions)
 if [[ ! -z "$data_fields" ]]
 then
   base_request="dotnet $LUSID_FINDATA_EX_DLL getdata $base_request -d $data_fields"
@@ -126,7 +125,7 @@ fi
 # check if running in safe mode
 if [[ ! -z "$safe_mode" ]]
 then
-  base_request="$base_request -s"
+  base_request="$base_request --safemode"
 fi
 
 echo "submitting findata ex request..."
@@ -137,11 +136,11 @@ $base_request
 echo "all arg vars for debug..."
 echo findataexDll:$LUSID_FINDATA_EX_DLL
 echo action:$action
-echo portfolios:$portfolios
 echo instrument_id_type :$instrument_id_type
-echo instrument_ids:$instrument_ids
+echo instrument_source:$instrument_source
+echo instrument_source_args:$instrument_source_args
 echo filesystem:$filesystem
-echo output_dir:$output_dir
+echo output_filename:$output_filename
 echo data_fields:$data_fields
 echo corp_actions:$corp_actions
 echo max_intruments:$max_instruments
