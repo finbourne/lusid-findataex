@@ -177,9 +177,9 @@ namespace Lusid.FinDataEx
     class DataLicenseOptions
     {
         [Option('f', "filepath", Required = true, 
-            HelpText = "File path to write DLWS output. Include  \"{REQUEST_ID}\" and/or \"{TIMESTAMP}\" in the filename " +
-                       " to include the DL request id and/or request timestamp respectively in the filename (e.g. " +
-                       "/home/dl_results/MySubmission_{REQUEST_ID}_{TIMESTAMP}.csv")]
+            HelpText = "File path to write DLWS output. Include  \"{REQUEST_ID}\", \"{AS_AT}\", \"{AS_AT_DATE}\" in the filename " +
+                       " to include the DL request id timestamps respectively in the filename (e.g. " +
+                       "/home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv")]
         public string OutputFilePath { get; set; }
         
         [Option('s', "filesystem", Required = false, Default = FileSystem.Local, 

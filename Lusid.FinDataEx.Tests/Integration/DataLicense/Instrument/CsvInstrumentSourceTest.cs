@@ -71,6 +71,26 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
         }
         
         [Test]
+        public void Get_OnAutoGenPatternInFilePath_ShouldReturnDlInstruments()
+        {
+            //{TEST} should end up looking up single_col_instruments_TestAutoGenPattern.csv is AutoGen working.
+            var filepath = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
+                "single_col_instruments_{TEST}.csv"});
+            IEnumerable<string> instrumentSourceArgs = new[]{filepath};
+            var instrumentSource = CsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            
+            //execute
+            var instruments = instrumentSource.Get();
+            Assert.That(instruments.instrument.Length, Is.EqualTo(6));
+            Assert.That(instruments.instrument[0].id, Is.EqualTo("BBG000NEWTRA"));
+            Assert.That(instruments.instrument[0].type, Is.EqualTo(InstrumentType.BB_GLOBAL));
+            Assert.That(instruments.instrument[1].id, Is.EqualTo("BBG000NEWTRB"));
+            Assert.That(instruments.instrument[1].type, Is.EqualTo(InstrumentType.BB_GLOBAL));
+            Assert.That(instruments.instrument[5].id, Is.EqualTo("BBG000NEWTRF"));
+            Assert.That(instruments.instrument[5].type, Is.EqualTo(InstrumentType.BB_GLOBAL));
+        }
+        
+        [Test]
         public void Get_EmptyCsv_ShouldReturnNoInstruments()
         {
             //when

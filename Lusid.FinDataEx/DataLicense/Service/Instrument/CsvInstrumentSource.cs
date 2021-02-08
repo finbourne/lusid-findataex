@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Lusid.FinDataEx.Util;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
@@ -38,8 +39,14 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             return new CsvInstrumentSource(instrumentType, filePath, delimiter, instrumentIdColIdx);
         }
 
+        /// <summary>
+        /// Retrieve the instrument source filepath, delimiter used and the column index of the instrument Id. Additionally apply
+        /// any AutoGen patterns to the file name (e.g. to insert the AsOf date into the filename). 
+        /// </summary>
+        /// <returns></returns>
         internal static Tuple<string, string, int> ParseInstrumentSourceArgs(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {
+            // retrieve filename, delimiter and instrument column index. 
             var sourceArgs = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
             if (sourceArgs.Length < 1)
             {
@@ -49,6 +56,9 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             var filePath = sourceArgs[0];
             var delimiter = sourceArgs.ElementAtOrDefault(1) ?? ",";
             Int32.TryParse(sourceArgs.ElementAtOrDefault(2) ?? "0", out var instrumentIdColIdx);
+            
+            // apply AutoGen patterns on filename
+            filePath = AutoGenPatternUtils.ApplyDateTimePatterns(filePath);
             
             Console.WriteLine($"Creating a instrument source to load instruments of type {instrumentType} " +
                               $"from local file system at {filePath}. Ids source from column index {instrumentIdColIdx} " +

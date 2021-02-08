@@ -10,8 +10,6 @@ namespace Lusid.FinDataEx.Output
     {
 
         public const char BbgDlDelimiter = '|';
-        public const string RequestIdPattern = "{REQUEST_ID}";
-        public const string TimestampPattern = "{TIMESTAMP}";
 
         /// <summary>
         /// Write financial data retrieved from BBG DLWS in form

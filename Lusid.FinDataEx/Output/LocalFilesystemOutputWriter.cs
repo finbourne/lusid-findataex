@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Lusid.FinDataEx.Util;
 using static Lusid.FinDataEx.Output.IOutputWriter;
 
 namespace Lusid.FinDataEx.Output
@@ -34,7 +35,7 @@ namespace Lusid.FinDataEx.Output
                         var record = new List<string>();
                         foreach (var header in dataLicenseOutput.Header)
                         {
-                            dR.TryGetValue(header, out string recordEntry);
+                            dR.TryGetValue(header, out var recordEntry);
                             record.Add(recordEntry);
                         }
 
@@ -63,9 +64,7 @@ namespace Lusid.FinDataEx.Output
         private string CreateFilepathWithAutoGenPatterns(string dataLicenseOutputId)
         {
             // check for and apply patterns to output filename
-            var modifiedOutputFilePath = _outputFilePath.Replace(TimestampPattern,
-                DateTime.Now.ToUniversalTime().ToString("yyyyMMddHHmmss"));
-            return modifiedOutputFilePath.Replace(RequestIdPattern, dataLicenseOutputId);
+            return AutoGenPatternUtils.ApplyAllPatterns(_outputFilePath, dataLicenseOutputId);
         }
 
     }
