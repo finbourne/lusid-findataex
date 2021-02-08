@@ -11,7 +11,7 @@ namespace Lusid.FinDataEx.Util
     ///     - Retrieving an instrument source file that changes on each day so requires date when constructing
     ///       the file.
     /// </summary>
-    public class AutoGenPatternUtils
+    public static class AutoGenPatternUtils
     {
         public const string RequestIdPattern = "{REQUEST_ID}";
         public const string AsAtKeyPattern = "{AS_AT}";
@@ -21,7 +21,7 @@ namespace Lusid.FinDataEx.Util
         public static string ApplyAsAt(string filePath)
         {
             return filePath.Replace(AsAtKeyPattern,
-                DateTime.Now.ToUniversalTime().ToString("yyyyMMddHHmmssFFF"));
+                DateTime.Now.ToUniversalTime().ToString("yyyyMMdd_HHmmssFFF"));
         }
 
         public static string ApplyAsAtDate(string filePath)

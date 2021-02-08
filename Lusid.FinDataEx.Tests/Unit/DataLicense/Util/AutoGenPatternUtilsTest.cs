@@ -12,16 +12,16 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Util
         [Test]
         public void ApplyAsAt_WhenPatternIncluded_ShouldReplaceWithTimestamp()
         {
-            var filePath = "/some/dir/my_file_{AS_AT}";
+            const string filePath = "/some/dir/my_file_{AS_AT}";
             var filePathAutoGen = AutoGenPatternUtils.ApplyAsAt(filePath);
-            Assert.IsTrue(DateTime.TryParseExact(filePathAutoGen[^17..], 
-                "yyyyMMddHHmmssFFF", CultureInfo.InvariantCulture, DateTimeStyles.None, out _));
+            Assert.IsTrue(DateTime.TryParseExact(filePathAutoGen[^18..], 
+                "yyyyMMdd_HHmmssFFF", CultureInfo.InvariantCulture, DateTimeStyles.None, out _));
         }
         
         [Test]
         public void ApplyAsAtDate_WhenPatternIncluded_ShouldReplaceWithTimestamp()
         {
-            var filePath = "/some/dir/my_file_{AS_AT_DATE}";
+            const string filePath = "/some/dir/my_file_{AS_AT_DATE}";
             var filePathAutoGen = AutoGenPatternUtils.ApplyAsAtDate(filePath);
             Assert.IsTrue(DateTime.TryParseExact(filePathAutoGen[^8..], 
                 "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _));
