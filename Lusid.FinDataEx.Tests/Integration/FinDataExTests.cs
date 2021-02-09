@@ -25,7 +25,10 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST";
-            FinDataEx.Main(commandArgs.Split(" "));
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
+            
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
             
             // ensure file is properly populated
             var entries = File.ReadAllLines(filepath);
@@ -55,7 +58,10 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES";
-            FinDataEx.Main(commandArgs.Split(" "));
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
+            
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
             
             // ensure file is properly populated
             var entries = File.ReadAllLines(filepath);
@@ -102,8 +108,11 @@ namespace Lusid.FinDataEx.Tests.Integration
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var commandArgs = $"getdata -i InstrumentSource -a BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
                               $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
-            FinDataEx.Main(commandArgs.Split(" "));
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
 
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
+            
             // ensure file is properly populated
             var entries = File.ReadAllLines(filepath);
             
@@ -167,7 +176,10 @@ namespace Lusid.FinDataEx.Tests.Integration
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
                               $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
-            FinDataEx.Main(commandArgs.Split(" "));
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
+            
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
             
             // ensure file is properly populated
             var entries = File.ReadAllLines(filepath);
@@ -283,7 +295,10 @@ namespace Lusid.FinDataEx.Tests.Integration
                 "real_instruments.csv"});
             
             var commandArgs = $"getdata -i CsvInstrumentSource -a {instrumentSourceCsv} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
-            FinDataEx.Main(commandArgs.Split(" "));
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
+            
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
             
             // ensure file is properly populated
             var entries = File.ReadAllLines(filepath);
@@ -315,10 +330,21 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var commandArgs = $"getaction -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -c DVD_CASH DVD_STOCK STOCK_SPLT";
-            FinDataEx.Main(commandArgs.Split(" "));
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
             // Most days will have no corp actions and as test always uses latest date cannot check for file as will
             // likely not exist. For tests on writing corp actions to file see GetActionsDataLicenseCallTest
             // In this case an successful call to DLWS is enough
+        }
+        
+        /* Exception Handling */
+        [Test]
+        public void FinDataEx_OnException_ShouldReturnFailureExitCode()
+        {
+            var missingAllRequiredArgs = $"getdata -i InstrumentSource";
+            var exitCode = FinDataEx.Main(missingAllRequiredArgs.Split(" "));
+            Assert.That(exitCode, Is.EqualTo(1));
         }
         
         

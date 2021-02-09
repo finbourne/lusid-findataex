@@ -61,7 +61,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             filePath = AutoGenPatternUtils.ApplyDateTimePatterns(filePath);
             
             Console.WriteLine($"Creating a instrument source to load instruments of type {instrumentType} " +
-                              $"from local file system at {filePath}. Ids source from column index {instrumentIdColIdx} " +
+                              $"from {filePath}. Ids source from column index {instrumentIdColIdx} " +
                               $" with delimiter {delimiter}");
             
             return Tuple.Create(filePath, delimiter, instrumentIdColIdx);

@@ -16,12 +16,31 @@ namespace Lusid.FinDataEx
 {
     public class FinDataEx
     {
-        public static void Main(string[] args)
+        private const int SuExitCode = 0;
+        private const int FaBadArgExitCode = 1;
+        private const int FaProcessingExitCode = 1;
+
+        public static int Main(string[] args)
         {
-            Parser.Default.ParseArguments<GetDataOptions,GetActionsOptions>(args)
-                .WithParsed<GetDataOptions>(ExecuteGet)
-                .WithParsed<GetActionsOptions>(ExecuteGet);
-            
+            try
+            {
+                var parserResult = Parser.Default.ParseArguments<GetDataOptions, GetActionsOptions>(args)
+                    .WithParsed<GetDataOptions>(ExecuteGet)
+                    .WithParsed<GetActionsOptions>(ExecuteGet);
+                if (parserResult.Tag == ParserResultType.NotParsed)
+                {
+                    Console.WriteLine(
+                        "FinDataExt program arguments could not be parsed. Check above logs for details. Exiting FinDataEx.");
+                    return FaBadArgExitCode;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"FinDataEx request processing failed. Exiting FinDataEx. Exception details : {e}");
+                return FaProcessingExitCode;
+            }
+            Console.WriteLine($"FinDataEx run to successful completion with exit code {SuExitCode}");
+            return SuExitCode;
         }
         
         /// <summary>
@@ -60,7 +79,7 @@ namespace Lusid.FinDataEx
             {
                 var dataLicenseOutput = dlDataService.Get(dataLicenseCall, instruments, ProgramTypes.Adhoc);
                 var writeResult = finDataOutputWriter.Write(dataLicenseOutput);
-                LogWriteResult(writeResult);
+                ProcessWriteResult(writeResult);
             }
         }
     
@@ -104,17 +123,14 @@ namespace Lusid.FinDataEx
         ///  Log results of BBG response write.
         /// </summary>
         /// <param name="writeResult"></param>
-        private static void LogWriteResult(WriteResult writeResult)
+        private static void ProcessWriteResult(WriteResult writeResult)
         {
             if (writeResult.Status != WriteResultStatus.Ok)
             {
-                Console.Error.WriteLine("FinDataEx request completed with failures. See details below: ");
-                Console.Error.WriteLine(writeResult);
+                Console.Error.WriteLine("FinDataEx request completed with failures...");
+                throw new Exception(writeResult.ToString());
             }
-            else
-            {
-                Console.WriteLine(writeResult.FileOutputPath);
-            }
+            Console.WriteLine($"FinDataEx request completed and output written to {writeResult.FileOutputPath}");
         }
         
         private static void LogRequest(Instruments instruments, IDataLicenseCall<PerSecurityResponse> dataLicenseCall)

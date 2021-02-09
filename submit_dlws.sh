@@ -104,6 +104,12 @@ then
   base_request="$base_request -a $instrument_source_args"
 fi
 
+# add output filesystem
+if [[ ! -z "$filesystem" ]]
+then
+  base_request="$base_request -s $filesystem"
+fi
+
 # populate data fields if pricing request (getdata action) or corp action types if corp action request (getactions)
 if [[ ! -z "$data_fields" ]]
 then
@@ -130,26 +136,13 @@ fi
 
 echo "submitting findata ex request..."
 echo $base_request
-
 $base_request
-
-echo "all arg vars for debug..."
-echo findataexDll:$LUSID_FINDATA_EX_DLL
-echo action:$action
-echo instrument_id_type :$instrument_id_type
-echo instrument_source:$instrument_source
-echo instrument_source_args:$instrument_source_args
-echo filesystem:$filesystem
-echo output_filename:$output_filename
-echo data_fields:$data_fields
-echo corp_actions:$corp_actions
-echo max_intruments:$max_instruments
-echo safe_mode:$safe_mode
-
-
-echo findataex request completed with exit code $?
+dlws_exit_code=$?
+echo "findataex request completed with exit code=$dlws_exit_code"
 
 # delete the tmp file for the identity file
 trap "rm -f $tmp_file" EXIT
 trap "rm -f $pk12_cert_file" EXIT
-exit 0
+
+# exit with same code as the request
+exit $dlws_exit_code
