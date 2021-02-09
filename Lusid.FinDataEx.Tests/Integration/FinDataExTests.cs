@@ -338,6 +338,24 @@ namespace Lusid.FinDataEx.Tests.Integration
             // In this case an successful call to DLWS is enough
         }
         
+        /* No instruments sourced  */
+        [Test]
+        public void FinDataEx_GetData_OnNoInsturmentsFromSource_ShouldDoNothingButReturnAsSuccess()
+        {
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var instrumentSourceCsv = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
+                "empty_instruments.csv"});
+            
+            var commandArgs = $"getdata -i CsvInstrumentSource -a {instrumentSourceCsv} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
+            
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
+            
+            // ensure no file is created
+            Assert.False(File.Exists(filepath));
+        }
+        
         /* Exception Handling */
         [Test]
         public void FinDataEx_OnException_ShouldReturnFailureExitCode()

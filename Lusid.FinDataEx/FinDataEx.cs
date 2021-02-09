@@ -63,6 +63,12 @@ namespace Lusid.FinDataEx
             
             // construct instruments in DL format to be passed to DLWS
             var instruments = CreateInstruments(getOptions);
+            if (instruments.instrument.Length == 0)
+            {
+                Console.WriteLine("No instruments were constructed from your selected source and arguments. No DLWS call " +
+                                  "will be executed");
+                return;
+            }
             
             // construct data license call
             var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
