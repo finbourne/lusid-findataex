@@ -21,17 +21,29 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         /// <summary>
         ///  Default implementation to construct DL instruments from a set of instrument ids and a given instrument type.
         /// </summary>
-        /// <param name="instrumentType"></param>
-        /// <param name="instrumentIds"></param>
+        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
+        /// <param name="instrumentIds">Set of instrument ids to create and configure for submission to DLWS</param>
         /// <returns></returns>
-        internal static Instruments CreateInstruments(InstrumentType instrumentType, IEnumerable<string> instrumentIds)
+        internal static Instruments CreateInstruments(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentIds)
         {
-            var instruments = instrumentIds.Select(id => new PerSecurity_Dotnet.Instrument()
+            var instruments = instrumentIds.Select(id =>
             {
-                id = id,
-                type = instrumentType,
-                typeSpecified = true
+                // add mandatory instrument args
+                var instrument = new PerSecurity_Dotnet.Instrument()
+                {
+                    id = id,
+                    type = instrumentArgs.InstrumentType,
+                    typeSpecified = true
+                };
+                // add optional instrument args
+                if (instrumentArgs.YellowKey.HasValue)
+                {
+                    instrument.yellowkeySpecified = true;
+                    instrument.yellowkey = instrumentArgs.YellowKey.Value;
+                }
+                return instrument;
             }).ToArray();
+            
             return new Instruments()
             {
                 instrument = instruments

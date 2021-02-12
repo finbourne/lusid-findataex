@@ -10,12 +10,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     /// </summary>
     public class InstrumentSource : IInstrumentSource
     {
-        private readonly InstrumentType _instrumentType;
+        private readonly InstrumentArgs _instrumentArgs;
         private readonly ISet<string> _instrumentIds;
 
-        private InstrumentSource(InstrumentType instrumentType, ISet<string> instrumentIds)
+        private InstrumentSource(InstrumentArgs instrumentArgs, ISet<string> instrumentIds)
         {
-            _instrumentType = instrumentType;
+            _instrumentArgs = instrumentArgs;
             _instrumentIds = instrumentIds;
         }
 
@@ -23,15 +23,15 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         ///  Creates an instrument source for a given instrument id type and a set of
         ///  instrument ids.
         /// </summary>
-        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
         /// <param name="instrumentSourceArgs">Set of instrument ids to create</param>
         /// <returns>An InstrumentSource instance</returns>
-        public static InstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        public static InstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {
             var instrumentIds = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
-            Console.WriteLine($"Creating a basic instrument source using instrument id type {instrumentType} for the " +
+            Console.WriteLine($"Creating a basic instrument source using instrument id type {instrumentArgs.InstrumentType} for the " +
                               $"instrument ids: {string.Join(',',instrumentIds)}");                
-            return new InstrumentSource(instrumentType, new HashSet<string>(instrumentIds)); 
+            return new InstrumentSource(instrumentArgs, new HashSet<string>(instrumentIds)); 
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         #nullable enable
         public Instruments? Get()
         {
-            return IInstrumentSource.CreateInstruments(_instrumentType, _instrumentIds);
+            return IInstrumentSource.CreateInstruments(_instrumentArgs, _instrumentIds);
         }
     }
 }

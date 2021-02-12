@@ -157,7 +157,8 @@ namespace Lusid.FinDataEx
         /// <exception cref="ArgumentException"></exception>
         private static Instruments CreateInstruments(DataLicenseOptions dataOptions)
         {
-            var instruments = CreateInstrumentSource(dataOptions).Get();
+            var instrumentSource = CreateInstrumentSource(dataOptions);
+            var instruments = instrumentSource.Get();
             if (instruments is {} dlInstruments)
             {
                 // check instruments in request does not exceed the allowed limit
@@ -176,16 +177,17 @@ namespace Lusid.FinDataEx
 
         private static IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions)
         {
+            var instrumentArgs = InstrumentArgs.Create(dataOptions);
             return dataOptions.InstrumentSource switch
             {
                 nameof(InstrumentSource) =>
-                    InstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                    InstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 nameof(LusidPortfolioInstrumentSource) =>
-                    LusidPortfolioInstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                    LusidPortfolioInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 nameof(CsvInstrumentSource) =>
-                    CsvInstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                    CsvInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 nameof(DriveCsvInstrumentSource) =>
-                    DriveCsvInstrumentSource.Create(dataOptions.InstrumentIdType, dataOptions.InstrumentSourceArguments),
+                    DriveCsvInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 _ => throw new ArgumentOutOfRangeException(
                     $"{dataOptions.InstrumentSource} has no supported implementation.")
             };
@@ -196,7 +198,7 @@ namespace Lusid.FinDataEx
     /// Base Options for all BBG DL calls
     /// 
     /// </summary>
-    class DataLicenseOptions
+    public class DataLicenseOptions
     {
         [Option('f', "filepath", Required = true, 
             HelpText = "File path to write DLWS output. Include  \"{REQUEST_ID}\", \"{AS_AT}\", \"{AS_AT_DATE}\" in the filename " +
@@ -211,6 +213,10 @@ namespace Lusid.FinDataEx
         [Option('t', "instrument_id_type", Required = false, Default = InstrumentType.BB_GLOBAL, 
         HelpText = "Type of instrument ids being input (BB_GLOBAL (Figi), ISIN, CUSIP)")]
         public InstrumentType InstrumentIdType { get; set; }
+        
+        [Option( 'y', "yellowkey", Required = false,
+            HelpText = "Yellow key required if querying by BBG by TICKER. YellowKey maps to MarketSector in DLWS.")]
+        public MarketSector YellowKey { get; set; }
         
         /*
          * Start Instrument Sources :

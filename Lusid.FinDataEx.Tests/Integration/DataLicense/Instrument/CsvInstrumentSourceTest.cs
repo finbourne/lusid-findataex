@@ -17,7 +17,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             var filepath = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
                 "single_col_instruments.csv"});
             IEnumerable<string> instrumentSourceArgs = new[]{filepath};
-            var instrumentSource = CsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = CsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();
@@ -37,7 +37,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             var filepath = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
                 "multi_col_instruments.csv"});
             IEnumerable<string> instrumentSourceArgs = new[]{filepath, ",", "1"};
-            var instrumentSource = CsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = CsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();
@@ -57,7 +57,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             var filepath = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
                 "multi_col_instruments_pipe_delim.csv"});
             IEnumerable<string> instrumentSourceArgs = new[]{filepath, "|", "1"};
-            var instrumentSource = CsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = CsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();
@@ -77,7 +77,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             var filepath = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
                 "single_col_instruments_{TEST}.csv"});
             IEnumerable<string> instrumentSourceArgs = new[]{filepath};
-            var instrumentSource = CsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = CsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();
@@ -97,7 +97,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             var filepath = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
                 "empty_instruments.csv"});
             IEnumerable<string> instrumentSourceArgs = new[]{filepath};
-            var instrumentSource = CsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = CsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();

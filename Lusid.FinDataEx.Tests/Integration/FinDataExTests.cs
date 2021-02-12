@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using static Lusid.FinDataEx.Tests.Unit.TestUtils
     ;
@@ -52,7 +55,37 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.That(instrumentEntry2[1], Is.Not.Empty);
             Assert.That(instrumentEntry2[3], Is.Not.Empty);
         }
-        
+
+        [Test]
+        public void FinDataEx_GetData_ForFxUsingTicker_ShouldProduceFxRateFile()
+        {
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var commandArgs = new[] {"getdata", "-f", filepath, "-i", "InstrumentSource", "-a", "GBP", "USD", "-y", "Curncy", "-t", "TICKER", "-d", "TICKER", "PX_LAST"}; 
+            var exitCode = FinDataEx.Main(commandArgs.ToArray());
+            
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
+            
+            // ensure file is properly populated
+            var entries = File.ReadAllLines(filepath);
+            
+            // check headers
+            Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|TICKER|PX_LAST"));
+
+            // check instrument 1 entry
+            var instrumentEntry1 = entries[1].Split("|");
+            Assert.That(instrumentEntry1[0], Is.Not.Empty);
+            Assert.That(instrumentEntry1[1], Is.Not.Empty);
+            Assert.That(instrumentEntry1[2], Is.EqualTo("GBP"));
+            Assert.That(instrumentEntry1[3], Is.Not.Empty); // price will change so check not empty
+            
+            var instrumentEntry2 = entries[2].Split("|");
+            Assert.That(instrumentEntry2[0], Is.Not.Empty);
+            Assert.That(instrumentEntry2[1], Is.Not.Empty);
+            Assert.That(instrumentEntry2[2], Is.EqualTo("USD"));
+            Assert.That(instrumentEntry2[3], Is.EqualTo("1.000000")); // should always be
+        }
+
         [Test]
         public void FinDataEx_GetData_ForEquityInstrumentMaster_ShouldProduceEqInsMasterFile()
         {
@@ -291,8 +324,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_OnValidBbgIdFromCsvInstrumentSource_ShouldProduceDataFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var instrumentSourceCsv = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
-                "real_instruments.csv"});
+            var instrumentSourceCsv = Path.Combine("Integration", "DataLicense", "Instrument", "TestData", "real_instruments.csv");
             
             var commandArgs = $"getdata -i CsvInstrumentSource -a {instrumentSourceCsv} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
@@ -323,6 +355,36 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.That(instrumentEntry2[3], Is.Not.Empty);
         }
         
+        [Test]
+        public void FinDataEx_GetData_ForFxUsingTickerFromCsvInstrumentSource_ShouldProduceFxRateFile()
+        {
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var instrumentSourceCsv = Path.Combine("Integration", "DataLicense", "Instrument", "TestData", "currency_instruments.csv");
+            var commandArgs = new[] {"getdata", "-f", filepath, "-i", "CsvInstrumentSource", "-a", instrumentSourceCsv, "-y", "Curncy", "-t", "TICKER", "-d", "TICKER", "PX_LAST"}; 
+            var exitCode = FinDataEx.Main(commandArgs.ToArray());
+            
+            // ensure ran to success
+            Assert.That(exitCode, Is.EqualTo(0));
+            
+            // ensure file is properly populated
+            var entries = File.ReadAllLines(filepath);
+            
+            // check headers
+            Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|TICKER|PX_LAST"));
+
+            // check instrument 1 entry
+            var instrumentEntry1 = entries[1].Split("|");
+            Assert.That(instrumentEntry1[0], Is.Not.Empty);
+            Assert.That(instrumentEntry1[1], Is.Not.Empty);
+            Assert.That(instrumentEntry1[2], Is.EqualTo("GBP"));
+            Assert.That(instrumentEntry1[3], Is.Not.Empty); // price will change so check not empty
+            
+            var instrumentEntry2 = entries[2].Split("|");
+            Assert.That(instrumentEntry2[0], Is.Not.Empty);
+            Assert.That(instrumentEntry2[1], Is.Not.Empty);
+            Assert.That(instrumentEntry2[2], Is.EqualTo("USD"));
+            Assert.That(instrumentEntry2[3], Is.EqualTo("1.000000")); // should always be
+        }
         
         /* Corporate Actions */
         [Test]

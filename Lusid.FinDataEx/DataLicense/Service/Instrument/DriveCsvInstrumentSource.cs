@@ -5,9 +5,7 @@ using System.Linq;
 using Lusid.Drive.Sdk.Api;
 using Lusid.Drive.Sdk.Model;
 using Lusid.Drive.Sdk.Utilities;
-using Lusid.FinDataEx.Output;
 using Lusid.FinDataEx.Util;
-using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
@@ -16,8 +14,8 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         private readonly IFilesApi _filesApi;
         private readonly ISearchApi _searchApi;
 
-        private DriveCsvInstrumentSource(IFilesApi filesApi, ISearchApi searchApi, InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx) : 
-            base(instrumentType, filePath, delimiter, instrumentIdColIdx)
+        private DriveCsvInstrumentSource(IFilesApi filesApi, ISearchApi searchApi, InstrumentArgs instrumentArgs, string filePath, string delimiter, int instrumentIdColIdx) : 
+            base(instrumentArgs, filePath, delimiter, instrumentIdColIdx)
         {
             _filesApi = filesApi;
             _searchApi = searchApi;
@@ -27,18 +25,18 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         ///  Creates an instrument source for a given instrument id type and a set of
         ///  instrument ids.
         /// </summary>
-        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
         /// <param name="instrumentSourceArgs">Application arguments passed in. LUSID filepath (mandatory), delimiter (optional) and column number of the instrument id (optional)</param>
         /// <returns>A DriveCsvInstrumentSource instance</returns>
-        public new static DriveCsvInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        public new static DriveCsvInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {
             // LusidApiFactory to load instrument source file from drive.
             var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
             var filesApi = lusidApiFactory.Api<IFilesApi>();
             var searchApi = lusidApiFactory.Api<ISearchApi>();
             
-            var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentType, instrumentSourceArgs);
-            return new DriveCsvInstrumentSource(filesApi, searchApi, instrumentType, filePath, delimiter, instrumentIdColIdx); 
+            var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentArgs.InstrumentType, instrumentSourceArgs);
+            return new DriveCsvInstrumentSource(filesApi, searchApi, instrumentArgs, filePath, delimiter, instrumentIdColIdx); 
         }
 
         protected override IEnumerable<string> LoadInstrumentsFromFile(string filePath, string delimiter, int instrumentIdColIdx)

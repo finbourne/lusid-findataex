@@ -12,15 +12,15 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     /// </summary>
     public class CsvInstrumentSource : IInstrumentSource
     {
-        private readonly InstrumentType _instrumentType;
+        private readonly InstrumentArgs _instrumentArgs;
         private readonly string _filePath;
         private readonly string _delimiter;
         private readonly int _instrumentIdColIdx;
         
 
-        protected CsvInstrumentSource(InstrumentType instrumentType, string filePath, string delimiter, int instrumentIdColIdx)
+        protected CsvInstrumentSource(InstrumentArgs instrumentArgs, string filePath, string delimiter, int instrumentIdColIdx)
         {
-            _instrumentType = instrumentType;
+            _instrumentArgs = instrumentArgs;
             _filePath = filePath;
             _delimiter = delimiter;
             _instrumentIdColIdx = instrumentIdColIdx;
@@ -30,13 +30,13 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         ///  Creates an instrument source for a given instrument id type and a set of
         ///  instrument ids.
         /// </summary>
-        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
         /// <param name="instrumentSourceArgs">Application arguments passed in. Filepath (mandatory), delimiter (optional) and column number of the instrument id (optional)</param>
         /// <returns>A CsvInstrumentSource instance</returns>
-        public static CsvInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        public static CsvInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {
-            var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentType, instrumentSourceArgs);
-            return new CsvInstrumentSource(instrumentType, filePath, delimiter, instrumentIdColIdx);
+            var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentArgs.InstrumentType, instrumentSourceArgs);
+            return new CsvInstrumentSource(instrumentArgs, filePath, delimiter, instrumentIdColIdx);
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         public Instruments? Get()
         {
             IEnumerable<string> instrumentIds = LoadInstrumentsFromFile(_filePath, _delimiter, _instrumentIdColIdx);
-            return IInstrumentSource.CreateInstruments(_instrumentType, instrumentIds);
+            return IInstrumentSource.CreateInstruments(_instrumentArgs, instrumentIds);
         }
 
         protected virtual IEnumerable<string> LoadInstrumentsFromFile(string filepath, string delimiter, int instrumentIdColIdx)

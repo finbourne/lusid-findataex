@@ -22,7 +22,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             //when
             const string filepath = "/findataex-tests/testdata/single_col_instruments.csv";
             IEnumerable<string> instrumentSourceArgs = new[]{filepath};
-            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();
@@ -41,7 +41,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             //when
             const string filepath = "/findataex-tests/testdata/multi_col_instruments.csv";
             IEnumerable<string> instrumentSourceArgs = new[]{filepath, ",", "1"};
-            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();
@@ -60,7 +60,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             //when
             const string filepath = "/findataex-tests/testdata/multi_col_instruments_pipe_delim.csv";
             IEnumerable<string> instrumentSourceArgs = new[]{filepath, "|", "1"};
-            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();
@@ -79,7 +79,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
             //when
             const string filepath = "/findataex-tests/testdata/empty_instruments.csv";
             IEnumerable<string> instrumentSourceArgs = new[]{filepath};
-            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentType.BB_GLOBAL, instrumentSourceArgs);
+            var instrumentSource = DriveCsvInstrumentSource.Create(InstrumentArgs.Create(InstrumentType.BB_GLOBAL), instrumentSourceArgs);
             
             //execute
             var instruments = instrumentSource.Get();

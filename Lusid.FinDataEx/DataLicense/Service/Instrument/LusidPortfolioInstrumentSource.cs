@@ -17,16 +17,16 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     public class LusidPortfolioInstrumentSource : IInstrumentSource
     {
         private readonly ILusidApiFactory _lusidApiFactory;
-        private readonly InstrumentType _instrumentType;
+        private readonly InstrumentArgs _instrumentArgs;
         private readonly string _instrumentTypeLusidPropertyKey;
         private readonly ISet<Tuple<string, string>> _scopesAndPortfolios;
         private readonly DateTimeOffset _effectiveAt;
 
-        protected internal LusidPortfolioInstrumentSource(ILusidApiFactory lusidApiFactory, InstrumentType instrumentType, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
+        protected internal LusidPortfolioInstrumentSource(ILusidApiFactory lusidApiFactory, InstrumentArgs instrumentArgs, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
             _lusidApiFactory = lusidApiFactory;
-            _instrumentType = instrumentType;
-            _instrumentTypeLusidPropertyKey = GetLusidInstrumentIdPropertyAddress(instrumentType);
+            _instrumentArgs = instrumentArgs;
+            _instrumentTypeLusidPropertyKey = GetLusidInstrumentIdPropertyAddress(instrumentArgs.InstrumentType);
             _scopesAndPortfolios = scopesAndPortfolios;
             _effectiveAt = effectiveAt;
         }
@@ -35,17 +35,17 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         ///  Creates an instrument source for a given for instrument ids that are constructed from the holdings
         /// of a portfolio within a given scope.
         /// </summary>
-        /// <param name="instrumentType">Instrument id types (e.g. BB_GLOBAL (FIGI), ISIN, etc...)</param>
+        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
         /// <param name="instrumentSourceArgs">Set of | delimited pair of portfolio and scope (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])</param>
         /// <returns>A LusidPortfolioInstrumentSource instance</returns>
-        public static LusidPortfolioInstrumentSource Create(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
+        public static LusidPortfolioInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {   
             // parse portfolio and scopes from request arguments (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])
             var portfoliosAndScopes = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
             // LusidApiFactory to access LUSID to retrieve portfolio gholding data
             var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
             
-            Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentType} for the " +
+            Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentArgs.InstrumentType} for the " +
                               $"portfolios and scopes: {string.Join(',',portfoliosAndScopes)}");
 
             // parse the input arguments into set of portfolio/scope pairs.
@@ -63,7 +63,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             // currently only support holdings as at latest date. if required to support historical dates can modify
             // to include effectiveAt as part of instrumentSourceArgs.
             var effectiveAt = DateTimeOffset.UtcNow;
-            return new LusidPortfolioInstrumentSource(lusidApiFactory, instrumentType, scopesAndPortfolios, effectiveAt);
+            return new LusidPortfolioInstrumentSource(lusidApiFactory, instrumentArgs, scopesAndPortfolios, effectiveAt);
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         public Instruments? Get()
         {
             var holdingsInstrumentIds = GetHoldingsInstrumentIds(_lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
-            return holdingsInstrumentIds.Any() ? IInstrumentSource.CreateInstruments(_instrumentType, holdingsInstrumentIds) : null;
+            return holdingsInstrumentIds.Any() ? IInstrumentSource.CreateInstruments(_instrumentArgs, holdingsInstrumentIds) : null;
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                         .ToHashSet();
 
                     Console.WriteLine($"Retrieving ids for instruments of positions for scope={scope}, " +
-                                      $"portfolio={portfolio}, effectiveAt={effectiveAt}. InstrumentId={_instrumentType}, instrument Ids={validPortfolioInstrumentIds}");
+                                      $"portfolio={portfolio}, effectiveAt={effectiveAt}. InstrumentType={_instrumentArgs.InstrumentType}, instrument Ids={validPortfolioInstrumentIds}");
                     
                     // union with other portfolio holding instruments
                     instrumentIds.UnionWith(validPortfolioInstrumentIds);
