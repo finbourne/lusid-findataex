@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo $*
-
 # check for safe mode
 if [[ $* == *" safemode"* ]]
 then
@@ -9,7 +7,7 @@ then
   safe_mode=true
 fi
 
-while getopts 'k:c:t:i:a:f:s:d:c:m:' opt
+while getopts 'k:c:t:y:i:a:f:s:d:c:m:' opt
 do
     echo "this opt is $opt"
     case $opt in
@@ -22,6 +20,9 @@ do
         t)
           echo setting instrument_id_type $OPTARG
           instrument_id_type=$OPTARG ;;
+		y)
+          echo setting yellowkey $OPTARG
+          yellowkey=$OPTARG ;;
         i)
           echo setting instrument_source $OPTARG
           instrument_source=$OPTARG ;;
@@ -86,8 +87,14 @@ base64 -d $certificate_file > $pk12_cert_file
 # set decoded certificate file path as env var for use by findataex
 export BBG_DL_CERT=$pk12_cert_file
 
-# being constructing findataex cmd request
+# begin constructing findataex request
 base_request="-t $instrument_id_type -f $output_filename"
+
+# add yellowkey if provided to select a market sector for a TICKER type argument.
+if [[ ! -z "$yellowkey" ]]
+then
+  base_request="$base_request -y $yellowkey"
+fi
 
 # check instrument source provided
 if [[ ! -z "$instrument_source" ]]
