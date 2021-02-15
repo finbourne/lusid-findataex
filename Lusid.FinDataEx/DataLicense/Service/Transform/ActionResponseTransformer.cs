@@ -65,8 +65,8 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
             }
             
             //populate all records with timestamp fields from corp actions response
-            var timeStarted = new DateTimeOffset(getActionsResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString();
-            var timeFinished = new DateTimeOffset(getActionsResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString();
+            var timeStarted = new DateTimeOffset(getActionsResponse.timestarted.ToUniversalTime(), TimeSpan.Zero).ToString(DefaultCultureInfo);
+            var timeFinished = new DateTimeOffset(getActionsResponse.timefinished.ToUniversalTime(), TimeSpan.Zero).ToString(DefaultCultureInfo);
             corpActionRecords.ForEach(r =>
             {
                 r.Add(TimeStarted, timeStarted);
