@@ -63,6 +63,18 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
             var getActionsOutput = _transformer.Transform(retrieveGetActionsResponse);
             Assert.That(getActionsOutput.IsEmpty, Is.True);
         }
+        
+        [Test]
+        public void transform_OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput_Example2()
+        {
+            //when
+            var responseId = "1613489899-105709323_NoActions";
+            var retrieveGetActionsResponse =  TestUtils.LoadGetActionsResponseFromFile(responseId);
+            
+            //execute
+            var getActionsOutput = _transformer.Transform(retrieveGetActionsResponse);
+            Assert.That(getActionsOutput.IsEmpty, Is.True);
+        }
 
     }
 }

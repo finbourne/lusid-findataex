@@ -35,21 +35,21 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         ///  Creates an instrument source for a given for instrument ids that are constructed from the holdings
         /// of a portfolio within a given scope.
         /// </summary>
-        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
+        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InstrumentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
         /// <param name="instrumentSourceArgs">Set of | delimited pair of portfolio and scope (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])</param>
         /// <returns>A LusidPortfolioInstrumentSource instance</returns>
         public static LusidPortfolioInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {   
-            // parse portfolio and scopes from request arguments (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])
-            var portfoliosAndScopes = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
-            // LusidApiFactory to access LUSID to retrieve portfolio gholding data
+            // parse portfolio and scopes from request arguments (e.g. [Scope1|Port1, Scope2|Port2, Scope3|Port3])
+            var scopeAndPortfolioArgs = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
+            // LusidApiFactory to access LUSID to retrieve portfolio and holding data
             var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
             
             Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentArgs.InstrumentType} for the " +
-                              $"portfolios and scopes: {string.Join(',',portfoliosAndScopes)}");
+                              $"portfolios and scopes: {string.Join(',',scopeAndPortfolioArgs)}");
 
             // parse the input arguments into set of portfolio/scope pairs.
-            ISet<Tuple<string,string>> scopesAndPortfolios = portfoliosAndScopes.Select(p =>
+            ISet<Tuple<string,string>> scopesAndPortfolios = scopeAndPortfolioArgs.Select(p =>
             {
                 var scopeAndPortfolio = p.Split("|");
                 if (scopeAndPortfolio.Length != 2)
