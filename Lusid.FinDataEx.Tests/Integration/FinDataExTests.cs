@@ -418,6 +418,16 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.False(File.Exists(filepath));
         }
         
+        /* Maximum instruments threshold breached, */
+        [Test]
+        public void FinDataEx_GetData_OnBreachMaximumInstruments_ShouldFail()
+        {
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST -m 1";
+            var exitCode = FinDataEx.Main(commandArgs.Split(" "));
+            Assert.That(exitCode, Is.EqualTo(1));
+        }
+        
         /* Exception Handling */
         [Test]
         public void FinDataEx_OnException_ShouldReturnFailureExitCode()

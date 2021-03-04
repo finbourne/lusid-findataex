@@ -31,7 +31,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         ///  instrument ids.
         /// </summary>
         /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
-        /// <param name="instrumentSourceArgs">Application arguments passed in. Filepath (mandatory), delimiter (optional) and column number of the instrument id (optional)</param>
+        /// <param name="instrumentSourceArgs">Application arguments passed in. Filepath (mandatory), delimiter (optional) and column index of the instrument id (optional)</param>
         /// <returns>A CsvInstrumentSource instance</returns>
         public static CsvInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {
@@ -55,7 +55,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             }
             var filePath = sourceArgs[0];
             var delimiter = sourceArgs.ElementAtOrDefault(1) ?? ",";
-            Int32.TryParse(sourceArgs.ElementAtOrDefault(2) ?? "0", out var instrumentIdColIdx);
+            int.TryParse(sourceArgs.ElementAtOrDefault(2) ?? "0", out var instrumentIdColIdx);
             
             // apply AutoGen patterns on filename
             filePath = AutoGenPatternUtils.ApplyDateTimePatterns(filePath);
