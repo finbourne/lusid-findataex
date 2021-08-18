@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
 {
     [TestFixture]
-    public class GetDataResponseTransformerTest
+    public class DataResponseTransformerTest
     {
         private GetDataResponseTransformer _transformer;
 
@@ -20,26 +20,28 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         {
             //when
             var responseId = "1602149495-71386027_ValidInstruments";
-            var retrieveGetDataResponse =  TestUtils.LoadResponseFromFile(responseId);
+            var retrieveGetDataResponse =  TestUtils.LoadGetDataResponseFromFile(responseId);
             
             //execute
-            var getDataOutputs = _transformer.Transform(retrieveGetDataResponse);
-            var getDataOutput = getDataOutputs[0];
+            var getDataOutput = _transformer.Transform(retrieveGetDataResponse);
             
             //verify
-            Assert.That(getDataOutputs.Count, Is.EqualTo(1));
-            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"ID_BB_GLOBAL","PX_LAST"});
+            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
             
             Assert.That(getDataOutput.Records.Count, Is.EqualTo(2));
             CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
             {
                 {"ID_BB_GLOBAL" , "BBG000BPHFS9"},
-                {"PX_LAST", "209.830000"}
+                {"PX_LAST", "209.830000"},
+                {"timeStarted", "08/10/2020 09:31:52 +00:00"},
+                {"timeFinished", "08/10/2020 09:32:09 +00:00"}
             });
             CollectionAssert.AreEquivalent(getDataOutput.Records[1], new Dictionary<string,string>
             {
                 {"ID_BB_GLOBAL" , "BBG000BVPV84"},
-                {"PX_LAST", "3195.690000"}
+                {"PX_LAST", "3195.690000"},
+                {"timeStarted", "08/10/2020 09:31:52 +00:00"},
+                {"timeFinished", "08/10/2020 09:32:09 +00:00"}
             });
         }
         
@@ -48,21 +50,21 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         {
             //when
             var responseId = "1602161569-1051504982_OneBadInstrument";
-            var retrieveGetDataResponse =  TestUtils.LoadResponseFromFile(responseId);
+            var retrieveGetDataResponse =  TestUtils.LoadGetDataResponseFromFile(responseId);
             
             //execute
-            var getDataOutputs = _transformer.Transform(retrieveGetDataResponse);
-            var getDataOutput = getDataOutputs[0];
+            var getDataOutput = _transformer.Transform(retrieveGetDataResponse);
             
             //verify
-            Assert.That(getDataOutputs.Count, Is.EqualTo(1));
-            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"ID_BB_GLOBAL","PX_LAST"});
+            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
             
             Assert.That(getDataOutput.Records.Count, Is.EqualTo(1));
             CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
             {
                 {"ID_BB_GLOBAL" , "BBG000BVPV84"},
-                {"PX_LAST", "3195.690000"}
+                {"PX_LAST", "3195.690000"},
+                {"timeStarted", "08/10/2020 12:53:06 +00:00"},
+                {"timeFinished", "08/10/2020 12:53:24 +00:00"}
             });
         }
 

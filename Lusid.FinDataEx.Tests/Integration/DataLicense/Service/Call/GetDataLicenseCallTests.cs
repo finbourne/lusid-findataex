@@ -5,7 +5,7 @@ using NUnit.Framework;
 using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call.GetDataLicenseCallTest;
 
-namespace Lusid.FinDataEx.Tests.Integration.DataLicence.Service.Call
+namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service.Call
 {
     [TestFixture]
     public class GetDataLicenseCallTests

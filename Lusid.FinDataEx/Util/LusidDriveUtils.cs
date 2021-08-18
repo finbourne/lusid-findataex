@@ -1,35 +1,24 @@
 ﻿using System;
-using System.IO;
-using Lusid.Drive.Sdk.Api;
-using Lusid.Drive.Sdk.Client;
-using Lusid.Drive.Sdk.Utilities;
+using System.Linq;
 
 namespace Lusid.FinDataEx.Util
 {
     public class LusidDriveUtils
     {
-        public static byte[] LoadFileFromLusidDrive(string lusidDriveFileId)
+        public const string LusidDrivePathSeparator = "/";
+
+        public static Tuple<string, string> PathToFolderAndFile(string filepath)
         {
-            ILusidApiFactory factory = LusidApiFactoryBuilder.Build("secrets.json");
-            IFilesApi filesApi = factory.Api<IFilesApi>();
-            try
+            var splitPath = filepath.Split(LusidDrivePathSeparator);
+            // file is in root folder
+            if (splitPath.Length < 2)
             {
-                Console.WriteLine($"Loading byte[] from lusidDriveFileId={lusidDriveFileId}");
-                Stream responseDlFileStream = filesApi.DownloadFile(lusidDriveFileId);
-                MemoryStream ms = new MemoryStream();
-                responseDlFileStream.CopyTo(ms);
-                return ms.ToArray();
+                return Tuple.Create("", filepath);
             }
-            catch (ApiException e)
-            {
-                Console.WriteLine($"Error in retrieving byte[] for lusidDriveFileId={lusidDriveFileId}");
-                Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error code={e.ErrorCode}");
-                Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error content={e.ErrorContent}");
-                throw;
-            }
-            
+            // split into folder path and file name
+            return Tuple.Create(
+                string.Join(LusidDrivePathSeparator, splitPath.Take(splitPath.Length-1)), 
+                splitPath.Last());
         }
-        
-        
     }
 }

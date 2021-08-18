@@ -20,6 +20,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         /// <returns>Response with requested data for the instruments if it could be provided.</returns>
         T Get(Instruments instruments);
 
-        DataLicenseTypes.DataTypes GetDataLicenseDataType();
+        DataLicenseTypes.DataTypes GetDataType();
     }
 }

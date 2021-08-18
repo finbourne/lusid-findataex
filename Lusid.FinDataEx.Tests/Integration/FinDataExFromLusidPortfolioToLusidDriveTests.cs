@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace Lusid.FinDataEx.Tests.Integration
 {
-    public class FinDataExLusidDriveTests
+    public class FinDataExFromLusidPortfolioToLusidDriveTests : BaseLusidPortfolioTests
     {
         private string _lusidOutputDirPath;
         private string _lusidOutputDirName;
@@ -18,21 +18,24 @@ namespace Lusid.FinDataEx.Tests.Integration
         private IFilesApi _filesApi;
         private string outputDirId;
         private string _outputFilePath;
-        
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             _lusidOutputDirName = ("Test_Dir_FDE_" + Guid.NewGuid()).Substring(0,49);
             _lusidOutputDirPath = "/" + _lusidOutputDirName;
-            _outputFilePath = _lusidOutputDirPath + "/test_request_output.csv"; 
+            _outputFilePath = _lusidOutputDirPath + "/test_request_output.csv";
             _factory = LusidApiFactoryBuilder.Build("secrets.json");
             _foldersApi = _factory.Api<IFoldersApi>();
             _filesApi = _factory.Api<IFilesApi>();
         }
         
         [SetUp]
-        public void SetUp()
+        public override void SetUp()
         {
+            // base setup to create portfolios for test
+            base.SetUp();
+            
             // setup temp test folder in LUSID drive for each run
             outputDirId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidOutputDirName}'").Values.SingleOrDefault()?.Id;
             var createFolder = new CreateFolder("/", _lusidOutputDirName);
@@ -40,19 +43,26 @@ namespace Lusid.FinDataEx.Tests.Integration
         }
         
         [TearDown]
-        public void TearDown()
+        public override void TearDown()
         {
+            // base tear down to drop portfolios on test completion
+            base.TearDown();
+            
             // remove folders in drive at end of each test.
             // note if debugging ensure to clean lusid drive if terminate tests early
             _foldersApi.DeleteFolder(outputDirId);
         }
 
         [Test]
-        public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
+        public void FinDataEx_GetData_OnValidPortfolio_ShouldProduceDataFile()
         {
-            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
+            // amzn holding portfolio (BBG000BVPV84)
+            var amznHoldingPortfolio = $"{Scope}|{Portfolio}";
+            // msft holding portfolio (BBG000BPHFS9)
+            var msftHoldingPortfolio = $"{Scope}|{Portfolio2}";
+            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {amznHoldingPortfolio} {msftHoldingPortfolio} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
-
+            
             //verify
             var entries = GetFileAsStringsFromFolderInDrive(outputDirId);
             
@@ -61,7 +71,7 @@ namespace Lusid.FinDataEx.Tests.Integration
 
             // check instrument 1 entry
             var instrumentEntry1 = entries[1].Split("|");
-            Assert.That(instrumentEntry1[2], Is.EqualTo("BBG000BPHFS9"));
+            Assert.That(instrumentEntry1[2], Is.EqualTo("BBG000BVPV84"));
             // timestamps and price will change with each call so just check not empty
             Assert.That(instrumentEntry1[0], Is.Not.Empty);
             Assert.That(instrumentEntry1[1], Is.Not.Empty);
@@ -69,45 +79,12 @@ namespace Lusid.FinDataEx.Tests.Integration
             
             // check instrument 2 entry
             var instrumentEntry2 = entries[2].Split("|");
-            Assert.That(instrumentEntry2[2], Is.EqualTo("BBG000BVPV84"));
+            Assert.That(instrumentEntry2[2], Is.EqualTo("BBG000BPHFS9"));
             // price will change with each call so just check not empty
             Assert.That(instrumentEntry2[0], Is.Not.Empty);
             Assert.That(instrumentEntry2[1], Is.Not.Empty);
             Assert.That(instrumentEntry2[3], Is.Not.Empty);
         }
-        
-        [Test]
-        public void FinDataEx_GetData_OnValidBbgIdFromCsvInstrumentSource_ShouldProduceDataFile()
-        {
-            const string instrumentSourceDriveCsvPath = "/findataex-tests/testdata/real_instruments.csv";
-            var commandArgs = $"getdata -i DriveCsvInstrumentSource -a {instrumentSourceDriveCsvPath} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
-
-            FinDataEx.Main(commandArgs.Split(" "));
-
-            //verify
-            var entries = GetFileAsStringsFromFolderInDrive(outputDirId);
-            
-            // check headers
-            Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));
-
-            // check instrument 1 entry
-            var instrumentEntry1 = entries[1].Split("|");
-            Assert.That(instrumentEntry1[2], Is.EqualTo("BBG000BPHFS9"));
-            // timestamps and price will change with each call so just check not empty
-            Assert.That(instrumentEntry1[0], Is.Not.Empty);
-            Assert.That(instrumentEntry1[1], Is.Not.Empty);
-            Assert.That(instrumentEntry1[3], Is.Not.Empty);
-            
-            // check instrument 2 entry
-            var instrumentEntry2 = entries[2].Split("|");
-            Assert.That(instrumentEntry2[2], Is.EqualTo("BBG000BVPV84"));
-            // price will change with each call so just check not empty
-            Assert.That(instrumentEntry2[0], Is.Not.Empty);
-            Assert.That(instrumentEntry2[1], Is.Not.Empty);
-            Assert.That(instrumentEntry2[3], Is.Not.Empty);
-        }
-        
-        
 
         private string[] GetFileAsStringsFromFolderInDrive(string lusdiDriveFolderId)
         {

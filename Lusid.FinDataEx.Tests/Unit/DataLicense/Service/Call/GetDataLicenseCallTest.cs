@@ -158,11 +158,13 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
 
         internal static Instruments CreateTestInstruments()
         {
+            // MSFT
             var bbUniqueId1 = new Instrument
             {
                 id = "BBG000BPHFS9", type = InstrumentType.BB_GLOBAL, typeSpecified = true
             };
 
+            //AMZ
             var bbUniqueId2 = new Instrument
             {
                 id = "US0231351067", type = InstrumentType.ISIN, typeSpecified = true
@@ -198,7 +200,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
 
         private retrieveGetDataResponseResponse CreateRetrieveGetDataResponseResponse(string responseId)
         {
-            var retrieveGetDataResponse = TestUtils.LoadResponseFromFile(responseId);
+            var retrieveGetDataResponse = TestUtils.LoadGetDataResponseFromFile(responseId);
             var retrieveGetDataResponseResponse = new retrieveGetDataResponseResponse
             {
                 retrieveGetDataResponse = retrieveGetDataResponse

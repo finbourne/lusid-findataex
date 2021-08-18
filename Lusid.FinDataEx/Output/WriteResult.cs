@@ -1,6 +1,4 @@
-﻿﻿using System.Collections.Generic;
-
- namespace Lusid.FinDataEx.Output
+﻿﻿ namespace Lusid.FinDataEx.Output
 {
     /// <summary>
     /// Contains status and any error messages of writing FinDataOutput
@@ -9,24 +7,40 @@
     public class WriteResult
     {
         public readonly WriteResultStatus Status;
-        public readonly IList<string> FilesWritten;
-        public readonly IList<string> FailureMessages;
+        public readonly string FileOutputPath;
+        public readonly string FailureMessage;
 
-        public WriteResult(WriteResultStatus status, IList<string> filesWritten, IList<string> failureMessages)
+        private WriteResult(WriteResultStatus status, string fileOutputPath, string failureMessage)
         {
             Status = status;
-            FilesWritten = filesWritten;
-            FailureMessages = failureMessages;
+            FileOutputPath = fileOutputPath;
+            FailureMessage = failureMessage;
+        }
+
+        public static WriteResult Ok(string fileOutputPath)
+        {
+            return new WriteResult(WriteResultStatus.Ok, fileOutputPath, "");
+        }
+
+        public static WriteResult NotRun()
+        {
+            return new WriteResult(WriteResultStatus.NotRun, "", "");
+        }
+        
+        public static WriteResult Fail(string failureMessage)
+        {
+            return new WriteResult(WriteResultStatus.Fail, "", failureMessage);
         }
 
         public override string ToString()
         {
-            return $"{nameof(Status)}: {Status}, {nameof(FilesWritten)}: {FilesWritten}";
+            return $"{nameof(Status)}: {Status}, {nameof(FileOutputPath)}: {FileOutputPath}, {nameof(FailureMessage)}: {FailureMessage}";
         }
+        
     }
 
     public enum WriteResultStatus
     {
-        Ok, Fail
+        Ok, Fail, NotRun
     }
 }

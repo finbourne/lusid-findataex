@@ -10,16 +10,14 @@ namespace Lusid.FinDataEx.Output
     {
 
         public const char BbgDlDelimiter = '|';
-        public const string BbgDlOutputFileFormat = ".csv";
 
         /// <summary>
         /// Write financial data retrieved from BBG DLWS in form
         /// of FinDataOutputs to an output destination
         /// 
         /// </summary>
-        /// <param name="finDataOutputs">Financial data to write</param>
+        /// <param name="dataLicenseOutput">Financial data to write</param>
         /// <returns>Result status of the write</returns>
-        WriteResult Write(IEnumerable<DataLicenseOutput> finDataOutputs);
-
+        WriteResult Write(DataLicenseOutput dataLicenseOutput);
     }
 }

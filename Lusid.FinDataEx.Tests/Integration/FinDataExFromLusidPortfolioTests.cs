@@ -28,62 +28,54 @@ namespace Lusid.FinDataEx.Tests.Integration
             var scopePortfolio1 = $"{Scope}|{Portfolio}";
             var scopePortfolio2 = $"{Scope}|{Portfolio2}";
             var scopePortfolioSameHoldingP1 = $"{Scope}|{PortfolioSameHoldingAsP1}";
-            var commandArgs = $"GetData -p {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
-            
-            //verify
-            var expectedDataFiles = Directory.GetFiles(_tempOutputDir);
-            
-            // ensure only GetData file created and name is in correct format
-            // more than one file is a contaminated test and should be investigated
-            Assert.That(expectedDataFiles.Length, Is.EqualTo(1));
-            StringAssert.EndsWith("_GetData.csv", expectedDataFiles[0]);
 
             // ensure file is properly populated
-            var entries = File.ReadAllLines(expectedDataFiles[0]);
+            var entries = File.ReadAllLines(filepath);
             
             // check headers
-            Assert.That(entries[0], Is.EqualTo("ID_BB_GLOBAL|PX_LAST"));
+            Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));
 
             // check instrument 1 entry
             var instrumentEntry1 = entries[1].Split("|");
-            Assert.That(instrumentEntry1[0], Is.EqualTo("BBG000BVPV84"));
-            // price will change with each call so just check not empty
+            Assert.That(instrumentEntry1[2], Is.EqualTo("BBG000BVPV84"));
+            // timestamps and price will change with each call so just check not empty
             Assert.That(instrumentEntry1[0], Is.Not.Empty);
+            Assert.That(instrumentEntry1[1], Is.Not.Empty);
+            Assert.That(instrumentEntry1[3], Is.Not.Empty);
             
             // check instrument 2 entry
             var instrumentEntry2 = entries[2].Split("|");
-            Assert.That(instrumentEntry2[0], Is.EqualTo("BBG000BPHFS9"));
+            Assert.That(instrumentEntry2[2], Is.EqualTo("BBG000BPHFS9"));
             // price will change with each call so just check not empty
             Assert.That(instrumentEntry2[0], Is.Not.Empty);
+            Assert.That(instrumentEntry2[1], Is.Not.Empty);
+            Assert.That(instrumentEntry2[3], Is.Not.Empty);
         }
         
         [Test]
         public void FinDataEx_GetData_OnValidPortfoliosUsingIsin_ShouldProduceDataFile()
         {
             var scopePortfolio1 = $"{Scope}|{Portfolio}";
-            var commandArgs = $"GetData -p {scopePortfolio1} -t ISIN -o {_tempOutputDir} -d ID_BB_GLOBAL PX_LAST";
+            var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
+            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {scopePortfolio1} -t ISIN -f {filepath} -d ID_BB_GLOBAL PX_LAST";
             FinDataEx.Main(commandArgs.Split(" "));
-            
-            //verify
-            var expectedDataFiles = Directory.GetFiles(_tempOutputDir);
-            
-            // ensure only GetData file created and name is in correct format
-            // more than one file is a contaminated test and should be investigated
-            Assert.That(expectedDataFiles.Length, Is.EqualTo(1));
-            StringAssert.EndsWith("_GetData.csv", expectedDataFiles[0]);
 
             // ensure file is properly populated
-            var entries = File.ReadAllLines(expectedDataFiles[0]);
+            var entries = File.ReadAllLines(filepath);
             
             // check headers - querying BBG with ISIN but returning BBG Global Id (Figi)
-            Assert.That(entries[0], Is.EqualTo("ID_BB_GLOBAL|PX_LAST"));
+            Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));
 
             // check instrument 1 entry
             var instrumentEntry1 = entries[1].Split("|");
-            Assert.That(instrumentEntry1[0], Is.EqualTo("BBG000BVPV84"));
-            // price will change with each call so just check not empty
+            Assert.That(instrumentEntry1[2], Is.EqualTo("BBG000BVPV84"));
+            // timestamps and price will change with each call so just check not empty
             Assert.That(instrumentEntry1[0], Is.Not.Empty);
+            Assert.That(instrumentEntry1[1], Is.Not.Empty);
+            Assert.That(instrumentEntry1[3], Is.Not.Empty);
         }
     }
 }

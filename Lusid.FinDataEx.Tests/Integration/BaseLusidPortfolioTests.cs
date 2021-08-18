@@ -31,7 +31,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [SetUp]
         public virtual void SetUp()
         {
-            LusidApiFactory = LusidApiFactoryBuilder.Build("secrets_api.json");
+            LusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
             var transactionPortfoliosApi = LusidApiFactory.Api<TransactionPortfoliosApi>();
             
             // Create Portfolio with AMZN
