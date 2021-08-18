@@ -28,6 +28,9 @@ namespace Lusid.FinDataEx.Core
         /// <summary> contains all the request parameters required to fetch data from the vendor source</summary>
         public Dictionary<string,object> RequestBody { get; set;}
 
-        
+        public override string ToString()
+        {
+            return $"{nameof(Uid)}: {Uid}, {nameof(CallerId)}: {CallerId}, {nameof(Output)}: {Output}, {nameof(Vendor)}: {Vendor}, {nameof(ConnectorConfig)}: {ConnectorConfig}, {nameof(RequestBody)}: {RequestBody}";
+        }
     }
 }

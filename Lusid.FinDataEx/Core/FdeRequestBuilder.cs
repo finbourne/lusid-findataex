@@ -1,12 +1,17 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using Lusid.Drive.Sdk.Api;
+using Lusid.Drive.Sdk.Client;
+using Lusid.Drive.Sdk.Utilities;
 using Newtonsoft.Json;
 
 namespace Lusid.FinDataEx.Core
 {
     public class FdeRequestBuilder
     {
+        
         /// <summary>
-        ///  Construct a FdeRequest from a json file
+        ///  Construct an FdeRequest from a json file
         /// </summary>
         /// <param name="requestPath"> location of the json file FdeRequest</param>
         /// <returns></returns>
@@ -14,6 +19,35 @@ namespace Lusid.FinDataEx.Core
         {
             FdeRequest fdeRequest = JsonConvert.DeserializeObject<FdeRequest>(File.ReadAllText(requestPath));
             return fdeRequest;
+        }
+
+        /// <summary>
+        ///  Construct an FdeRequest from a json file that exists on LUSID drive
+        /// </summary>
+        /// <param name="lusidDriveFileId">lusid drive file id</param>
+        /// <returns></returns>
+        public FdeRequest LoadFromLusidDrive(string lusidDriveFileId)
+        {
+            ILusidApiFactory factory = LusidApiFactoryBuilder.Build("secrets.json");
+            IFilesApi filesApi = factory.Api<IFilesApi>();
+            try
+            {
+                Console.WriteLine($"Loading FDE request from lusidDriveFileId={lusidDriveFileId}");
+                Stream responseDlFileStream = filesApi.DownloadFile(lusidDriveFileId);
+                using (StreamReader sr = new StreamReader(responseDlFileStream))
+                {
+                    FdeRequest fdeRequest = JsonConvert.DeserializeObject<FdeRequest>(sr.ReadToEnd());
+                    return fdeRequest;
+                }
+            }
+            catch (ApiException e)
+            {
+                Console.WriteLine($"Error in processing fde request from lusidDriveFileId={lusidDriveFileId}");
+                Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error code={e.ErrorCode}");
+                Console.WriteLine($"Exception for lusidDriveFileId={lusidDriveFileId} error content={e.ErrorContent}");
+                throw;
+            }
+            
         }
     }
 }

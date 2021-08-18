@@ -13,10 +13,5 @@
     "sourceData" : {
       "reqCode" :"SomeJsonRequest"
     }
-  },
-  "outputConfig" : {
-    "format" : "lusidtools",
-    "url" : "./",
-    "lusidToolsConfig" : "./LusidToolsConfig/lusidtools_instructions.json"
   }
 }

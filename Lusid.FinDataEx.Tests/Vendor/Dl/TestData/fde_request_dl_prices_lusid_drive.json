@@ -1,17 +1,17 @@
 ﻿{
-  "uid" : "DL30001",
+  "uid" : "DL12345",
   "callerId" : "client_scheduler_uat_01",
   "vendor" : "DL",
-  "output" : "lusidtools",
+  "output" : "lusiddrive",
   "connectorConfig" : {
     "type" : "ftp",
-    "url" : "sftp://dl_ftp.com:22",
+    "url" : "lusiddrive://52ff9d39-ace8-4873-95dc-d288feda3011",
     "user" : "user_1",
     "password" : "pass_1"
   },
   "requestBody" : {
     "source" : "file",
-    "sourceData" : "Vendor/Dl/TestData/DlRequests/DL30001.req",
-    "requestType" : "CorpActions" 
+    "sourceData" : "Vendor/Dl/TestData/DlRequests/DL12345.req",
+    "requestType" : "Prices" 
   }
 }

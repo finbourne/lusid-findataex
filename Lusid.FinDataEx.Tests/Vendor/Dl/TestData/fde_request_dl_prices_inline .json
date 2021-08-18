@@ -56,10 +56,5 @@
         "USGG10YR Index|Ticker|"
       ]
     }
-  },
-  "outputConfig" : {
-    "format" : "lusidtools",
-    "url" : "./",
-    "lusidToolsConfig" : "./LusidToolsConfig/dl_all_lusidtools_instructions.json"
   }
 }

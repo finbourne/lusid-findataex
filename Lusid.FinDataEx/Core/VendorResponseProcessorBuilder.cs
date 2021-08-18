@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Lusid.Drive.Sdk.Utilities;
 
 namespace Lusid.FinDataEx.Core
 {
@@ -11,13 +12,14 @@ namespace Lusid.FinDataEx.Core
     public class FdeResponseProcessorBuilder
     {
         private const string LptResponseProcessor = "lusidtools";
-        
+        private const string LusidDriveResponseProcessor = "lusiddrive";
+
         
         public string OutputDir { get; }
 
         public FdeResponseProcessorBuilder(string outputDir)
         {
-            this.OutputDir = outputDir;
+            OutputDir = outputDir;
         }
 
         /// <summary>
@@ -28,14 +30,12 @@ namespace Lusid.FinDataEx.Core
         /// <exception cref="InvalidDataException"> if the requested vendor processor is not supported</exception>
         public IVendorResponseProcessor CreateFdeResponseProcessor(FdeRequest fdeRequest)
         {
-            switch (fdeRequest.Output)
+            return fdeRequest.Output switch
             {
-                case LptResponseProcessor:
-                    return new LptVendorResponseProcessor(OutputDir);
-                    break;
-            }
-
-            throw new InvalidDataException($"No response processor found for {fdeRequest.Output}");
+                LptResponseProcessor => new LptVendorResponseProcessor(OutputDir),
+                LusidDriveResponseProcessor => new LusidDriveVendorResponseProcessor(OutputDir, LusidApiFactoryBuilder.Build("secrets.json")),
+                _ => throw new InvalidDataException($"No response processor found for {fdeRequest.Output}")
+            };
         }
     }
 }
