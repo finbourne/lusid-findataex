@@ -77,17 +77,18 @@ namespace Lusid.FinDataEx
 
             LogRequest(instruments, dataLicenseCall);
             // call DL and write results to specified output (as long as not in safe mode)
-            if (!getOptions.Unsafe)
-            {
-                Console.WriteLine("--- SAFE MODE --- ");
-                Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS.");
-            }
-            else
+            if (getOptions.Unsafe)
             {
                 var dataLicenseOutput = dlDataService.Get(dataLicenseCall, instruments, ProgramTypes.Adhoc);
                 var writeResult = finDataOutputWriter.Write(dataLicenseOutput);
                 ProcessWriteResult(writeResult);
             }
+            else
+            {
+                Console.WriteLine("--- SAFE MODE --- ");
+                Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS.");
+            }
+            
         }
     
         /// <summary>

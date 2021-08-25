@@ -34,9 +34,17 @@ By default DLWS connection goes to "https://dlws.bloomberg.com/dlps". There is t
 
 Set the following environment variables for your DL certificate and password:
 
-* `BBG_DL_CERT` : Path to you DL certificate (e.g. /tmp/DLWSCert.p12)
-* `BBG_DL_PASS` : DL certificate password
+* `BBG_DL_CERT_PATH` : Path to you DL certificate (e.g. /tmp/DLWSCert.p12)
+* `BBG_DL_CERT_DATA` : Base64 encoded binary certificate
+* `BBG_DL_CERT_PASS` : DL certificate password
 
 ### DL Support
 
 First port of call should be the BBG DL [support docs.](https://service.bloomberg.com/portal/docs/dl). Access to logs requires a BBG Web Portal Support account. Speak to BBG account for manager for access. 
+
+
+Also - 
+Where are the cert and password in AWS
+What teh test pipeline looks like
+What How much exactly running the test suites costs
+How to add drive api to secrets.json

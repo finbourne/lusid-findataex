@@ -4,7 +4,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
-using Lusid.FinDataEx.Util;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Vendor
@@ -18,8 +17,9 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
     {
         
         public const string BbgDlAddress = "https://dlws.bloomberg.com/dlps";
-        public const string BbgDlCertEnvVar = "BBG_DL_CERT";
-        public const string BbgDlPassEnvVar = "BBG_DL_PASS";
+        public const string BbgDlCertPathEnvVar = "BBG_DL_CERT_PATH";
+        public const string BbgDlCertDataEnvVar = "BBG_DL_CERT_DATA";
+        public const string BbgDlCertPassEnvVar = "BBG_DL_CERT_PASS";
 
         /// <summary>
         ///  Creates a default BBG DLWS client using default bbg ws address 
@@ -102,21 +102,31 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
         
         private X509Certificate2 CreateCertificateFromEnvVar()
         {
-            var clientCertFilePath = Environment.GetEnvironmentVariable(BbgDlCertEnvVar);
-            if (clientCertFilePath == null)
+            var encodedClientCertContent = Environment.GetEnvironmentVariable(BbgDlCertDataEnvVar);
+            if (encodedClientCertContent == null)
             {
-                throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
-                                                $"certificate. Ensure you've set environment variable {BbgDlCertEnvVar}");
+                var clientCertPath = Environment.GetEnvironmentVariable(BbgDlCertPathEnvVar);
+                if (clientCertPath == null)
+                {
+                    throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client certificate. " +
+                    $"Ensure you've set environment variable {BbgDlCertPathEnvVar} or {BbgDlCertDataEnvVar}");
+                }
+
+                encodedClientCertContent = File.ReadAllText(clientCertPath);
             }
-            var clientCertPassword = Environment.GetEnvironmentVariable(BbgDlPassEnvVar);
+
+            var clientCertPassword = Environment.GetEnvironmentVariable(BbgDlCertPassEnvVar);
             if (clientCertPassword == null)
             {
-                throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
-                                                $"password. Ensure you've set environment variable {BbgDlPassEnvVar}");
+                throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client password. " +
+                    $"Ensure you've set environment variable {BbgDlCertPassEnvVar}");
             }
-            Console.WriteLine($"Retrieving BBG DL certificate {clientCertFilePath}");
-            return new X509Certificate2(clientCertFilePath, clientCertPassword);
+
+            Console.WriteLine($"Decoding BBG DL certificate...");
+
+            // The certificate should be base64 encoded from a raw binary format and thus needs decoding
+            var decodedClientCertContent = Convert.FromBase64String(encodedClientCertContent);
+            return new X509Certificate2(decodedClientCertContent, clientCertPassword);
         }
-        
     }
 }
