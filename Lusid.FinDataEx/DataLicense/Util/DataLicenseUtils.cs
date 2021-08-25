@@ -2,12 +2,36 @@
 using System.Text.Json;
 using Lusid.FinDataEx.DataLicense.Service;
 using PerSecurity_Dotnet;
+using Polly;
+using Polly.Wrap;
 
 namespace Lusid.FinDataEx.DataLicense.Util
 {
     public static class DataLicenseUtils
     {
-        public const int DefaultPollingInterval = 30000;
+        public static readonly TimeSpan DefaultPollingInterval = TimeSpan.FromSeconds(30);
+        public static readonly int DefaultPollingAttempts = 2;
+
+        /// <summary>
+        /// Poll for data availability. As per BBG DL sample recommendation.
+        /// Beware amending the poll interval due to BBG limitations. Especially in TEST.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pollingInterval"></param>
+        /// <returns></returns>
+        //
+        public static PolicyWrap<T> GetBBGRetryPolicy<T>(TimeSpan? pollingInterval = null) where T : PerSecurityResponse
+        {
+            var fallback = Policy
+                .HandleResult<T>(response => response.statusCode.code == DataLicenseService.DataNotAvailable)
+                .Fallback(() => throw new TimeoutException($"Failed to poll for BBG response - Status code was {DataLicenseService.DataNotAvailable}"));
+
+            var waitAndRetry = Policy
+                .HandleResult<T>(response => response.statusCode.code == DataLicenseService.DataNotAvailable)
+                .WaitAndRetry(DefaultPollingAttempts, _ => pollingInterval ?? DefaultPollingInterval);
+
+            return Policy.Wrap(fallback, waitAndRetry);
+        }
 
         /// <summary>
         /// Print the BBG DL response as JSON to allow the response to be reconstructed
@@ -88,9 +112,9 @@ namespace Lusid.FinDataEx.DataLicense.Util
                     {
                         for (int j = 0; j < retrieveGetActionsResponse.instrumentDatas[i].data.Length; j++)
                         {
-                            Console.WriteLine(": field =  "
+                            Console.WriteLine(": field = "
                                               + retrieveGetActionsResponse.instrumentDatas[i].data[j].field
-                                              + ", value =  "
+                                              + ", value = "
                                               + retrieveGetActionsResponse.instrumentDatas[i].data[j].value);
                         }
                     }

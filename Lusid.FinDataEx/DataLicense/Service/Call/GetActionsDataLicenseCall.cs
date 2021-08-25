@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Lusid.FinDataEx.DataLicense.Util;
 using PerSecurity_Dotnet;
 
@@ -17,16 +16,16 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
     {
         /* DO NOT change _PollingInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
-        private readonly int _pollingInterval;
+        private readonly TimeSpan _pollingInterval;
         
         private readonly PerSecurityWS _perSecurityWs;
         private readonly List<DataLicenseTypes.CorpActionType> _corporateActions;
 
-        public GetActionsDataLicenseCall(PerSecurityWS perSecurityWs, List<DataLicenseTypes.CorpActionType> corporateActions, int pollingInterval=DataLicenseUtils.DefaultPollingInterval)
+        public GetActionsDataLicenseCall(PerSecurityWS perSecurityWs, List<DataLicenseTypes.CorpActionType> corporateActions, TimeSpan? pollingInterval = null)
         {
             _corporateActions = corporateActions;
             _perSecurityWs = perSecurityWs;
-            _pollingInterval = pollingInterval;
+            _pollingInterval = pollingInterval ?? DataLicenseUtils.DefaultPollingInterval;
         }
 
         /// <summary>
@@ -40,11 +39,11 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             var getActionRequest = CreateGetActionsRequest(instruments);
             var submitGetActionsRequest = _perSecurityWs.submitGetActionsRequest(getActionRequest);
             var submitGetActionsResponse = submitGetActionsRequest.submitGetActionsResponse;
-            Console.WriteLine($"Submitted GetActionRequest. Response ID to check for {submitGetActionsResponse.responseId} with current status {submitGetActionsResponse.statusCode}");
+            Console.WriteLine($"Submitted GetActionRequest. Response ID to check for {submitGetActionsResponse.responseId}");
 
             // Await for response and retrieve once ready
             var getActionsRespReq = RetrieveGetActionsResponseRequest(submitGetActionsResponse);
-            var retrieveGetActionsResponse =  GetActionsResponseSync(getActionsRespReq);
+            var retrieveGetActionsResponse = GetActionsResponseSync(getActionsRespReq);
 
             //log output
             Console.WriteLine($"GetActions response for id={retrieveGetActionsResponse.responseId} and response-level status code={retrieveGetActionsResponse.statusCode.code}({retrieveGetActionsResponse.statusCode.description})");
@@ -60,17 +59,9 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
         
         private RetrieveGetActionsResponse GetActionsResponseSync(retrieveGetActionsResponseRequest getActionsRespReq)
         {
-            //Poll for data availability. As per BBG DL sample recommendation.
-            //Beware amending the poll interval due to BBG limitations. Especially in TEST.
-            RetrieveGetActionsResponse getActionsResponse;
-            do
-            {
-                Thread.Sleep(_pollingInterval);
-                var retrieveGetActionsResponse = _perSecurityWs.retrieveGetActionsResponse(getActionsRespReq);
-                getActionsResponse = retrieveGetActionsResponse.retrieveGetActionsResponse;
-            }
-            while (getActionsResponse.statusCode.code == DataLicenseService.DataNotAvailable);
-            return getActionsResponse;
+            return DataLicenseUtils
+                .GetBBGRetryPolicy<RetrieveGetActionsResponse>(_pollingInterval)
+                .Execute(() => _perSecurityWs.retrieveGetActionsResponse(getActionsRespReq).retrieveGetActionsResponse);
         }
         
         private submitGetActionsRequestRequest CreateGetActionsRequest(Instruments instruments)

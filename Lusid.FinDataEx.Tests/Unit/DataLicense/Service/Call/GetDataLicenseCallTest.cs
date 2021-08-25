@@ -3,6 +3,7 @@ using Lusid.FinDataEx.DataLicense.Service.Call;
 using Moq;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
+using System;
 
 namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
 {
@@ -16,7 +17,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
         public void SetUp()
         {
             _perSecurityWs = Mock.Of<PerSecurityWS>();
-            _getDataLicenseCall = new GetDataLicenseCall(_perSecurityWs, 10);
+            _getDataLicenseCall = new GetDataLicenseCall(_perSecurityWs, pollingInterval: TimeSpan.FromMilliseconds(10));
         }
 
         [Test]
@@ -48,7 +49,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
                 .Callback<retrieveGetDataResponseRequest>(r => retrieveGetDataResponseRequest = r);
             
             //execute test
-            var retrieveGetDataResponse =  _getDataLicenseCall.Get(testInstruments);
+            var retrieveGetDataResponse = _getDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetDataResponse.instrumentDatas;
             var getDataFields = retrieveGetDataResponse.fields;
 
@@ -99,7 +100,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
                 .Callback<retrieveGetDataResponseRequest>(r => retrieveGetDataResponseRequest = r);
             
             //execute test
-            var retrieveGetDataResponse =  _getDataLicenseCall.Get(testInstruments);
+            var retrieveGetDataResponse = _getDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetDataResponse.instrumentDatas;
             var getDataFields = retrieveGetDataResponse.fields;
 

@@ -10,6 +10,8 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service
 {
+    [TestFixture]
+    [Explicit]
     public class DataLicenseServiceTests
     {
 

@@ -3,17 +3,16 @@ using System.IO;
 using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Transform;
 using Lusid.FinDataEx.Output;
-using Lusid.FinDataEx.Tests.Unit;
 using NUnit.Framework;
 using static Lusid.FinDataEx.Tests.Unit.TestUtils;
 
-namespace Lusid.FinDataEx.Tests.Integration.Output
+namespace Lusid.FinDataEx.Tests.Unit.Output
 {
     [TestFixture]
     public class LocalFilesystemOutputWriterTests
     {
         
-        private static readonly string TempOutputDir = $"TempTestDir_{nameof(FinDataExTests)}";
+        private static readonly string TempOutputDir = $"TempTestDir_{nameof(LocalFilesystemOutputWriterTests)}";
         private readonly string _outputFilePath = TempOutputDir + Path.DirectorySeparatorChar + "Output_{REQUEST_ID}.csv";
         private LocalFilesystemOutputWriter _outputWriter;
         [SetUp]
@@ -34,9 +33,9 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         {
             var finDataOutput = CreateFinDataEntry("id_1_GetData");
 
-            var writeResult =  _outputWriter.Write(finDataOutput);
+            var writeResult = _outputWriter.Write(finDataOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FileOutputPath, Is.EqualTo("TempTestDir_FinDataExTests\\Output_id_1_GetData.csv"));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo($"{TempOutputDir}\\Output_id_1_GetData.csv"));
             Assert.That(writeResult.FileOutputPath, Does.Exist);
             
             // ensure file is properly populated
@@ -51,12 +50,12 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         public void Write_OnValidCorpActionData_ShouldWriteToOutputDir()
         {
             var responseId = "1603798418-1052073180_ValidActions";
-            var retrieveGetActionResponse =  LoadGetActionsResponseFromFile(responseId);
+            var retrieveGetActionResponse = LoadGetActionsResponseFromFile(responseId);
             var getActionOutput = new GetActionResponseTransformer().Transform(retrieveGetActionResponse);
 
-            var writeResult =  _outputWriter.Write(getActionOutput);
+            var writeResult = _outputWriter.Write(getActionOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FileOutputPath, Is.EqualTo("TempTestDir_FinDataExTests\\Output_1603798418-1052073180_ValidActions.csv"));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo($"{TempOutputDir}\\Output_1603798418-1052073180_ValidActions.csv"));
             Assert.That(writeResult.FileOutputPath, Does.Exist);
             
             // ensure file is properly populated
@@ -73,7 +72,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             var records = new List<Dictionary<string, string>>();
             var finDataOutput = new DataLicenseOutput("id_GetData", headers, records);
 
-            var writeResult =  _outputWriter.Write(finDataOutput);
+            var writeResult = _outputWriter.Write(finDataOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             
             // ensure file is properly populated
@@ -90,7 +89,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         {
             var finDataOutput = DataLicenseOutput.Empty("requestId_that_returned_no_data");
 
-            var writeResult =  _outputWriter.Write(finDataOutput);
+            var writeResult = _outputWriter.Write(finDataOutput);
             
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
             Assert.False(Directory.EnumerateFileSystemEntries(TempOutputDir).Any());
@@ -103,7 +102,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             _outputWriter = new LocalFilesystemOutputWriter(nonExistingPath);
 
             DataLicenseOutput finDataOutput = CreateFinDataEntry("id_1_GetData");
-            var writeResult =  _outputWriter.Write(finDataOutput);
+            var writeResult = _outputWriter.Write(finDataOutput);
             
             //verify
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Fail));

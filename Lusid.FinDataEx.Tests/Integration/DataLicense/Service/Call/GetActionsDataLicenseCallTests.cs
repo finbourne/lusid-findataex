@@ -9,6 +9,7 @@ using PerSecurity_Dotnet;
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service.Call
 {
     [TestFixture]
+    [Explicit]
     public class GetActionsDataLicenseCallTests
     {
 
@@ -28,9 +29,9 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service.Call
             _getActionsDataLicenseCall = new GetActionsDataLicenseCall(_perSecurityWs, 
                 new List<DataLicenseTypes.CorpActionType>() {DataLicenseTypes.CorpActionType.STOCK_SPLT, DataLicenseTypes.CorpActionType.DVD_CASH, DataLicenseTypes.CorpActionType.DVD_STOCK});
             var testInstruments = CreateCorpActionTestInstrument();
-            
+
             //execute
-            var retrieveGetActionsResponse =  _getActionsDataLicenseCall.Get(testInstruments);
+            var retrieveGetActionsResponse = _getActionsDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetActionsResponse.instrumentDatas;
 
             //verify

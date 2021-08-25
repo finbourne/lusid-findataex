@@ -1,15 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.DataLicense.Service.Instrument;
+using Moq;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
 {
     [TestFixture]
+    [Explicit]
     public class CsvInstrumentSourceTest
     {
-        
         [Test]
         public void Get_OnSingleColumnCsv_ShouldReturnDlInstruments()
         {

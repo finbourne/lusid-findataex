@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using CommandLine;
-using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Service.Instrument;
@@ -19,6 +17,9 @@ namespace Lusid.FinDataEx
         private const int SuExitCode = 0;
         private const int FaBadArgExitCode = 1;
         private const int FaProcessingExitCode = 1;
+
+        private static readonly Sdk.Utilities.ILusidApiFactory LusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets.json");
+        private static readonly Drive.Sdk.Utilities.ILusidApiFactory DriveApiFactory = Drive.Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets.json");
 
         public static int Main(string[] args)
         {
@@ -76,7 +77,7 @@ namespace Lusid.FinDataEx
 
             LogRequest(instruments, dataLicenseCall);
             // call DL and write results to specified output (as long as not in safe mode)
-            if (getOptions.SafeMode)
+            if (!getOptions.Unsafe)
             {
                 Console.WriteLine("--- SAFE MODE --- ");
                 Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS.");
@@ -118,8 +119,7 @@ namespace Lusid.FinDataEx
         {
             return fileSystem switch
             {
-                FileSystem.Lusid => new LusidDriveOutputWriter(outputDirectory,
-                    LusidApiFactoryBuilder.Build("secrets.json")),
+                FileSystem.Lusid => new LusidDriveOutputWriter(outputDirectory, DriveApiFactory),
                 FileSystem.Local => new LocalFilesystemOutputWriter(outputDirectory),
                 _ => throw new ArgumentOutOfRangeException(nameof(fileSystem), fileSystem, null)
             };
@@ -183,88 +183,14 @@ namespace Lusid.FinDataEx
                 nameof(InstrumentSource) =>
                     InstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 nameof(LusidPortfolioInstrumentSource) =>
-                    LusidPortfolioInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
+                    LusidPortfolioInstrumentSource.Create(LusidApiFactory, instrumentArgs, dataOptions.InstrumentSourceArguments),
                 nameof(CsvInstrumentSource) =>
                     CsvInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 nameof(DriveCsvInstrumentSource) =>
-                    DriveCsvInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
+                    DriveCsvInstrumentSource.Create(DriveApiFactory, instrumentArgs, dataOptions.InstrumentSourceArguments),
                 _ => throw new ArgumentOutOfRangeException(
                     $"{dataOptions.InstrumentSource} has no supported implementation.")
             };
         }
-    }
-
-    /// <summary>
-    /// Base Options for all BBG DL calls
-    /// 
-    /// </summary>
-    public class DataLicenseOptions
-    {
-        [Option('f', "filepath", Required = true, 
-            HelpText = "File path to write DLWS output. Include  \"{REQUEST_ID}\", \"{AS_AT}\", \"{AS_AT_DATE}\" in the filename " +
-                       " to include the DL request id timestamps respectively in the filename (e.g. " +
-                       "/home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv")]
-        public string OutputFilePath { get; set; }
-        
-        [Option('s', "filesystem", Required = false, Default = FileSystem.Local, 
-            HelpText = "Filesystems to write DL results (Lusid or Local)")]
-        public FileSystem FileSystem { get; set; }
-        
-        [Option('t', "instrument_id_type", Required = false, Default = InstrumentType.BB_GLOBAL, 
-        HelpText = "Type of instrument ids being input (BB_GLOBAL (Figi), ISIN, CUSIP)")]
-        public InstrumentType InstrumentIdType { get; set; }
-        
-        [Option( 'y', "yellowkey", Required = false,
-            HelpText = "Yellow key required if querying by BBG by TICKER. YellowKey maps to MarketSector in DLWS.")]
-        public MarketSector YellowKey { get; set; }
-        
-        /*
-         * Start Instrument Sources :
-         * Input arguments on where to source instruments to request data against.
-         * Using SetName mutual exclusivity as only one instrument source is supported per request.
-         */
-        
-        [Option( 'i', "instrument-source", Required = true, Default = "InstrumentSource",
-            HelpText = "Instrument source to create the instruments to query against DataLicense. Supported types include" +
-                       " : [InstrumentSource, LusidPortfolioInstrumentSource, FromDriveCsvInstrumentSource, FromLocalCsvInstrumentSource]." +
-                       " Developers can add custom instrument sources as required, see FinDataEx readme for details.")]
-        public string InstrumentSource { get; set; }
-        
-        [Option( 'a', "instrument-source-args", Required = false,
-            HelpText = "Arguments passed to the instrument source for retrieving instruments to query against DataLicense.")]
-        public IEnumerable<string> InstrumentSourceArguments { get; set; }
-
-        /*
-         *  Safety and Control Options :
-         *  Given DLWS charges per call adding features to allow restrictions in number of instruments to query.
-         *  Safemode allow request construction without sending to DL for testing and debugging.
-         */
-        
-        [Option("safemode", Default = false, HelpText = "Running in safe mode will simply print the DL request without making the actual call to BBG.")]
-        public bool SafeMode { get; set; }
-
-        [Option('m', "max_instruments", Default = 50, HelpText = "Set the maximum number of instruments allowed in a BBG DLWS call. Especially important in" +
-                                                                 " production environments that are billed per instrument.")]
-        public int MaxInstruments { get; set; }
-    }
-
-    /// <summary>
-    /// Options for GetData calls to BBG
-    /// </summary>
-    [Verb ("getdata", HelpText = "BBG DL request to retrieve data for requested set of fields and insturments.")]
-    class GetDataOptions : DataLicenseOptions
-    {
-        [Option('d', "datafields", Required = true, HelpText = "BBG DL fields to retrieve. Only relevant for GetData requests.")]
-        public IEnumerable<string> DataFields { get; set; }
-    }
-    
-    /// <summary>
-    /// Options for GetAction calls to BBG
-    /// </summary>
-    [Verb ("getactions", HelpText = "BBG DL request to retrieve corporate actions for requested instruments.")]
-    class GetActionsOptions : DataLicenseOptions
-    {
-        [Option('c', "corpactions", Required = true, HelpText = "The corporate action types to retrieve (e.g. DVD_CASH, STOCK_SPLIT, etc...)")]
-        public IEnumerable<CorpActionType> CorpActionTypes { get; set; }
     }
 }
