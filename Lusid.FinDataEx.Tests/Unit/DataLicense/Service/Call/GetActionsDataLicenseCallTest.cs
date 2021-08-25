@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Service.Call;
 using Lusid.FinDataEx.DataLicense.Util;
@@ -21,7 +22,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
             _getActionDataLicenseCall = new GetActionsDataLicenseCall(
                 _perSecurityWs,
                 new List<DataLicenseTypes.CorpActionType>() {DataLicenseTypes.CorpActionType.STOCK_SPLT, DataLicenseTypes.CorpActionType.DVD_CASH, DataLicenseTypes.CorpActionType.DVD_STOCK},
-            10);
+                TimeSpan.FromMilliseconds(10));
         }
 
         [Test]
@@ -53,7 +54,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
                 .Callback<retrieveGetActionsResponseRequest>(r => retrieveGetDataResponseRequest = r);
             
             //execute test
-            var retrieveGetActionsResponse =  _getActionDataLicenseCall.Get(testInstruments);
+            var retrieveGetActionsResponse = _getActionDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetActionsResponse.instrumentDatas;
 
             // verify correct submit request was constructed

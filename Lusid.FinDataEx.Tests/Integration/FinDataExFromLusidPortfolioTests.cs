@@ -1,9 +1,11 @@
 ﻿using System.IO;
 using NUnit.Framework;
-using static Lusid.FinDataEx.Tests.Unit.TestUtils
-    ;
+using static Lusid.FinDataEx.Tests.Unit.TestUtils;
+
 namespace Lusid.FinDataEx.Tests.Integration
 {
+    [TestFixture]
+    [Explicit]
     public class FinDataExFromLusidPortfolioTests : BaseLusidPortfolioTests
     {
         private readonly string _tempOutputDir = $"TempTestDir_{nameof(FinDataExTests)}";
@@ -29,7 +31,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             var scopePortfolio2 = $"{Scope}|{Portfolio2}";
             var scopePortfolioSameHoldingP1 = $"{Scope}|{PortfolioSameHoldingAsP1}";
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {scopePortfolio1} {scopePortfolio2} {scopePortfolioSameHoldingP1} -f {filepath} -d ID_BB_GLOBAL PX_LAST --unsafe";
             FinDataEx.Main(commandArgs.Split(" "));
 
             // ensure file is properly populated
@@ -60,7 +62,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             var scopePortfolio1 = $"{Scope}|{Portfolio}";
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {scopePortfolio1} -t ISIN -f {filepath} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {scopePortfolio1} -t ISIN -f {filepath} -d ID_BB_GLOBAL PX_LAST --unsafe";
             FinDataEx.Main(commandArgs.Split(" "));
 
             // ensure file is properly populated

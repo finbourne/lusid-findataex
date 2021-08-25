@@ -16,21 +16,19 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         }
 
         [Test]
-        public void transform_OnValidCorpActions_ShouldProduceOutput()
+        public void OnValidCorpActions_ShouldProduceOutput()
         {
-            //when
             var responseId = "1603798418-1052073180_ValidActions";
-            var retrieveGetActionResponse =  TestUtils.LoadGetActionsResponseFromFile(responseId);
-            
-            //execute
+            var retrieveGetActionResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
+
             var getActionOutput = _transformer.Transform(retrieveGetActionResponse);
-            
-            //verify data field headers from corp action (specific to corp action type)
+
+            // Verify data field headers from corp action (specific to corp action type)
             CollectionAssert.IsSupersetOf(getActionOutput.Header, new List<string>{"CP_RECORD_DT","CP_PAY_DT","CP_FREQ",
                 "CP_NET_AMT","CP_TAX_AMT","CP_GROSS_AMT","CP_FRANKED_AMT", "CP_DVD_CRNCY", "CP_DVD_TYP","CP_ELECTION_DT", 
                 "CP_ACTION_STATUS"});
-            
-            //verify standard corp action field headers from corp action ( general to any corp action type)
+
+            // Verify standard corp action field headers from corp action ( general to any corp action type)
             CollectionAssert.IsSupersetOf(getActionOutput.Header, new List<string>{"announceDate","bbGlobal","companyName",
                 "currency","effectiveDate","mnemonic","CP_FRANKED_AMT", "CP_DVD_CRNCY", "CP_DVD_TYP","CP_ELECTION_DT", 
                 "CP_ACTION_STATUS"});
@@ -51,13 +49,13 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
             Assert.That(corpActionRecord["timeStarted"], Is.EqualTo("27/10/2020 18:06:20 +00:00"));
             Assert.That(corpActionRecord["timeFinished"], Is.EqualTo("27/10/2020 18:06:22 +00:00"));
         }
-        
+
         [Test]
-        public void transform_OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput()
+        public void OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput()
         {
             //when
             var responseId = "1603900538-71379765_NoActions";
-            var retrieveGetActionsResponse =  TestUtils.LoadGetActionsResponseFromFile(responseId);
+            var retrieveGetActionsResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
             
             //execute
             var getActionsOutput = _transformer.Transform(retrieveGetActionsResponse);
@@ -65,12 +63,12 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         }
         
         [Test]
-        public void transform_OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput_Example2()
+        public void OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput_Example2()
         {
             //when
             var responseId = "1613489899-105709323_NoActions";
-            var retrieveGetActionsResponse =  TestUtils.LoadGetActionsResponseFromFile(responseId);
-            
+            var retrieveGetActionsResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
+
             //execute
             var getActionsOutput = _transformer.Transform(retrieveGetActionsResponse);
             Assert.That(getActionsOutput.IsEmpty, Is.True);

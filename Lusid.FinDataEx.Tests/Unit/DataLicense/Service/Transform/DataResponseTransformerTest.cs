@@ -20,7 +20,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         {
             //when
             var responseId = "1602149495-71386027_ValidInstruments";
-            var retrieveGetDataResponse =  TestUtils.LoadGetDataResponseFromFile(responseId);
+            var retrieveGetDataResponse = TestUtils.LoadGetDataResponseFromFile(responseId);
             
             //execute
             var getDataOutput = _transformer.Transform(retrieveGetDataResponse);
@@ -50,7 +50,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         {
             //when
             var responseId = "1602161569-1051504982_OneBadInstrument";
-            var retrieveGetDataResponse =  TestUtils.LoadGetDataResponseFromFile(responseId);
+            var retrieveGetDataResponse = TestUtils.LoadGetDataResponseFromFile(responseId);
             
             //execute
             var getDataOutput = _transformer.Transform(retrieveGetDataResponse);

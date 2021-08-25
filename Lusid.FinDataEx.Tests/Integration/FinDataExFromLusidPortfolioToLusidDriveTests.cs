@@ -9,6 +9,8 @@ using NUnit.Framework;
 
 namespace Lusid.FinDataEx.Tests.Integration
 {
+    [TestFixture]
+    [Explicit]
     public class FinDataExFromLusidPortfolioToLusidDriveTests : BaseLusidPortfolioTests
     {
         private string _lusidOutputDirPath;
@@ -60,7 +62,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             var amznHoldingPortfolio = $"{Scope}|{Portfolio}";
             // msft holding portfolio (BBG000BPHFS9)
             var msftHoldingPortfolio = $"{Scope}|{Portfolio2}";
-            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {amznHoldingPortfolio} {msftHoldingPortfolio} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i LusidPortfolioInstrumentSource -a {amznHoldingPortfolio} {msftHoldingPortfolio} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST --unsafe";
             FinDataEx.Main(commandArgs.Split(" "));
             
             //verify

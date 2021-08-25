@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using static Lusid.FinDataEx.Tests.Unit.TestUtils
-    ;
+using static Lusid.FinDataEx.Tests.Unit.TestUtils;
+
 namespace Lusid.FinDataEx.Tests.Integration
 {
+    [TestFixture]
+    [Explicit]
     public class FinDataExTests
     {
         private readonly string _tempOutputDir = $"TempTestDir_{nameof(FinDataExTests)}";
@@ -27,7 +27,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
             
             // ensure ran to success
@@ -60,7 +60,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_ForFxUsingTicker_ShouldProduceFxRateFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = new[] {"getdata", "-f", filepath, "-i", "InstrumentSource", "-a", "GBP", "USD", "-y", "Curncy", "-t", "TICKER", "-d", "TICKER", "PX_LAST"}; 
+            var commandArgs = new[] {"getdata", "-f", filepath, "-i", "InstrumentSource", "-a", "GBP", "USD", "-y", "Curncy", "-t", "TICKER", "-d", "TICKER", "PX_LAST", "--unsafe"}; 
             var exitCode = FinDataEx.Main(commandArgs.ToArray());
             
             // ensure ran to success
@@ -90,7 +90,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_ForEquityInstrumentMaster_ShouldProduceEqInsMasterFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
             
             // ensure ran to success
@@ -140,7 +140,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var commandArgs = $"getdata -i InstrumentSource -a BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
-                              $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
+                              $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
 
             // ensure ran to success
@@ -208,7 +208,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 BBG00HPJL7D0 BBG00RN2M5S4 -f {filepath} -d ID_BB_GLOBAL TICKER ID_ISIN ID_CUSIP SECURITY_TYP CRNCY COUNTRY_ISO EXCH_CODE INDUSTRY_SECTOR AMT_ISSUED SECURITY_DES " +
-                              $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION";
+                              $"ISSUE_DT MATURITY CPN PAR_AMT CPN_CRNCY CPN_FREQ DAY_CNT_DES FLT_CPN_CONVENTION --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
             
             // ensure ran to success
@@ -326,7 +326,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var instrumentSourceCsv = Path.Combine("Integration", "DataLicense", "Instrument", "TestData", "real_instruments.csv");
             
-            var commandArgs = $"getdata -i CsvInstrumentSource -a {instrumentSourceCsv} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i CsvInstrumentSource -a {instrumentSourceCsv} -f {filepath} -d ID_BB_GLOBAL PX_LAST --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
             
             // ensure ran to success
@@ -360,7 +360,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var instrumentSourceCsv = Path.Combine("Integration", "DataLicense", "Instrument", "TestData", "currency_instruments.csv");
-            var commandArgs = new[] {"getdata", "-f", filepath, "-i", "CsvInstrumentSource", "-a", instrumentSourceCsv, "-y", "Curncy", "-t", "TICKER", "-d", "TICKER", "PX_LAST"}; 
+            var commandArgs = new[] {"getdata", "-f", filepath, "-i", "CsvInstrumentSource", "-a", instrumentSourceCsv, "-y", "Curncy", "-t", "TICKER", "-d", "TICKER", "PX_LAST", "--unsafe"}; 
             var exitCode = FinDataEx.Main(commandArgs.ToArray());
             
             // ensure ran to success
@@ -391,7 +391,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetAction_OnValidEquityBbgId_ShouldProduceCorpActionFile()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getaction -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -c DVD_CASH DVD_STOCK STOCK_SPLT";
+            var commandArgs = $"getactions -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -c DVD_CASH DVD_STOCK STOCK_SPLT --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
             // ensure ran to success
             Assert.That(exitCode, Is.EqualTo(0));
@@ -408,7 +408,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             var instrumentSourceCsv = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",
                 "empty_instruments.csv"});
             
-            var commandArgs = $"getdata -i CsvInstrumentSource -a {instrumentSourceCsv} -f {filepath} -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i CsvInstrumentSource -a {instrumentSourceCsv} -f {filepath} -d ID_BB_GLOBAL PX_LAST --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
             
             // ensure ran to success
@@ -423,7 +423,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         public void FinDataEx_GetData_OnBreachMaximumInstruments_ShouldFail()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
-            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST -m 1";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {filepath} -d ID_BB_GLOBAL PX_LAST -m 1 --unsafe";
             var exitCode = FinDataEx.Main(commandArgs.Split(" "));
             Assert.That(exitCode, Is.EqualTo(1));
         }
@@ -432,7 +432,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_OnException_ShouldReturnFailureExitCode()
         {
-            var missingAllRequiredArgs = $"getdata -i InstrumentSource";
+            var missingAllRequiredArgs = $"getdata -i InstrumentSource --unsafe";
             var exitCode = FinDataEx.Main(missingAllRequiredArgs.Split(" "));
             Assert.That(exitCode, Is.EqualTo(1));
         }

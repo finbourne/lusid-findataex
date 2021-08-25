@@ -55,7 +55,7 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
         /// <returns></returns>
         public PerSecurityWS CreateDefault(string bbgDlAddress, string bbgDlCert, string bbgDlPass)
         {
-            var certificate =  new X509Certificate2(bbgDlCert, bbgDlPass);
+            var certificate = new X509Certificate2(bbgDlCert, bbgDlPass);
             return Create(bbgDlAddress, certificate);
         }
 

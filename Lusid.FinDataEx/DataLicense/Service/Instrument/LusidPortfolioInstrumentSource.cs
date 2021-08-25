@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Lusid.Sdk.Utilities;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
-using Lusid.Sdk.Utilities;
 using PerSecurity_Dotnet;
 
 [assembly: InternalsVisibleTo("Lusid.FinDataEx.Tests", AllInternalsVisible = true)]
@@ -38,13 +38,13 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InstrumentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
         /// <param name="instrumentSourceArgs">Set of | delimited pair of portfolio and scope (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])</param>
         /// <returns>A LusidPortfolioInstrumentSource instance</returns>
-        public static LusidPortfolioInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
+        public static LusidPortfolioInstrumentSource Create(ILusidApiFactory factory, InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {   
             // parse portfolio and scopes from request arguments (e.g. [Scope1|Port1, Scope2|Port2, Scope3|Port3])
             var scopeAndPortfolioArgs = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
             // LusidApiFactory to access LUSID to retrieve portfolio and holding data
-            var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
-            
+            //var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
+
             Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentArgs.InstrumentType} for the " +
                               $"portfolios and scopes: {string.Join(',',scopeAndPortfolioArgs)}");
 
@@ -63,7 +63,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             // currently only support holdings as at latest date. if required to support historical dates can modify
             // to include effectiveAt as part of instrumentSourceArgs.
             var effectiveAt = DateTimeOffset.UtcNow;
-            return new LusidPortfolioInstrumentSource(lusidApiFactory, instrumentArgs, scopesAndPortfolios, effectiveAt);
+            return new LusidPortfolioInstrumentSource(factory, instrumentArgs, scopesAndPortfolios, effectiveAt);
         }
 
         /// <summary>

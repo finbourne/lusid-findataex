@@ -2,29 +2,42 @@
 using System.IO;
 using System.Linq;
 using Lusid.Drive.Sdk.Api;
+using Lusid.Drive.Sdk.Client;
 using Lusid.Drive.Sdk.Model;
 using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.Output;
 using NUnit.Framework;
+using Polly;
 
 namespace Lusid.FinDataEx.Tests.Integration
 {
+    [TestFixture]
+    [Explicit]
     public class FinDataExLusidDriveTests
     {
-        private string _lusidOutputDirPath;
-        private string _lusidOutputDirName;
+        private const string OutputFileName = "test_request_output.csv";
+        private const string InputFileName = "real_instruments.csv";
+
+        private string _lusidTestDirPath;
+        private string _lusidTestDirName;
+
         private ILusidApiFactory _factory;
         private IFoldersApi _foldersApi;
         private IFilesApi _filesApi;
-        private string outputDirId;
+
+        private string _testDirId;
+        private string _inputFilePath;
         private string _outputFilePath;
-        
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _lusidOutputDirName = ("Test_Dir_FDE_" + Guid.NewGuid()).Substring(0,49);
-            _lusidOutputDirPath = "/" + _lusidOutputDirName;
-            _outputFilePath = _lusidOutputDirPath + "/test_request_output.csv"; 
+            _lusidTestDirName = "Test_Dir_FDE_" + Guid.NewGuid().ToString().Substring(0,36);
+            _lusidTestDirPath = "/" + _lusidTestDirName;
+
+            _inputFilePath = _lusidTestDirPath + "/" + InputFileName;
+            _outputFilePath = _lusidTestDirPath + "/" + OutputFileName;
+
             _factory = LusidApiFactoryBuilder.Build("secrets.json");
             _foldersApi = _factory.Api<IFoldersApi>();
             _filesApi = _factory.Api<IFilesApi>();
@@ -33,10 +46,21 @@ namespace Lusid.FinDataEx.Tests.Integration
         [SetUp]
         public void SetUp()
         {
-            // setup temp test folder in LUSID drive for each run
-            outputDirId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidOutputDirName}'").Values.SingleOrDefault()?.Id;
-            var createFolder = new CreateFolder("/", _lusidOutputDirName);
-            outputDirId ??= _foldersApi.CreateFolder(createFolder).Id;
+            // Setup temp test folder in LUSID drive for each run
+            _testDirId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidTestDirName}'").Values.SingleOrDefault()?.Id;
+            _testDirId ??= _foldersApi.CreateFolder(new CreateFolder("/", _lusidTestDirName)).Id;
+
+            // Upload a test file to the folder
+            var testDataFile = File.ReadAllBytes(Path.Combine("Integration", "DataLicense", "Instrument", "TestData", InputFileName));
+            var fileId = _filesApi.CreateFile(InputFileName, _lusidTestDirPath, testDataFile.Length, testDataFile).Id;
+
+            // Wait for the file to become available for download
+            Policy.Handle<ApiException>()
+                .WaitAndRetry(5, attempts => TimeSpan.FromSeconds(10))
+                .Execute(() =>
+                {
+                    using var _ = _filesApi.DownloadFile(fileId);
+                });
         }
         
         [TearDown]
@@ -44,17 +68,17 @@ namespace Lusid.FinDataEx.Tests.Integration
         {
             // remove folders in drive at end of each test.
             // note if debugging ensure to clean lusid drive if terminate tests early
-            _foldersApi.DeleteFolder(outputDirId);
+            _foldersApi.DeleteFolder(_testDirId);
         }
 
         [Test]
         public void FinDataEx_GetData_OnValidBbgId_ShouldProduceDataFile()
         {
-            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
+            var commandArgs = $"getdata -i InstrumentSource -a BBG000BPHFS9 BBG000BVPV84 -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST --unsafe";
             FinDataEx.Main(commandArgs.Split(" "));
 
             //verify
-            var entries = GetFileAsStringsFromFolderInDrive(outputDirId);
+            var entries = GetFileAsStringsFromFolderInDrive(_testDirId);
             
             // check headers
             Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));
@@ -75,17 +99,17 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.That(instrumentEntry2[1], Is.Not.Empty);
             Assert.That(instrumentEntry2[3], Is.Not.Empty);
         }
-        
+
         [Test]
         public void FinDataEx_GetData_OnValidBbgIdFromCsvInstrumentSource_ShouldProduceDataFile()
         {
-            const string instrumentSourceDriveCsvPath = "/findataex-tests/testdata/real_instruments.csv";
-            var commandArgs = $"getdata -i DriveCsvInstrumentSource -a {instrumentSourceDriveCsvPath} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST";
+            //const string instrumentSourceDriveCsvPath = "/findataex-tests/testdata/real_instruments.csv";
+            var commandArgs = $"getdata -i DriveCsvInstrumentSource -a {_inputFilePath} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST --unsafe";
 
             FinDataEx.Main(commandArgs.Split(" "));
 
             //verify
-            var entries = GetFileAsStringsFromFolderInDrive(outputDirId);
+            var entries = GetFileAsStringsFromFolderInDrive(_testDirId);
             
             // check headers
             Assert.That(entries[0], Is.EqualTo("timeStarted|timeFinished|ID_BB_GLOBAL|PX_LAST"));
@@ -122,7 +146,5 @@ namespace Lusid.FinDataEx.Tests.Integration
                 .ReadToEnd()
                 .Split(LusidDriveOutputWriter.OutputFileEntrySeparator);
         }
-        
-        
     }
 }

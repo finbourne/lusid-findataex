@@ -7,14 +7,14 @@ using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.Output;
 using NUnit.Framework;
 
-namespace Lusid.FinDataEx.Tests.Integration.Output
+namespace Lusid.FinDataEx.Tests.Unit.Output
 {
     [TestFixture]
     public class LusidDriveOutputWriterTests
     {
 
         private LusidDriveOutputWriter _outputWriter;
-        
+
         private string _lusidOutputDirPath;
         private string _lusidOutputDirName;
         private ILusidApiFactory _factory;
@@ -72,7 +72,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             var finDataOutputs = DataLicenseOutput.Empty();
             
             //execute
-            var writeResult =  _outputWriter.Write(finDataOutputs);
+            var writeResult = _outputWriter.Write(finDataOutputs);
             
             //verify
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));

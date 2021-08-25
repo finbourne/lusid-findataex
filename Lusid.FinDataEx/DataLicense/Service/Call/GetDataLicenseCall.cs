@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Lusid.FinDataEx.DataLicense.Util;
 using PerSecurity_Dotnet;
 
@@ -16,31 +15,18 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
     {
         /* DO NOT change _PollingInterval except for testing with Mocks. BBG DL will throttle
          or worse if poll interval against actual servers*/
-        private readonly int _pollingInterval;
+        private readonly TimeSpan _pollingInterval;
         
         private readonly PerSecurityWS _perSecurityWs;
         private readonly GetDataHeaders _getDataHeaders;
         private readonly string[] _getDataFields;
 
-        public GetDataLicenseCall(PerSecurityWS perSecurityWs, int pollingInterval=DataLicenseUtils.DefaultPollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
-            GetDefaultDataFields())
-        {
-            _pollingInterval = pollingInterval;
-        }
-
-        public GetDataLicenseCall(PerSecurityWS perSecurityWs, string[] dataFields,
-            int pollingInterval = DataLicenseUtils.DefaultPollingInterval) : this(perSecurityWs, GetDefaultHeaders(),
-            dataFields)
-        {
-            _pollingInterval = pollingInterval;
-        }
-
-        private GetDataLicenseCall(PerSecurityWS perSecurityWs, GetDataHeaders dataHeaders, string[] dataFields)
+        public GetDataLicenseCall(PerSecurityWS perSecurityWs, string[] dataFields = null, TimeSpan? pollingInterval = null)
         {
             _perSecurityWs = perSecurityWs;
-            _getDataHeaders = dataHeaders;
-            _getDataFields = dataFields;
-            _pollingInterval = DataLicenseUtils.DefaultPollingInterval;
+            _getDataHeaders = GetDefaultHeaders();
+            _getDataFields = dataFields ?? GetDefaultDataFields();
+            _pollingInterval = pollingInterval ?? DataLicenseUtils.DefaultPollingInterval;
         }
 
         /// <summary>
@@ -54,13 +40,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
             var getDataRequest = CreateGetDataRequest(instruments);
             var submitGetDataRequest = _perSecurityWs.submitGetDataRequest(getDataRequest);
             var submitGetDataResponse = submitGetDataRequest.submitGetDataResponse;
-            Console.WriteLine($"Submitted GetDataRequest. Response ID to check for {submitGetDataResponse.responseId} with current status {submitGetDataResponse.statusCode}");
-            
+            Console.WriteLine($"Submitted GetDataRequest. Response ID to check for {submitGetDataResponse.responseId}");
+
             // Await for response and retrieve once ready
             var retrieveGetDataResponseRequest =
                 RetrieveGetDataResponseRequest(submitGetDataResponse);
-            var retrieveGetDataResponse =  GetDataResponseSync(retrieveGetDataResponseRequest);
-
+            var retrieveGetDataResponse = GetDataResponseSync(retrieveGetDataResponseRequest);
 
             // log output
             Console.WriteLine($"GetData response for id={retrieveGetDataResponse.responseId} and response-level status code={retrieveGetDataResponse.statusCode.code}({retrieveGetDataResponse.statusCode.description})");
@@ -76,17 +61,9 @@ namespace Lusid.FinDataEx.DataLicense.Service.Call
 
         private RetrieveGetDataResponse GetDataResponseSync(retrieveGetDataResponseRequest retrieveGetDataResponseRequest)
         {
-            //Poll for data availability. As per BBG DL sample recommendation.
-            //Beware amending the poll interval due to BBG limitations. Especially in TEST.
-            RetrieveGetDataResponse getDataResponse;
-            do
-            {
-                Thread.Sleep(_pollingInterval);
-                var retrieveGetDataResponse = _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest);
-                getDataResponse = retrieveGetDataResponse.retrieveGetDataResponse;
-            }
-            while (getDataResponse.statusCode.code == DataLicenseService.DataNotAvailable);
-            return getDataResponse;
+            return DataLicenseUtils
+                .GetBBGRetryPolicy<RetrieveGetDataResponse>(_pollingInterval)
+                .Execute(() => _perSecurityWs.retrieveGetDataResponse(retrieveGetDataResponseRequest).retrieveGetDataResponse);
         }
 
         private submitGetDataRequestRequest CreateGetDataRequest(Instruments instruments)

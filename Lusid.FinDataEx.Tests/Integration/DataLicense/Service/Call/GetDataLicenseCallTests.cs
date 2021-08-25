@@ -8,6 +8,7 @@ using static Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call.GetDataLicenseC
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service.Call
 {
     [TestFixture]
+    [Explicit]
     public class GetDataLicenseCallTests
     {
 
@@ -27,7 +28,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service.Call
             var testInstruments = CreateTestInstruments();
             
             //execute
-            var retrieveGetDataResponse =  _getDataLicenseCall.Get(testInstruments);
+            var retrieveGetDataResponse = _getDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetDataResponse.instrumentDatas;
             var getDataFields = retrieveGetDataResponse.fields;
 
