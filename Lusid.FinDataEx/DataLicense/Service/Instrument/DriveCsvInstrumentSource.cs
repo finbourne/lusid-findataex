@@ -10,7 +10,7 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
-    public class DriveCsvInstrumentSource : IInstrumentSource//CsvInstrumentSource
+    public class DriveCsvInstrumentSource : IInstrumentSource
     {
         private readonly IFilesApi _filesApi;
         private readonly ISearchApi _searchApi;

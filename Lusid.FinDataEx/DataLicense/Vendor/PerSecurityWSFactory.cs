@@ -103,14 +103,12 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
         private X509Certificate2 CreateCertificateFromEnvVar()
         {
             var clientCertFilePath = Environment.GetEnvironmentVariable(BbgDlCertEnvVar);
-            clientCertFilePath = @"C:\Users\JeremyBarber\OneDrive - Finbourne Technology Limited\Desktop\bloomout";
             if (clientCertFilePath == null)
             {
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
                                                 $"certificate. Ensure you've set environment variable {BbgDlCertEnvVar}");
             }
             var clientCertPassword = Environment.GetEnvironmentVariable(BbgDlPassEnvVar);
-            clientCertPassword = "TXTNEDQZ";
             if (clientCertPassword == null)
             {
                 throw new ArgumentNullException($"Cannot connect to BBG DLWS without a client " +
