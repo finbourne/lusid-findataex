@@ -18,7 +18,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
     /// 
     /// </summary>
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class DriveCsvInstrumentSourceTest
     {
         private Mock<ILusidApiFactory> mockApiFactory;

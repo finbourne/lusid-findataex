@@ -8,7 +8,7 @@ using static Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call.GetDataLicenseC
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service.Call
 {
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class GetDataLicenseCallTests
     {
 

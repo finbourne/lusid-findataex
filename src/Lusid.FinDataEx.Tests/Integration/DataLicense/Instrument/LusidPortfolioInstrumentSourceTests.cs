@@ -8,7 +8,7 @@ using PerSecurity_Dotnet;
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
 {
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class LusidPortfolioInstrumentSourceTests : BaseLusidPortfolioTests
     {
         private static readonly ILusidApiFactory Factory = LusidApiFactoryBuilder.Build("secrets.json");

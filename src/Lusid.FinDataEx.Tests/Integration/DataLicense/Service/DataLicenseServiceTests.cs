@@ -11,7 +11,7 @@ using PerSecurity_Dotnet;
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Service
 {
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class DataLicenseServiceTests
     {
 

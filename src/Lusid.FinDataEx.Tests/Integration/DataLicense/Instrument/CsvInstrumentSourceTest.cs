@@ -9,7 +9,7 @@ using PerSecurity_Dotnet;
 namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
 {
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class CsvInstrumentSourceTest
     {
         [Test]
