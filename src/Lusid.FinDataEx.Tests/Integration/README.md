@@ -6,5 +6,5 @@ too often and they recommendation of minimum of 30s.
 
 To prevent them from slowing down development, and from accidentally incurring unexpected costs, they have been separated into this folder
 
-They have also all been tagged with the 'Explicit' annotation, which means that they will not run unless specifically requested.
+They have also all been tagged with the 'Category("Unsafe")' annotation, which means that they will not run unless specifically requested.
 Note that the Test Runner in VS <4.0 will still run them due to an issue in test discovery (see https://github.com/nunit/nunit3-vs-adapter/issues/658)

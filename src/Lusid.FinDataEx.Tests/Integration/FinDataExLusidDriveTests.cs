@@ -12,7 +12,7 @@ using Polly;
 namespace Lusid.FinDataEx.Tests.Integration
 {
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class FinDataExLusidDriveTests
     {
         private const string OutputFileName = "test_request_output.csv";

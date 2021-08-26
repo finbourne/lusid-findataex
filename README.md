@@ -38,10 +38,6 @@ Set the following environment variables for your DL certificate and password:
 * `BBG_DL_CERT_DATA` : Base64 encoded binary certificate
 * `BBG_DL_CERT_PASS` : DL certificate password
 
-Finbourne has a developer account with credentials stored in AWS Parameter Store at:
-* /Scheduler/ClientConfiguration/datalicense-test/DLWSCert/BbgDlCertBinStr
-* /Scheduler/ClientConfiguration/datalicense-test/DLWSCert/BbgDlPass
-
 ### DL Support
 
 First port of call should be the BBG DL [support docs.](https://service.bloomberg.com/portal/docs/dl). Access to logs requires a BBG Web Portal Support account. Speak to BBG account for manager for access.

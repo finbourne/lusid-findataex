@@ -5,7 +5,7 @@ using static Lusid.FinDataEx.Tests.Unit.TestUtils;
 namespace Lusid.FinDataEx.Tests.Integration
 {
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class FinDataExFromLusidPortfolioTests : BaseLusidPortfolioTests
     {
         private readonly string _tempOutputDir = $"TempTestDir_{nameof(FinDataExTests)}";

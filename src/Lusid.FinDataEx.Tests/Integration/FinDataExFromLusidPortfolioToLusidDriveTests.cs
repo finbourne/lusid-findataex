@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace Lusid.FinDataEx.Tests.Integration
 {
     [TestFixture]
-    [Explicit]
+    [Category("Unsafe")]
     public class FinDataExFromLusidPortfolioToLusidDriveTests : BaseLusidPortfolioTests
     {
         private string _lusidOutputDirPath;

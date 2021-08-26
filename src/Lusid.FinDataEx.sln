@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lusid.FinDataEx", "Lusid.FinDataEx.csproj", "{7B07E399-BBE0-4BD6-833E-D66FDD0A2F1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lusid.FinDataEx", ".\Lusid.FinDataEx\Lusid.FinDataEx.csproj", "{7B07E399-BBE0-4BD6-833E-D66FDD0A2F1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lusid.FinDataEx.Tests", "..\Lusid.FinDataEx.Tests\Lusid.FinDataEx.Tests.csproj", "{6DE45523-841C-4D61-BDBA-4CDC38D236A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lusid.FinDataEx.Tests", ".\Lusid.FinDataEx.Tests\Lusid.FinDataEx.Tests.csproj", "{6DE45523-841C-4D61-BDBA-4CDC38D236A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
