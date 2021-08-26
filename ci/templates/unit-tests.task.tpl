@@ -9,11 +9,15 @@ image_resource:
 inputs:
   - name: source-code-findataex
   - name: findataex-version
+  - name: nuget-config
 run:
   path: /bin/bash
   args:
     - -cel
     - |
+      cp ../nuget-config/nuget.config .
+      nuget_path=./nuget.config
+
       export VERSION=$(cat oktahttpcachingproxy-version/version)
 
       echo "Starting testing of v${VERSION}"
