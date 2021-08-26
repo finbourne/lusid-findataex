@@ -4,7 +4,7 @@ image_resource:
   source: 
     repository: harbor.finbourne.com/build/dotnetcoresdk-3-1-awscli
     username: robot$concourse
-    password: harbor.build_token
+    password: ((harbor.build_token))
     tag: "0.0.33"
 inputs:
   - name: source-code-findataex
@@ -12,11 +12,19 @@ inputs:
 run:
   path: /bin/bash
   args:
-    - 
+    - -cel
+    - |
+      export VERSION=$(cat oktahttpcachingproxy-version/version)
+
+      echo "Starting testing of v${VERSION}"
+
       echo "Starting Build"
-      dotnet build $project_file
+      #dotnet build $project_file
 
       # set the working directory to be the output folder
-      cd Integrations/IntegrationTests/bin/Debug/netcoreapp3.1
+      #cd Integrations/IntegrationTests/bin/Debug/netcoreapp3.1
+      cd source-code-findataex
+      
+      ls -la
 
-      dotnet test $project_file --filter 'TestCategory!=Unsafe'
+      dotnet test ./src/Lusid.FinDataEx.sln --filter 'TestCategory!=Unsafe'

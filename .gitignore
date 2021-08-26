@@ -16,6 +16,9 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Concourse
+pipeline.yaml
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

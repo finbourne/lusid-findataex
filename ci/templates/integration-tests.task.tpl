@@ -12,7 +12,7 @@ inputs:
 run:
   path: /bin/bash
   args:
-    - 
+    - |
       echo "Starting Build"
       dotnet build $project_file
 

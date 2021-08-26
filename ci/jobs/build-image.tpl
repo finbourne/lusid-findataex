@@ -14,7 +14,7 @@ jobs:
           doppler_blameable: true
         trigger: true
         passed:
-          - unit-tests
+          - integration-tests
       - task: build-binary
         config:
           {{ include "build-binary.task.tpl" | indentSub 10 }}

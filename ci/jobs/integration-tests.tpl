@@ -12,6 +12,8 @@ jobs:
         params:
           doppler_blameable: true
         trigger: true
+        passed:
+          - unit-tests
       - in_parallel:
         - task: run-integration-tests
           config:
