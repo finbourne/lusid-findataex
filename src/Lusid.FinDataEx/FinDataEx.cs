@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using CommandLine;
 using Lusid.FinDataEx.DataLicense.Service;
@@ -18,8 +19,9 @@ namespace Lusid.FinDataEx
         private const int FaBadArgExitCode = 1;
         private const int FaProcessingExitCode = 1;
 
-        private static readonly Sdk.Utilities.ILusidApiFactory LusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets.json");
-        private static readonly Drive.Sdk.Utilities.ILusidApiFactory DriveApiFactory = Drive.Sdk.Utilities.LusidApiFactoryBuilder.Build("secrets.json");
+        private const string secretsJsonFilename = "secrets.json";
+        private static readonly Sdk.Utilities.ILusidApiFactory LusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
+        private static readonly Drive.Sdk.Utilities.ILusidApiFactory DriveApiFactory = Drive.Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
 
         public static int Main(string[] args)
         {

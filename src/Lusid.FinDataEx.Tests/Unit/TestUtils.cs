@@ -7,7 +7,11 @@ namespace Lusid.FinDataEx.Tests.Unit
 {
     public static class TestUtils
     {
-        public static void SetupTempTestDirectory(String tempOutputDir)
+        private const string secretsJsonFilename = "secrets.json";
+        public static readonly Sdk.Utilities.ILusidApiFactory LusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
+        public static readonly Drive.Sdk.Utilities.ILusidApiFactory DriveApiFactory = Drive.Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
+
+        public static void SetupTempTestDirectory(string tempOutputDir)
         {
             if (Directory.Exists(tempOutputDir))
             {
@@ -18,7 +22,7 @@ namespace Lusid.FinDataEx.Tests.Unit
             Directory.CreateDirectory(tempOutputDir);
         }
 
-        public static void TearDownTempTestDirectory(String tempOutputDir)
+        public static void TearDownTempTestDirectory(string tempOutputDir)
         {
             if (Directory.Exists(tempOutputDir))
             {

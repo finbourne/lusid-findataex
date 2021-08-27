@@ -11,7 +11,7 @@ namespace Lusid.FinDataEx.Tests.Integration.DataLicense.Instrument
     [Category("Unsafe")]
     public class LusidPortfolioInstrumentSourceTests : BaseLusidPortfolioTests
     {
-        private static readonly ILusidApiFactory Factory = LusidApiFactoryBuilder.Build("secrets.json");
+        private static readonly ILusidApiFactory Factory = Unit.TestUtils.LusidApiFactory;
 
         [Test]
         public void Get_OnPortfoliosWithAndWithoutHoldings_ShouldDlInstruments()

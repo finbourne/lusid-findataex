@@ -8,16 +8,17 @@ image_resource:
     tag: "0.0.33"
 inputs:
   - name: source-code-findataex
+  - name: findataex-version
+  - name: nuget-config
 outputs:
   - name: source-code-findataex
 run:
   path: /bin/bash
   args:
-  - 
-    solution_file=src/Lusid.FinDataEx.sln
+    - -cel
+    - |
+      export VERSION=$(cat oktahttpcachingproxy-version/version)
+      echo "Starting building of v${VERSION}"
 
-    echo "[INFO] Building Debug $solution_file"
-    dotnet build -c Debug /warnaserror $solution_file
-
-    echo "[INFO] Building Release $solution_file"
-    dotnet build -c Release /warnaserror $solution_file
+      dotnet restore source-code-findataex/src/Lusid.FinDataEx.sln --configfile nuget-config/nuget.config
+      dotnet build -c Release /warnaserror source-code-findataex/src/Lusid.FinDataEx.sln

@@ -14,8 +14,7 @@ jobs:
           doppler_blameable: true
         trigger: true
       - get: nuget-config
-        resource: s3-nuget-config  
-      - in_parallel:
-        - task: run-unit-tests
-          config:
-            {{ include "unit-tests.task.tpl" | indentSub 12 }}
+        resource: s3-nuget-config
+      - task: run-unit-tests
+        config:
+          {{ include "unit-tests.task.tpl" | indentSub 10 }}
