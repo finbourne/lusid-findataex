@@ -35,7 +35,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
 
             var writeResult = _outputWriter.Write(finDataOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FileOutputPath, Is.EqualTo($"{TempOutputDir}\\Output_id_1_GetData.csv"));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo($"{TempOutputDir}{Path.DirectorySeparatorChar}Output_id_1_GetData.csv"));
             Assert.That(writeResult.FileOutputPath, Does.Exist);
             
             // ensure file is properly populated
@@ -55,7 +55,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
 
             var writeResult = _outputWriter.Write(getActionOutput);
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FileOutputPath, Is.EqualTo($"{TempOutputDir}\\Output_1603798418-1052073180_ValidActions.csv"));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo($"{TempOutputDir}{Path.DirectorySeparatorChar}Output_1603798418-1052073180_ValidActions.csv"));
             Assert.That(writeResult.FileOutputPath, Does.Exist);
             
             // ensure file is properly populated
@@ -76,7 +76,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             
             // ensure file is properly populated
-            var entries = File.ReadAllLines(TempOutputDir + Path.DirectorySeparatorChar + "Output_id_GetData.csv");
+            var entries = File.ReadAllLines($"{TempOutputDir}{Path.DirectorySeparatorChar}Output_id_GetData.csv");
             // contains headers only
             Assert.That(entries.Length, Is.EqualTo(1));
             // check headers

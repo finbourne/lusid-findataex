@@ -7,12 +7,12 @@ using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.Output;
 using NUnit.Framework;
 
-namespace Lusid.FinDataEx.Tests.Unit.Output
+namespace Lusid.FinDataEx.Tests.Integration.Output
 {
     [TestFixture]
+    [Category("Unsafe")]
     public class LusidDriveOutputWriterTests
     {
-
         private LusidDriveOutputWriter _outputWriter;
 
         private string _lusidOutputDirPath;
