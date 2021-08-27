@@ -38,7 +38,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             _inputFilePath = _lusidTestDirPath + "/" + InputFileName;
             _outputFilePath = _lusidTestDirPath + "/" + OutputFileName;
 
-            _factory = LusidApiFactoryBuilder.Build("secrets.json");
+            _factory = Unit.TestUtils.DriveApiFactory;
             _foldersApi = _factory.Api<IFoldersApi>();
             _filesApi = _factory.Api<IFilesApi>();
         }
@@ -103,9 +103,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         [Test]
         public void FinDataEx_GetData_OnValidBbgIdFromCsvInstrumentSource_ShouldProduceDataFile()
         {
-            //const string instrumentSourceDriveCsvPath = "/findataex-tests/testdata/real_instruments.csv";
             var commandArgs = $"getdata -i DriveCsvInstrumentSource -a {_inputFilePath} -f {_outputFilePath} -s Lusid -d ID_BB_GLOBAL PX_LAST --unsafe";
-
             FinDataEx.Main(commandArgs.Split(" "));
 
             //verify
@@ -140,7 +138,7 @@ namespace Lusid.FinDataEx.Tests.Integration
             Assert.That(contents.Values.Count, Is.EqualTo(1));
             
             var expectedPricesStorageObject = contents.Values[0];
-            StringAssert.EndsWith("test_request_output.csv", expectedPricesStorageObject.Name);
+            StringAssert.EndsWith(InputFileName, expectedPricesStorageObject.Name);
             
             return new StreamReader(_filesApi.DownloadFile(expectedPricesStorageObject.Id))
                 .ReadToEnd()

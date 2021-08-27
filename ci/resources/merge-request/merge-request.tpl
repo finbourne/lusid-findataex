@@ -8,4 +8,4 @@ resources:
     source:
       uri: git@github.com:finbourne/lusid-findataex.git
       private_key: ((github.id_rsa))
-      private_token: ((github.access_token))
+      # private_token: ((github.access_token))

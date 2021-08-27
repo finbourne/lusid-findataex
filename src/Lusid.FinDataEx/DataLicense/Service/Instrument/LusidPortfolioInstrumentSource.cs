@@ -42,8 +42,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         {   
             // parse portfolio and scopes from request arguments (e.g. [Scope1|Port1, Scope2|Port2, Scope3|Port3])
             var scopeAndPortfolioArgs = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
-            // LusidApiFactory to access LUSID to retrieve portfolio and holding data
-            //var lusidApiFactory = LusidApiFactoryBuilder.Build("secrets.json");
 
             Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentArgs.InstrumentType} for the " +
                               $"portfolios and scopes: {string.Join(',',scopeAndPortfolioArgs)}");

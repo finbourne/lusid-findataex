@@ -1,6 +1,7 @@
 merge:
   - template: resources/git/github/source-code-findataex.tpl
   - template: resources/git/github/findataex-version.tpl
+  - template: resources/s3/nuget-config.tpl
 
 jobs:
   - name: integration-tests
@@ -14,7 +15,8 @@ jobs:
         trigger: true
         passed:
           - unit-tests
-      - in_parallel:
-        - task: run-integration-tests
-          config:
-            {{ include "integration-tests.task.tpl" | indentSub 12 }}
+      - get: nuget-config
+        resource: s3-nuget-config
+      - task: run-integration-tests
+        config:
+          {{ include "integration-tests.task.tpl" | indentSub 10 }}

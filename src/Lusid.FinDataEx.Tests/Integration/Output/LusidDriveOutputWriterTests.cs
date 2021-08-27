@@ -28,7 +28,7 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
         {
             _lusidOutputDirName = ("Test_Dir_FDE_" + Guid.NewGuid()).Substring(0,49);
             _lusidOutputDirPath = "/" + _lusidOutputDirName;
-            _factory = LusidApiFactoryBuilder.Build("secrets.json");
+            _factory = Unit.TestUtils.DriveApiFactory;
             _foldersApi = _factory.Api<IFoldersApi>();
             _filesApi = _factory.Api<IFilesApi>();
         }
