@@ -9,11 +9,17 @@ image_resource:
 inputs:
   - name: source-code-findataex
   - name: findataex-version
+  - name: nuget-config
 run:
   path: /bin/bash
   args:
     - -cel
     - |
+      #ls -la
+
+      #cp nuget-config/nuget.config .
+      #nuget_path=./nuget.config
+
       export VERSION=$(cat oktahttpcachingproxy-version/version)
 
       echo "Starting testing of v${VERSION}"
@@ -23,8 +29,8 @@ run:
 
       # set the working directory to be the output folder
       #cd Integrations/IntegrationTests/bin/Debug/netcoreapp3.1
-      cd source-code-findataex
-      
-      ls -la
+      #cd source-code-findataex
 
-      dotnet test ./src/Lusid.FinDataEx.sln --filter 'TestCategory!=Unsafe'
+      dotnet restore source-code-findataex/src/Lusid.FinDataEx.sln --configfile nuget-config/nuget.config
+
+      dotnet test source-code-findataex/src/Lusid.FinDataEx.sln --filter 'TestCategory!=Unsafe'
