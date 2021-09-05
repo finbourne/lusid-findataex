@@ -20,7 +20,7 @@ namespace Lusid.FinDataEx.Output
 
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
         {
-            if (!(_getOptions is GetActionsOptions))
+            if (!(_getOptions is GetActionsOptions getActionsOptions))
             {
                 Console.WriteLine($"LusidTenantOutputWriter does not support requests other than GetActions. Skipping...");
                 return WriteResult.NotRun();
@@ -36,7 +36,7 @@ namespace Lusid.FinDataEx.Output
             var scope = corporateActionSourceComponents.First();
             var code = corporateActionSourceComponents.Last();
 
-            var interpreter = CreateInterpreter(_getOptions);
+            var interpreter = CreateInterpreter(getActionsOptions);
 
             var actions = interpreter.Interpret(dataLicenseOutput);
 
@@ -53,11 +53,11 @@ namespace Lusid.FinDataEx.Output
             }
         }
 
-        private static IOutputInterpreter CreateInterpreter(DataLicenseOptions getOptions)
+        private static IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions)
         {
             if (!string.IsNullOrWhiteSpace(getOptions.BBGSource))
             {
-                return new FileInterpreter();
+                return new FileInterpreter(getOptions);
             }
             else if (!string.IsNullOrWhiteSpace(getOptions.InstrumentSource))
             {

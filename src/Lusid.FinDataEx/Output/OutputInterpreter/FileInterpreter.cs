@@ -1,27 +1,53 @@
-﻿using System;
+﻿using Lusid.Sdk.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
 namespace Lusid.FinDataEx.Output.OutputInterpreter
 {
-    public class FileInterpreter : IOutputInterpreter
+    public class FileInterpreter : BaseOutputInterpreter
     {
-        public string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => requestName + rowIndex;
+        private readonly GetActionsOptions _getOptions;
 
-        public string GetDescription(Dictionary<string, string> output, string requestName, int rowIndex) => output["0-Action Type"];
+        private static readonly Dictionary<CorpActionType, string> ActionTypeMapping = new Dictionary<CorpActionType, string>
+        {
+            { CorpActionType.DVD_CASH, "Cash Dividend" },
+            { CorpActionType.DVD_STOCK, "Stock Dividend" },
+            { CorpActionType.STOCK_SPLT, "Stock Split" }
+        };
 
-        public DateTimeOffset? GetAnnouncementDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["2-Announce/Declared Date"]);
+        public FileInterpreter(GetActionsOptions getOptions)
+        {
+            _getOptions = getOptions;
+        }
 
-        public DateTimeOffset? GetExecutionDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["3-Effective Date"]);
+        public override string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => requestName + rowIndex;
 
-        public DateTimeOffset? GetRecordDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["11-Summary"]);
+        public override string GetDescription(Dictionary<string, string> output, string requestName, int rowIndex) => output["0-Action Type"];
 
-        public DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["12-Summary"]);
+        public override DateTimeOffset? GetAnnouncementDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["2-Announce/Declared Date"]);
 
-        public string GetInstrumentName(Dictionary<string, string> output, string requestName, int rowIndex) => output["13-tad_id"].Split(" ").First();
+        public override DateTimeOffset? GetExecutionDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["3-Effective Date"]);
 
-        public decimal? GetUnits(Dictionary<string, string> output, string requestName, int rowIndex) => 1;
+        public override DateTimeOffset? GetRecordDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["11-Summary"]);
 
-        public decimal? GetCost(Dictionary<string, string> output, string requestName, int rowIndex) => decimal.Parse(output["8-Summary"].Replace("Gross Amount: ", ""));
+        public override DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["12-Summary"]);
+
+        public override string GetInstrumentName(Dictionary<string, string> output, string requestName, int rowIndex) => output["13-tad_id"].Split(" ").First();
+
+        public override decimal? GetUnits(Dictionary<string, string> output, string requestName, int rowIndex) => 1;
+
+        public override decimal? GetCost(Dictionary<string, string> output, string requestName, int rowIndex) => decimal.Parse(output["8-Summary"].Replace("Gross Amount: ", ""));
+
+        public override List<UpsertCorporateActionRequest> Interpret(DataLicenseOutput dataLicenseOutput)
+        {
+            var dataLicenseOutputOfActionType = dataLicenseOutput;
+
+            var requestedActionTypes = _getOptions.CorpActionTypes.Select(actionType => ActionTypeMapping[actionType]).ToList();
+            var dataRecordsOfActionType = dataLicenseOutput.Records.Where(output => requestedActionTypes.Contains(GetDescription(output, "", 0))).ToList();
+
+            return base.Interpret(new DataLicenseOutput(dataLicenseOutput.Id, dataLicenseOutput.Header, dataRecordsOfActionType));
+        }
     }
 }

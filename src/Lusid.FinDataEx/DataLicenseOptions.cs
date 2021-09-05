@@ -97,7 +97,7 @@ namespace Lusid.FinDataEx
     /// Options for GetData calls to BBG
     /// </summary>
     [Verb("getdata", HelpText = "BBG DL request to retrieve data for requested set of fields and insturments.")]
-    class GetDataOptions : DataLicenseOptions
+    public class GetDataOptions : DataLicenseOptions
     {
         [Option('d', "datafields",
             Required = true,
@@ -109,7 +109,7 @@ namespace Lusid.FinDataEx
     /// Options for GetAction calls to BBG
     /// </summary>
     [Verb("getactions", HelpText = "BBG DL request to retrieve corporate actions for requested instruments.")]
-    class GetActionsOptions : DataLicenseOptions
+    public class GetActionsOptions : DataLicenseOptions
     {
         [Option('c', "corpactions",
             Required = true,
