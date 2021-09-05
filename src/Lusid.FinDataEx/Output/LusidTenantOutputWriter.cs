@@ -20,6 +20,12 @@ namespace Lusid.FinDataEx.Output
 
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
         {
+            if (!(_getOptions is GetActionsOptions))
+            {
+                Console.WriteLine($"LusidTenantOutputWriter does not support requests other than GetActions. Skipping...");
+                return WriteResult.NotRun();
+            }
+
             if (dataLicenseOutput.IsEmpty())
             {
                 Console.WriteLine($"Attempting to write empty data license output : {dataLicenseOutput}. Skipping...");
