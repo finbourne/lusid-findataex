@@ -14,7 +14,7 @@ namespace Lusid.FinDataEx.Output
 
         private readonly IFilesApi _filesApi;
 
-        public LusidDriveOutputWriter(string outputFilePath, ILusidApiFactory factory) : base(outputFilePath)
+        public LusidDriveOutputWriter(DataLicenseOptions getOptions, ILusidApiFactory factory) : base(getOptions)
         {
             _filesApi = factory.Api<IFilesApi>();
         }
@@ -24,7 +24,7 @@ namespace Lusid.FinDataEx.Output
             // convert records to byte array for upload into LUSID drive
             var finDataEntriesStr = string.Join(OutputFileEntrySeparator, finDataRecords);
             var finDataEntriesBytes = Encoding.UTF8.GetBytes(finDataEntriesStr);
-            
+
             // upload to drive
             var lusidDriveFilename = modifiedFilepath.Split(LusidDriveUtils.LusidDrivePathSeparator).Last();
             var lusidDriveFolderPath =
@@ -33,7 +33,7 @@ namespace Lusid.FinDataEx.Output
             var upload = _filesApi.CreateFile(lusidDriveFilename, lusidDriveFolderPath, finDataEntriesBytes.Length, finDataEntriesBytes);
             Console.WriteLine($"Completed write to LUSID drive for filename={lusidDriveFilename}, " +
                               $"folder={lusidDriveFolderPath}. Output file id={upload.Id} with size={upload.Size}");
-            
+
             // return file id which will be required to reference file going forward
             return upload.Id;
         }

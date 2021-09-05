@@ -6,6 +6,8 @@
     /// </summary>
     public enum FileSystem
     {
-        Local, Lusid
+        Local,
+        Lusid,
+        Drive
     }
 }

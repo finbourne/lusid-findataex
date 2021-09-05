@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.DataLicense.Service.Instrument;
-using Moq;
 using NUnit.Framework;
 using PerSecurity_Dotnet;
 

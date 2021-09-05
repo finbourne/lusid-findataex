@@ -50,12 +50,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         private IEnumerable<string> LoadInstrumentsFromFile(string filePath, string delimiter, int instrumentIdColIdx)
         {
             var (directoryName, fileName) = LusidDriveUtils.PathToFolderAndFile(filePath);
-            
+
             // Retrieve LUSID drive file id from path
             var fileId = _searchApi.Search(new SearchBody(directoryName, fileName)).Values.SingleOrDefault()?.Id;
             if (fileId == null)
                 throw new FileNotFoundException($"{filePath} not found.");
-            
+
             // Download file and feed into a string via stream
             IList<string> csvEntries = new List<string>();
             using (var csvDriveReader = new StreamReader(_filesApi.DownloadFile(fileId)))
