@@ -10,24 +10,21 @@ using static Lusid.FinDataEx.Input.IInputReader;
 
 namespace Lusid.FinDataEx.Input
 {
-    public class FileReader : IInputReader
+    public class LocalFilesystemInputReader : IInputReader
     {
         public const string InputFileEntrySeparator = "\n";
 
         private readonly DataLicenseOptions _getOptions;
-        private readonly IFilesApi _filesApi;
-        private readonly ISearchApi _searchApi;
 
-        public FileReader(DataLicenseOptions getOptions, ILusidApiFactory driveApiFactory)
+
+        public LocalFilesystemInputReader(DataLicenseOptions getOptions)
         {
             _getOptions = getOptions;
-            _filesApi = driveApiFactory.Api<IFilesApi>();
-            _searchApi = driveApiFactory.Api<ISearchApi>();
         }
 
         public DataLicenseOutput Read()
         {
-            var data = GetFileAsStringsFromFolderInDrive(_getOptions.BBGSource);
+            var data = GetFileAsStringsFromLocalFolder(_getOptions.InputPath);
 
             var headers = data.First().Split(CsvDelimiter);
             for (var col = 0; col < headers.Count(); col++)
@@ -49,21 +46,15 @@ namespace Lusid.FinDataEx.Input
                 records.Add(record);
             }
 
-            return new DataLicenseOutput(_getOptions.BBGSource, headers, records);
+            return new DataLicenseOutput(_getOptions.InputPath, headers, records);
         }
 
-        private string[] GetFileAsStringsFromFolderInDrive(string filepath)
+        private string[] GetFileAsStringsFromLocalFolder(string filepath)
         {
-            var (directoryName, fileName) = LusidDriveUtils.PathToFolderAndFile(filepath);
+            if (!File.Exists(filepath))
+                throw new FileNotFoundException($"Local file '{filepath}' not found.");
 
-            // Retrieve LUSID drive file id from path
-            var fileId = _searchApi.Search(new SearchBody(directoryName, fileName)).Values.SingleOrDefault()?.Id;
-            if (fileId == null)
-                throw new FileNotFoundException($"{directoryName} not found.");
-
-            return new StreamReader(_filesApi.DownloadFile(fileId))
-                .ReadToEnd()
-                .Split(InputFileEntrySeparator);
+            return File.ReadAllLines(filepath);
         }
     }
 }

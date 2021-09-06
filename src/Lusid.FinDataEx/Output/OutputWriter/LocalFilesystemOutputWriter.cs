@@ -16,7 +16,7 @@ namespace Lusid.FinDataEx.Output
 
         public LocalFilesystemOutputWriter(DataLicenseOptions getOptions)
         {
-            _outputFilePath = getOptions.OutputLocal;
+            _outputFilePath = getOptions.OutputPath;
         }
 
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)

@@ -1,10 +1,9 @@
 ﻿namespace Lusid.FinDataEx.Util
 {
     /// <summary>
-    /// Supported file systems for persisting data extracts
-    /// 
+    /// Supported file systems for output
     /// </summary>
-    public enum FileSystem
+    public enum OutputType
     {
         Local,
         Lusid,

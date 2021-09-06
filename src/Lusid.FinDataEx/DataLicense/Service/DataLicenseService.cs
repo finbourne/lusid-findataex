@@ -34,7 +34,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
             {
                 // validate inputs
                 if (!dlInstruments.instrument.Any()) return DataLicenseOutput.Empty();
-                VerifyBblFlags(programType, dataLicenseCall.GetDataType());
+                VerifyBblFlags(programType);
 
                 // create relevant action and call to DLWS
                 var perSecurityResponse = dataLicenseCall.Get(dlInstruments);
@@ -64,7 +64,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
             };
         }
 
-        private static void VerifyBblFlags(ProgramTypes programType, DataTypes dataType)
+        private static void VerifyBblFlags(ProgramTypes programType)
         {
             if (programType != ProgramTypes.Adhoc)
             {

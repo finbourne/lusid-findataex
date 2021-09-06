@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Lusid.FinDataEx.Output.OutputInterpreter;
+using Lusid.FinDataEx.Util;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
@@ -32,7 +33,7 @@ namespace Lusid.FinDataEx.Output
                 return WriteResult.NotRun();
             }
 
-            var corporateActionSourceComponents = _getOptions.OutputLusid.Split(":");
+            var corporateActionSourceComponents = _getOptions.OutputPath.Split(":");
             var scope = corporateActionSourceComponents.First();
             var code = corporateActionSourceComponents.Last();
 
@@ -45,7 +46,7 @@ namespace Lusid.FinDataEx.Output
                 // Upsert corporate actions
                 UpsertCorporateActionsResponse result = _corporateActionSourcesApi.BatchUpsertCorporateActions(scope, code, actions);
                 Console.WriteLine(result);
-                return WriteResult.Ok(_getOptions.OutputLusid);
+                return WriteResult.Ok(_getOptions.OutputPath);
             }
             catch (Exception e)
             {
@@ -53,20 +54,11 @@ namespace Lusid.FinDataEx.Output
             }
         }
 
-        private static IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions)
+        private static IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions) => getOptions.OperationType switch
         {
-            if (!string.IsNullOrWhiteSpace(getOptions.BBGSource))
-            {
-                return new FileInterpreter(getOptions);
-            }
-            else if (!string.IsNullOrWhiteSpace(getOptions.InstrumentSource))
-            {
-                return new ServiceInterpreter();
-            }
-            else
-            {
-                throw new ArgumentNullException("No available interpreters");
-            }
-        }
+            OperationType.ParseExisting => new FileInterpreter(getOptions),
+            OperationType.BloombergRequest => new ServiceInterpreter(),
+            _ => throw new ArgumentNullException($"No output interpreters for operation type {getOptions.OperationType}")
+        };
     }
 }

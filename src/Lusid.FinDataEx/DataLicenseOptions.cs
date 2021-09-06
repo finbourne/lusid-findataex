@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CommandLine;
+using Lusid.FinDataEx.Util;
 using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
@@ -11,62 +12,56 @@ namespace Lusid.FinDataEx
     public class DataLicenseOptions
     {
         /*
+         * Operation
+         */
+        [Option('t', "operation-type",
+            Required = true,
+            Default = OperationType.BloombergRequest,
+            HelpText = "The type of operation [ParseExisting, BloombergRequest]")]
+        public OperationType OperationType { get; set; }
+
+        /*
          * Input
          */
-        [Option('i', "instrument-source",
-            Group = "input",
-            SetName = "instrumentInput",
-            Required = false,
-            Default = "InstrumentSource",
-            HelpText = "Instrument source to create the instruments to query against DataLicense. Supported types include : " +
-                       "[InstrumentSource, LusidPortfolioInstrumentSource, FromDriveCsvInstrumentSource, FromLocalCsvInstrumentSource]. " +
-                       "Developers can add custom instrument sources as required, see FinDataEx readme for details.")]
-        public string InstrumentSource { get; set; }
+        [Option('i', "input-source",
+            Required = true,
+            Default = InputType.CLI,
+            HelpText = "The input source [CLI, LUSID, Drive, Local]")]
+        public InputType InputSource { get; set; }
 
-        [Option('a', "instrument-source-args",
+        [Option("input-path",
+            Required = false,
+            HelpText = "If reading from a file, this should be the path to it")]
+        public string InputPath { get; set; }
+
+        [Option("instrument-source-args",
             SetName = "instrumentInput",
             Required = false,
             HelpText = "Arguments passed to the instrument source for retrieving instruments to query against DataLicense.")]
         public IEnumerable<string> InstrumentSourceArguments { get; set; }
 
-        [Option('t', "instrument_id_type",
+        [Option("instrument_id_type",
             SetName = "instrumentInput",
             Required = false,
             Default = InstrumentType.BB_GLOBAL,
             HelpText = "Type of instrument ids being input (BB_GLOBAL (Figi), ISIN, CUSIP)")]
         public InstrumentType InstrumentIdType { get; set; }
 
-        [Option('b', "bbg-source",
-            SetName = "bbgInput",
-            Group = "input",
-            Required = false,
-            HelpText = "BBG data csv file containing Data or Actions input. Paths must be for LUSID Drive")]
-        public string BBGSource { get; set; }
-
         /*
          * Output
          */
-        [Option("output-local",
-            Group = "output",
-            Required = false,
-            HelpText = "File path to write DLWS output. Include  \"{REQUEST_ID}\", \"{AS_AT}\", \"{AS_AT_DATE}\" in the filename " +
-                       " to include the DL request id timestamps respectively in the filename (e.g. " +
-                       "/home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv")]
-        public string OutputLocal { get; set; }
+        [Option('o', "output-target",
+            Required = true,
+            Default = OutputType.Local,
+            HelpText = "The  output target [CLI, LUSID, Drive, Local]")]
+        public OutputType OutputTarget { get; set; }
 
-        [Option("output-drive",
-            Group = "output",
-            Required = false,
-            HelpText = "File path to write DLWS output. Include  \"{REQUEST_ID}\", \"{AS_AT}\", \"{AS_AT_DATE}\" in the filename " +
-                       " to include the DL request id timestamps respectively in the filename (e.g. " +
-                       "/home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv")]
-        public string OutputDrive { get; set; }
-
-        [Option("output-lusid",
-            Group = "output",
-            Required = false,
-            HelpText = "The corporate action source to upsert to. Written as \"{SCOPE}:{CODE}\"")]
-        public string OutputLusid { get; set; }
+        [Option("output-path",
+            Required = true,
+            HelpText = "If writing to a file path, you can include \"{REQUEST_ID}\", \"{AS_AT}\", \"{AS_AT_DATE}\" in the filename " +
+                       "(e.g. /home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv. " +
+                       "If writing to a LUSID tenant, you must provide the location as \"{SCOPE}:{CODE}\"")]
+        public string OutputPath { get; set; }
 
         /*
          * Other Options
@@ -83,13 +78,14 @@ namespace Lusid.FinDataEx
          */
         [Option("enable-live-requests",
             Default = false,
-            HelpText = "Running without the safety will allow billable calls to be sent to BBG, rather than just echoing the DL request.")]
+            HelpText = "Set this flag to allow billable calls to be sent to BBG. " +
+                       "By default, calls will be echoed to terminal and not sent to BBG to prevent accidental billing.")]
         public bool EnableLiveRequests { get; set; }
 
         [Option('m', "max_instruments",
             Default = 50,
-            HelpText = "Set the maximum number of instruments allowed in a BBG DLWS call. Especially important in" +
-                       " production environments that are billed per instrument.")]
+            HelpText = "Set the maximum number of instruments allowed in a BBG DLWS call. Especially important in " +
+                       "production environments that are billed per instrument.")]
         public int MaxInstruments { get; set; }
     }
 
