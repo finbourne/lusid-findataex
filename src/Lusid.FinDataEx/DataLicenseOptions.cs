@@ -53,7 +53,7 @@ namespace Lusid.FinDataEx
         [Option('o', "output-target",
             Required = true,
             Default = OutputType.Local,
-            HelpText = "The  output target [CLI, LUSID, Drive, Local]")]
+            HelpText = "The  output target [LUSID, Drive, Local]")]
         public OutputType OutputTarget { get; set; }
 
         [Option("output-path",

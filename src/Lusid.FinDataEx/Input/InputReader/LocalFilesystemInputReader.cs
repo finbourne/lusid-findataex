@@ -1,9 +1,4 @@
-﻿using Lusid.Drive.Sdk.Api;
-using Lusid.Drive.Sdk.Model;
-using Lusid.Drive.Sdk.Utilities;
-using Lusid.FinDataEx.Util;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static Lusid.FinDataEx.Input.IInputReader;

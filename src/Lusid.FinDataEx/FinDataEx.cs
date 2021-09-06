@@ -8,7 +8,7 @@ namespace Lusid.FinDataEx
 {
     public class FinDataEx
     {
-        private const int SuExitCode = 0;
+        private const int SuccessExitCode = 0;
         private const int BadArgExitCode = 1;
         private const int ProcessingExitCode = 1;
 
@@ -35,8 +35,8 @@ namespace Lusid.FinDataEx
                 Console.WriteLine($"FinDataEx request processing failed. Exiting FinDataEx. Exception details : {e}");
                 return ProcessingExitCode;
             }
-            Console.WriteLine($"FinDataEx run to successful completion with exit code {SuExitCode}");
-            return SuExitCode;
+            Console.WriteLine($"FinDataEx run to successful completion with exit code {SuccessExitCode}");
+            return SuccessExitCode;
         }
 
         /// <summary>

@@ -22,7 +22,7 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
             _getOptions = getOptions;
         }
 
-        public override string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => requestName + rowIndex;
+        public override string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => requestName + "-" + rowIndex;
 
         public override string GetDescription(Dictionary<string, string> output, string requestName, int rowIndex) => output["0-Action Type"];
 
@@ -30,9 +30,9 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
 
         public override DateTimeOffset? GetExecutionDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["3-Effective Date"]);
 
-        public override DateTimeOffset? GetRecordDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["11-Summary"]);
+        public override DateTimeOffset? GetRecordDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["11-Summary"].Replace("Record Date: ", ""));
 
-        public override DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["12-Summary"]);
+        public override DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["12-Summary"].Replace("Pay Date: ", ""));
 
         public override string GetInstrumentName(Dictionary<string, string> output, string requestName, int rowIndex) => output["13-tad_id"].Split(" ").First();
 
