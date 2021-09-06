@@ -12,7 +12,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
     public class GetActionResponseTransformer : IDataLicenseResponseTransformer<RetrieveGetActionsResponse>
     {
         /// <summary>
-        /// Transform a a GetAction response from BBG DLWS to a standardised output.
+        /// Transform a GetAction response from BBG DLWS to a standardised output.
         /// </summary>
         /// <param name="getActionsResponse">GetAction response from BBG DLWS</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
@@ -29,7 +29,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
 
             // Corporate action headers constructed from the intersection of all corporate action fields
             // (mainly required for requests that span multiple corporate action types).
-            var headers = new HashSet<string>(){TimeStarted, TimeFinished};
+            var headers = new HashSet<string>{ TimeStarted, TimeFinished };
             var corpActionRecords = new List<Dictionary<string, string>>();
             foreach (var instrumentData in actionsInstrumentDatas)
             {
@@ -53,7 +53,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                 foreach (var standardFieldPropInfo in typeof(ActionStandardFields).GetProperties())
                 {
                     var fieldValue = standardFieldPropInfo.GetValue(actionStandardFields, null);
-                    var fieldValueEntry = (fieldValue == null) ? "" : fieldValue.ToString();
+                    var fieldValueEntry = fieldValue?.ToString() ?? string.Empty;
                     corpActionRecord.Add(standardFieldPropInfo.Name, fieldValueEntry);
                     headers.Add(standardFieldPropInfo.Name);
                 }

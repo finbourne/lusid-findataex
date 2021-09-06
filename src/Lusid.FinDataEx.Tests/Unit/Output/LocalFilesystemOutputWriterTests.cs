@@ -19,7 +19,11 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         public void SetUp()
         {
             SetupTempTestDirectory(TempOutputDir);
-            _outputWriter = new LocalFilesystemOutputWriter(_outputFilePath);
+            var options = new DataLicenseOptions
+            {
+                OutputPath = _outputFilePath
+            };
+            _outputWriter = new LocalFilesystemOutputWriter(options);
         }
         
         [TearDown]
@@ -81,7 +85,6 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
             Assert.That(entries.Length, Is.EqualTo(1));
             // check headers
             Assert.That(entries[0], Is.EqualTo("h1|h2|h3"));
-
         }
         
         [Test]
@@ -99,7 +102,11 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         public void Write_OnNonExistingOutputDir_ShouldReturnFail()
         {
             var nonExistingPath = Path.Combine(new[]{"this","Should","Not","Exist123"});
-            _outputWriter = new LocalFilesystemOutputWriter(nonExistingPath);
+            var options = new DataLicenseOptions
+            {
+                OutputPath = nonExistingPath
+            };
+            _outputWriter = new LocalFilesystemOutputWriter(options);
 
             DataLicenseOutput finDataOutput = CreateFinDataEntry("id_1_GetData");
             var writeResult = _outputWriter.Write(finDataOutput);

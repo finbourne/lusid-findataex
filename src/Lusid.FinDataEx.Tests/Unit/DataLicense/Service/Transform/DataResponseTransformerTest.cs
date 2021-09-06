@@ -16,7 +16,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         }
 
         [Test]
-        public void transform_OnAllValidInstrumentsResponse_IsWellFormed()
+        public void Transform_OnAllValidInstrumentsResponse_IsWellFormed()
         {
             //when
             var responseId = "1602149495-71386027_ValidInstruments";
@@ -46,7 +46,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         }
         
         [Test]
-        public void transform_OnOneBadInstrumentsResponse_IsWellFormedWithOnlyValidInstrument()
+        public void Transform_OnOneBadInstrumentsResponse_IsWellFormedWithOnlyValidInstrument()
         {
             //when
             var responseId = "1602161569-1051504982_OneBadInstrument";

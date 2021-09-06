@@ -14,11 +14,11 @@ namespace Lusid.FinDataEx.Output
     {
         private readonly string _outputFilePath;
 
-        public LocalFilesystemOutputWriter(string outputFilePath)
+        public LocalFilesystemOutputWriter(DataLicenseOptions getOptions)
         {
-            _outputFilePath = outputFilePath;
+            _outputFilePath = getOptions.OutputPath;
         }
-        
+
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
         {
             if (dataLicenseOutput.IsEmpty())
@@ -31,16 +31,16 @@ namespace Lusid.FinDataEx.Output
             var finDataRecords = new List<string>{headers};
             finDataRecords.AddRange(
             dataLicenseOutput.Records.Select(dR =>
+                {
+                    var record = new List<string>();
+                    foreach (var header in dataLicenseOutput.Header)
                     {
-                        var record = new List<string>();
-                        foreach (var header in dataLicenseOutput.Header)
-                        {
-                            dR.TryGetValue(header, out var recordEntry);
-                            record.Add(recordEntry);
-                        }
+                        dR.TryGetValue(header, out var recordEntry);
+                        record.Add(recordEntry);
+                    }
 
-                        return string.Join(BbgDlDelimiter, record);
-                    }).ToList()
+                    return string.Join(BbgDlDelimiter, record);
+                }).ToList()
             );
             
             try
@@ -66,6 +66,5 @@ namespace Lusid.FinDataEx.Output
             // check for and apply patterns to output filename
             return AutoGenPatternUtils.ApplyAllPatterns(_outputFilePath, dataLicenseOutputId);
         }
-
     }
 }
