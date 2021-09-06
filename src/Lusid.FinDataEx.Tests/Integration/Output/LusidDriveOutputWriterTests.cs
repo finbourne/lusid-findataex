@@ -40,7 +40,11 @@ namespace Lusid.FinDataEx.Tests.Integration.Output
             _outputDirId = _foldersApi.GetRootFolder(filter: $"Name eq '{_lusidOutputDirName}'").Values.SingleOrDefault()?.Id;
             var createFolder = new CreateFolder("/", _lusidOutputDirName);
             _outputDirId ??= _foldersApi.CreateFolder(createFolder).Id;
-            _outputWriter = new LusidDriveOutputWriter(_lusidOutputDirPath + "/" + _outputFilename, _factory);
+            var options = new DataLicenseOptions
+            {
+                OutputPath = _lusidOutputDirPath + "/" + _outputFilename
+            };
+            _outputWriter = new LusidDriveOutputWriter(options, _factory);
         }
         
         [TearDown]
