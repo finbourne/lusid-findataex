@@ -5,6 +5,7 @@ using Lusid.FinDataEx.Util;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
 namespace Lusid.FinDataEx.Output
 {
@@ -26,6 +27,13 @@ namespace Lusid.FinDataEx.Output
                 Console.WriteLine($"LusidTenantOutputWriter does not support requests other than GetActions. Skipping...");
                 return WriteResult.NotRun();
             }
+            
+            if (getActionsOptions.CorpActionTypes.Count() > 1 || 
+                getActionsOptions.CorpActionTypes.Single() != CorpActionType.DVD_CASH)
+            {
+                Console.WriteLine($"LusidTenantOutputWriter does not Action types other than {CorpActionType.DVD_CASH}. Skipping...");
+                return WriteResult.NotRun();
+            }
 
             if (dataLicenseOutput.IsEmpty())
             {
@@ -43,9 +51,13 @@ namespace Lusid.FinDataEx.Output
 
             try
             {
-                // Upsert corporate actions
-                UpsertCorporateActionsResponse result = _corporateActionSourcesApi.BatchUpsertCorporateActions(scope, code, actions);
-                Console.WriteLine(result);
+                var result = _corporateActionSourcesApi.BatchUpsertCorporateActions(scope, code, actions);
+
+                if (result.Failed.Any())
+                {
+                    throw new AggregateException("One or more actions failed", result.Failed.Values.Select(e => new Exception(e.ToString())));
+                }
+
                 return WriteResult.Ok(_getOptions.OutputPath);
             }
             catch (Exception e)

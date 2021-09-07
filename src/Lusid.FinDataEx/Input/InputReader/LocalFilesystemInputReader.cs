@@ -7,10 +7,7 @@ namespace Lusid.FinDataEx.Input
 {
     public class LocalFilesystemInputReader : IInputReader
     {
-        public const string InputFileEntrySeparator = "\n";
-
         private readonly DataLicenseOptions _getOptions;
-
 
         public LocalFilesystemInputReader(DataLicenseOptions getOptions)
         {

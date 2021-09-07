@@ -18,11 +18,9 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
 
         DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex);
 
-        string GetInstrumentName(Dictionary<string, string> output, string requestName, int rowIndex);
+        CorporateActionTransitionComponentRequest GetInputInstrument(Dictionary<string, string> output, string requestName, int rowIndex);
 
-        decimal? GetUnits(Dictionary<string, string> output, string requestName, int rowIndex);
-
-        decimal? GetCost(Dictionary<string, string> output, string requestName, int rowIndex);
+        List<CorporateActionTransitionComponentRequest> GetOutputInstruments(Dictionary<string, string> output, string requestName, int rowIndex);
 
         List<UpsertCorporateActionRequest> Interpret(DataLicenseOutput dataLicenseOutput);
     }

@@ -1,6 +1,7 @@
 ﻿using Lusid.Sdk.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
@@ -22,23 +23,35 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
             _getOptions = getOptions;
         }
 
-        public override string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => requestName + "-" + rowIndex;
+        public override string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => Path.GetFileNameWithoutExtension(requestName) + "-" + rowIndex;
 
         public override string GetDescription(Dictionary<string, string> output, string requestName, int rowIndex) => output["0-Action Type"];
 
-        public override DateTimeOffset? GetAnnouncementDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["2-Announce/Declared Date"]);
+        public override DateTimeOffset? GetAnnouncementDate(Dictionary<string, string> output, string requestName, int rowIndex) => new DateTimeOffset(DateTime.Parse(output["2-Announce/Declared Date"]).ToUniversalTime());
 
-        public override DateTimeOffset? GetExecutionDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["3-Effective Date"]);
+        public override DateTimeOffset? GetExecutionDate(Dictionary<string, string> output, string requestName, int rowIndex) => new DateTimeOffset(DateTime.Parse(output["3-Effective Date"]).ToUniversalTime());
 
-        public override DateTimeOffset? GetRecordDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["11-Summary"].Replace("Record Date: ", ""));
+        public override DateTimeOffset? GetRecordDate(Dictionary<string, string> output, string requestName, int rowIndex) => new DateTimeOffset(DateTime.Parse(output["11-Summary"].Replace("Record Date: ", "")).ToUniversalTime());
 
-        public override DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["12-Summary"].Replace("Pay Date: ", ""));
+        public override DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex) => new DateTimeOffset(DateTime.Parse(output["12-Summary"].Replace("Pay Date: ", "")).ToUniversalTime());
 
-        public override string GetInstrumentName(Dictionary<string, string> output, string requestName, int rowIndex) => output["13-tad_id"].Split(" ").First();
+        public override CorporateActionTransitionComponentRequest GetInputInstrument(Dictionary<string, string> output, string requestName, int rowIndex)
+        {
+            var units = 1;
+            var cost = 0;
+            var instruments = new Dictionary<string, string> { { "Instrument/default/ClientInternal", output["13-tad_id"] } };
 
-        public override decimal? GetUnits(Dictionary<string, string> output, string requestName, int rowIndex) => 1;
+            return new CorporateActionTransitionComponentRequest(instruments, units, cost);
+        }
 
-        public override decimal? GetCost(Dictionary<string, string> output, string requestName, int rowIndex) => decimal.Parse(output["8-Summary"].Replace("Gross Amount: ", ""));
+        public override List<CorporateActionTransitionComponentRequest> GetOutputInstruments(Dictionary<string, string> output, string requestName, int rowIndex)
+        {
+            var units = decimal.Parse(output["8-Summary"].Replace("Gross Amount: ", ""));
+            var cost = 0;
+            var instruments = new Dictionary<string, string> { { "Instrument/default/Currency", output["9-Summary"].Replace("Currency: ", "") } };
+
+            return new List<CorporateActionTransitionComponentRequest> { new CorporateActionTransitionComponentRequest(instruments, units, cost) };
+        }
 
         public override List<UpsertCorporateActionRequest> Interpret(DataLicenseOutput dataLicenseOutput)
         {

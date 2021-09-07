@@ -12,9 +12,8 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
         public abstract DateTimeOffset? GetExecutionDate(Dictionary<string, string> output, string requestName, int rowIndex);
         public abstract DateTimeOffset? GetRecordDate(Dictionary<string, string> output, string requestName, int rowIndex);
         public abstract DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex);
-        public abstract string GetInstrumentName(Dictionary<string, string> output, string requestName, int rowIndex);
-        public abstract decimal? GetUnits(Dictionary<string, string> output, string requestName, int rowIndex);
-        public abstract decimal? GetCost(Dictionary<string, string> output, string requestName, int rowIndex);
+        public abstract CorporateActionTransitionComponentRequest GetInputInstrument(Dictionary<string, string> output, string requestName, int rowIndex);
+        public abstract List<CorporateActionTransitionComponentRequest> GetOutputInstruments(Dictionary<string, string> output, string requestName, int rowIndex);
 
         public virtual List<UpsertCorporateActionRequest> Interpret(DataLicenseOutput dataLicenseOutput)
         {
@@ -31,35 +30,8 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
                 var executionDate = GetExecutionDate(output, requestName, rowIndex);
                 var recordDate = GetRecordDate(output, requestName, rowIndex);
                 var paymentDate = GetPaymentDate(output, requestName, rowIndex);
-
-                var lusidInputInstrumentName = GetInstrumentName(output, requestName, rowIndex);
-                var inputInstrumentName = lusidInputInstrumentName;
-                var inputUnits = GetUnits(output, requestName, rowIndex);
-                var inputCost = GetCost(output, requestName, rowIndex);
-
-                var lusidOutputInstrumentName = lusidInputInstrumentName;
-                var outputInstrumentName = inputInstrumentName;
-                var outputUnits = inputUnits;
-                var outputCost = inputCost;
-
-                var inputTransition = new CorporateActionTransitionComponentRequest(
-                    new Dictionary<string, string>
-                    {
-                        { lusidInputInstrumentName, inputInstrumentName }
-                    },
-                    inputUnits,
-                    inputCost);
-
-                var outputTransition = new List<CorporateActionTransitionComponentRequest>
-                {
-                    new CorporateActionTransitionComponentRequest(
-                        new Dictionary<string, string>
-                        {
-                            { lusidOutputInstrumentName, outputInstrumentName }
-                        },
-                        outputUnits,
-                        outputCost)
-                };
+                var inputTransition = GetInputInstrument(output, requestName, rowIndex);
+                var outputTransition = GetOutputInstruments(output, requestName, rowIndex);
 
                 var transitions = new List<CorporateActionTransitionRequest> { new CorporateActionTransitionRequest(inputTransition, outputTransition) };
 

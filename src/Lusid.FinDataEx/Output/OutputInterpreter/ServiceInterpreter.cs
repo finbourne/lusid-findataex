@@ -1,10 +1,14 @@
-﻿using System;
+﻿using Lusid.Sdk.Model;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Lusid.FinDataEx.Output.OutputInterpreter
 {
     public class ServiceInterpreter : BaseOutputInterpreter
     {
+        public object ActionTypeMapping { get; private set; }
+
         public override string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => requestName + rowIndex;
 
         public override string GetDescription(Dictionary<string, string> output, string requestName, int rowIndex) => output["actionId"];
@@ -17,11 +21,27 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
 
         public override DateTimeOffset? GetPaymentDate(Dictionary<string, string> output, string requestName, int rowIndex) => DateTimeOffset.Parse(output["amendDate"]);
 
-        public override string GetInstrumentName(Dictionary<string, string> output, string requestName, int rowIndex) => output["securityId"];
+        public override CorporateActionTransitionComponentRequest GetInputInstrument(Dictionary<string, string> output, string requestName, int rowIndex)
+        {
+            var units = 1;
+            var cost = 0;
+            var instruments = new Dictionary<string, string> { { "Instruments/default/ClientInternal", output["13-tad_id"].Split(" ").First() } };
 
-        // This needs expanding and translating
-        public override decimal? GetUnits(Dictionary<string, string> output, string requestName, int rowIndex) => 1;
+            return new CorporateActionTransitionComponentRequest(instruments, units, cost);
+        }
 
-        public override decimal? GetCost(Dictionary<string, string> output, string requestName, int rowIndex) => 0;
+        public override List<CorporateActionTransitionComponentRequest> GetOutputInstruments(Dictionary<string, string> output, string requestName, int rowIndex)
+        {
+            var units = decimal.Parse(output["8-Summary"].Replace("Gross Amount: ", ""));
+            var cost = 0;
+            var instruments = new Dictionary<string, string> { { "Instruments/default/Currency", output["9-Summary"].Replace("Currency: ", "") } };
+
+            return new List<CorporateActionTransitionComponentRequest> { new CorporateActionTransitionComponentRequest(instruments, units, cost) };
+        }
+
+        public override List<UpsertCorporateActionRequest> Interpret(DataLicenseOutput dataLicenseOutput)
+        {
+            throw new NotImplementedException("ServiceInterpreter is not complete at this time");
+        }
     }
 }
