@@ -24,5 +24,10 @@
     <ItemGroup>
       <ProjectReference Include="..\Lusid.FinDataEx\Lusid.FinDataEx.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Unit\Util\" />
+      <Folder Include="Unit\Operation\" />
+    </ItemGroup>
 
 </Project>

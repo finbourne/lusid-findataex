@@ -121,8 +121,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                 InstrumentType.BB_GLOBAL => "Instrument/default/Figi",
                 InstrumentType.ISIN => "Instrument/default/Isin",
                 InstrumentType.CUSIP => "Instrument/default/Cusip",
-                _ => throw new ArgumentException(
-                    $"Only Figi, Isin and Cusips are currently supported. {instrumentType} not yet supported.")
+                _ => throw new ArgumentException($"Only Figi, Isin and Cusips are currently supported. {instrumentType} not yet supported.")
             };
         }
     }

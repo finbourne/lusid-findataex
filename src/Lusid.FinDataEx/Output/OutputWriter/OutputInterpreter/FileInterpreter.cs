@@ -48,7 +48,7 @@ namespace Lusid.FinDataEx.Output.OutputInterpreter
         {
             var units = decimal.Parse(output["8-Summary"].Replace("Gross Amount: ", ""));
             var cost = 0;
-            var instruments = new Dictionary<string, string> { { "Instrument/default/Currency", output["9-Summary"].Replace("Currency: ", "") } };
+            var instruments = new Dictionary<string, string> { { "Instrument/default/Currency", output["9-Summary"].Replace(" Currency: ", "") } };
 
             return new List<CorporateActionTransitionComponentRequest> { new CorporateActionTransitionComponentRequest(instruments, units, cost) };
         }

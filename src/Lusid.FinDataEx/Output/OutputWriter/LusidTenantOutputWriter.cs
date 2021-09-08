@@ -3,7 +3,6 @@ using System.Linq;
 using Lusid.FinDataEx.Output.OutputInterpreter;
 using Lusid.FinDataEx.Util;
 using Lusid.Sdk.Api;
-using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 

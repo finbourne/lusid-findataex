@@ -1,22 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using Lusid.FinDataEx.Util.FileHandler;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static Lusid.FinDataEx.Input.IInputReader;
 
 namespace Lusid.FinDataEx.Input
 {
-    public class LocalFilesystemInputReader : IInputReader
+    public class FileInputReader : IInputReader
     {
-        private readonly DataLicenseOptions _getOptions;
+        private const char InputFileEntrySeparator = '\n';
 
-        public LocalFilesystemInputReader(DataLicenseOptions getOptions)
+        private readonly DataLicenseOptions _getOptions;
+        private readonly IFileHandler _fileHandler;
+
+        public FileInputReader(DataLicenseOptions getOptions, IFileHandler fileHandler)
         {
             _getOptions = getOptions;
+            _fileHandler = fileHandler;
         }
 
         public DataLicenseOutput Read()
         {
-            var data = GetFileAsStringsFromLocalFolder(_getOptions.InputPath);
+            var data = GetFileAsStrings(_getOptions.InputPath);
 
             var headers = data.First().Split(CsvDelimiter);
             for (var col = 0; col < headers.Count(); col++)
@@ -41,12 +46,15 @@ namespace Lusid.FinDataEx.Input
             return new DataLicenseOutput(_getOptions.InputPath, headers, records);
         }
 
-        private string[] GetFileAsStringsFromLocalFolder(string filepath)
+        private List<string> GetFileAsStrings(string filepath)
         {
-            if (!File.Exists(filepath))
-                throw new FileNotFoundException($"Local file '{filepath}' not found.");
+            var validatedPath = _fileHandler.ValidatePath(filepath);
+            if (string.IsNullOrWhiteSpace(validatedPath))
+            {
+                throw new FileNotFoundException($"File '{filepath}' not found.");
+            }
 
-            return File.ReadAllLines(filepath);
+            return _fileHandler.Read(validatedPath, InputFileEntrySeparator);
         }
     }
 }

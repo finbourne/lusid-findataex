@@ -3,6 +3,7 @@ using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Instrument;
 using PerSecurity_Dotnet;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.FileHandler;
 
 namespace Lusid.FinDataEx.Operation
 {
@@ -68,11 +69,11 @@ namespace Lusid.FinDataEx.Operation
             var instrumentArgs = InstrumentArgs.Create(dataOptions);
             return dataOptions.InputSource switch
             {
-                InputType.CLI => InstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
+                InputType.CLI => CliInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 InputType.Lusid => LusidPortfolioInstrumentSource.Create(_lusidApiFactory, instrumentArgs, dataOptions.InstrumentSourceArguments),
-                InputType.Local => CsvInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
-                InputType.Drive => DriveCsvInstrumentSource.Create(_driveApiFactory, instrumentArgs, dataOptions.InstrumentSourceArguments),
-                _ => throw new ArgumentOutOfRangeException($"No input readers for input type {dataOptions.InputSource}")
+                InputType.Local => FileInstrumentSource.Create(new LocalFileHandler(), instrumentArgs, dataOptions.InstrumentSourceArguments),
+                InputType.Drive => FileInstrumentSource.Create(new LusidDriveFileHandler(_driveApiFactory), instrumentArgs, dataOptions.InstrumentSourceArguments),
+                _ => throw new ArgumentOutOfRangeException($"No instrument sources for input type {dataOptions.InputSource}")
             };
         }
     }

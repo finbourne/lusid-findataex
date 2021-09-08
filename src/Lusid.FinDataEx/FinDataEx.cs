@@ -3,6 +3,7 @@ using CommandLine;
 using Lusid.FinDataEx.Operation;
 using Lusid.FinDataEx.Output;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.FileHandler;
 
 namespace Lusid.FinDataEx
 {
@@ -74,8 +75,8 @@ namespace Lusid.FinDataEx
         /// <returns></returns>
         private static IOutputWriter CreateFinDataOutputWriter(DataLicenseOptions getOptions) => getOptions.OutputTarget switch
         {
-            OutputType.Local => new LocalFilesystemOutputWriter(getOptions),
-            OutputType.Drive => new LusidDriveOutputWriter(getOptions, DriveApiFactory),
+            OutputType.Local => new FileOutputWriter(getOptions, new LocalFileHandler()),
+            OutputType.Drive => new FileOutputWriter(getOptions, new LusidDriveFileHandler(DriveApiFactory)),
             OutputType.Lusid => new LusidTenantOutputWriter(getOptions, LusidApiFactory),
             _ => throw new ArgumentNullException($"No output writer for operation type {getOptions.OutputTarget}")
         };

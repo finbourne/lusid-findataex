@@ -1,6 +1,7 @@
 ﻿using Lusid.Drive.Sdk.Utilities;
 using Lusid.FinDataEx.Input;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.FileHandler;
 using System;
 
 namespace Lusid.FinDataEx.Operation
@@ -21,15 +22,10 @@ namespace Lusid.FinDataEx.Operation
             return CreateFinDataInputReader(_getOptions).Read();
         }
 
-        /// <summary>
-        /// Select an input reader to take BBG data from
-        /// </summary>
-        /// <param name="getOptions"></param>
-        /// <returns></returns>
         private IInputReader CreateFinDataInputReader(DataLicenseOptions getOptions) => getOptions.InputSource switch
         {
-            InputType.Drive => new LusidDriveInputReader(getOptions, _driveApiFactory),
-            InputType.Local => new LocalFilesystemInputReader(getOptions),
+            InputType.Drive => new FileInputReader(getOptions, new LusidDriveFileHandler(_driveApiFactory)),
+            InputType.Local => new FileInputReader(getOptions, new LocalFileHandler()),
             _ => throw new ArgumentNullException($"No input readers for input type {getOptions.InputSource}")
         };
     }

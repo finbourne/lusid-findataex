@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.FileHandler;
 using static Lusid.FinDataEx.Output.IOutputWriter;
 
 namespace Lusid.FinDataEx.Output
 {
-    /// <summary>
-    ///  Writes FinDataOutput to local file system.
-    /// </summary>
-    public class LocalFilesystemOutputWriter : IOutputWriter
+    public class FileOutputWriter : IOutputWriter
     {
-        private readonly string _outputFilePath;
+        private const char OutputFileEntrySeparator = '\n';
 
-        public LocalFilesystemOutputWriter(DataLicenseOptions getOptions)
+        private readonly string _outputFilePath;
+        private readonly IFileHandler _fileHandler;
+
+        public FileOutputWriter(DataLicenseOptions getOptions, IFileHandler fileHandler)
         {
             _outputFilePath = getOptions.OutputPath;
+            _fileHandler = fileHandler;
         }
 
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
@@ -26,7 +27,7 @@ namespace Lusid.FinDataEx.Output
                 Console.WriteLine($"Attempting to write empty data license output : {dataLicenseOutput}. Skipping...");
                 return WriteResult.NotRun();
             }
-            // prepare fin data as strings to be written to file
+
             var headers = string.Join(BbgDlDelimiter, dataLicenseOutput.Header);
             var finDataRecords = new List<string>{headers};
             finDataRecords.AddRange(
@@ -42,7 +43,7 @@ namespace Lusid.FinDataEx.Output
                     return string.Join(BbgDlDelimiter, record);
                 }).ToList()
             );
-            
+
             try
             {
                 var modifiedFilepath = CreateFilepathWithAutoGenPatterns(dataLicenseOutput.Id);
@@ -55,16 +56,20 @@ namespace Lusid.FinDataEx.Output
             }
         }
 
-        protected virtual string WriteToFile(string modifiedFilepath, IEnumerable<string> finDataRecords)
-        {
-            File.WriteAllLines(modifiedFilepath, finDataRecords);
-            return modifiedFilepath;
-        }
-
         private string CreateFilepathWithAutoGenPatterns(string dataLicenseOutputId)
         {
-            // check for and apply patterns to output filename
             return AutoGenPatternUtils.ApplyAllPatterns(_outputFilePath, dataLicenseOutputId);
+        }
+
+        private string WriteToFile(string modifiedFilepath, List<string> finDataRecords)
+        {
+            Console.WriteLine($"Attempting to write to filename={modifiedFilepath}");
+
+            modifiedFilepath = _fileHandler.Write(modifiedFilepath, finDataRecords, OutputFileEntrySeparator);
+
+            Console.WriteLine($"Completed write to filename={modifiedFilepath}");
+
+            return modifiedFilepath;
         }
     }
 }

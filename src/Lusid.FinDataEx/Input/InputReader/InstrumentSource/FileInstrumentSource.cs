@@ -3,47 +3,36 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.FileHandler;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
-    /// <summary>
-    ///  Instruments loaded from csv on local filesystem
-    /// </summary>
-    public class CsvInstrumentSource : IInstrumentSource
+    public class FileInstrumentSource : IInstrumentSource
     {
+        private const char InputFileEntrySeparator = '\n';
+
+        private readonly IFileHandler _fileHandler;
         private readonly InstrumentArgs _instrumentArgs;
         private readonly string _filePath;
         private readonly string _delimiter;
         private readonly int _instrumentIdColIdx;
-        
 
-        protected CsvInstrumentSource(InstrumentArgs instrumentArgs, string filePath, string delimiter, int instrumentIdColIdx)
+        protected FileInstrumentSource(IFileHandler fileHandler, InstrumentArgs instrumentArgs, string filePath, string delimiter, int instrumentIdColIdx)
         {
+            _fileHandler = fileHandler;
             _instrumentArgs = instrumentArgs;
             _filePath = filePath;
             _delimiter = delimiter;
             _instrumentIdColIdx = instrumentIdColIdx;
         }
-        
-        /// <summary>
-        ///  Creates an instrument source for a given instrument id type and a set of
-        ///  instrument ids.
-        /// </summary>
-        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
-        /// <param name="instrumentSourceArgs">Application arguments passed in. Filepath (mandatory), delimiter (optional) and column index of the instrument id (optional)</param>
-        /// <returns>A CsvInstrumentSource instance</returns>
-        public static CsvInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
+
+        public static FileInstrumentSource Create(IFileHandler fileHandler, InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {
             var (filePath, delimiter, instrumentIdColIdx) = ParseInstrumentSourceArgs(instrumentArgs.InstrumentType, instrumentSourceArgs);
-            return new CsvInstrumentSource(instrumentArgs, filePath, delimiter, instrumentIdColIdx);
+            return new FileInstrumentSource(fileHandler, instrumentArgs, filePath, delimiter, instrumentIdColIdx);
         }
 
-        /// <summary>
-        /// Retrieve the instrument source filepath, delimiter used and the column index of the instrument Id. Additionally apply
-        /// any AutoGen patterns to the file name (e.g. to insert the AsOf date into the filename). 
-        /// </summary>
-        /// <returns></returns>
         internal static Tuple<string, string, int> ParseInstrumentSourceArgs(InstrumentType instrumentType, IEnumerable<string> instrumentSourceArgs)
         {
             // retrieve filename, delimiter and instrument column index. 
@@ -67,10 +56,6 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             return Tuple.Create(filePath, delimiter, instrumentIdColIdx);
         }
 
-        /// <summary>
-        ///  Retrieve a BBG DLWS set of instruments loaded from csv file.
-        /// </summary>
-        /// <returns>Set of BBG DLWS instruments</returns>
         #nullable enable
         public Instruments? Get()
         {
@@ -80,7 +65,13 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 
         protected virtual IEnumerable<string> LoadInstrumentsFromFile(string filepath, string delimiter, int instrumentIdColIdx)
         {
-            return File.ReadAllLines(filepath)
+            var validatedPath = _fileHandler.ValidatePath(filepath);
+            if (string.IsNullOrWhiteSpace(validatedPath))
+            {
+                throw new FileNotFoundException($"Local file '{filepath}' not found.");
+            }
+
+            return _fileHandler.Read(validatedPath, InputFileEntrySeparator)
                 .Skip(1)
                 .Select(e => e.Split(delimiter)[instrumentIdColIdx])
                 .ToHashSet();

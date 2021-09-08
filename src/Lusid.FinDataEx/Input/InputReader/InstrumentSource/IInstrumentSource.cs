@@ -26,7 +26,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         /// <returns></returns>
         internal static Instruments CreateInstruments(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentIds)
         {
-            var instruments = instrumentIds.Select(id =>
+            var instruments = instrumentIds.ToHashSet().Select(id =>
             {
                 // add mandatory instrument args
                 var instrument = new PerSecurity_Dotnet.Instrument()
@@ -35,6 +35,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                     type = instrumentArgs.InstrumentType,
                     typeSpecified = true
                 };
+
                 // add optional instrument args
                 if (instrumentArgs.YellowKey.HasValue)
                 {
