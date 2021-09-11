@@ -13,9 +13,9 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
     /// work fine for most use cases but if specific settings are needed (e.g. increased timeouts
     /// due to large calls) than new factory creation methods should be added here.
     /// </summary>
-    public class PerSecurityWsFactory
+    public class PerSecurityWsFactory : IPerSecurityWsFactory
     {
-        
+
         public const string BbgDlAddress = "https://dlws.bloomberg.com/dlps";
         public const string BbgDlCertPathEnvVar = "BBG_DL_CERT_PATH";
         public const string BbgDlCertDataEnvVar = "BBG_DL_CERT_DATA";
@@ -32,7 +32,7 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
             var certificate = CreateCertificateFromEnvVar();
             return Create(BbgDlAddress, certificate);
         }
-        
+
         /// <summary>
         ///  Creates a default BBG DLWS client against specified address and
         ///  authentication and retrieves certificates and
@@ -45,7 +45,7 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
             var certificate = CreateCertificateFromEnvVar();
             return Create(bbgDlAddress, certificate);
         }
-        
+
         /// <summary>
         ///  Creates a default BBG DLWS client.
         /// </summary>
@@ -99,7 +99,7 @@ namespace Lusid.FinDataEx.DataLicense.Vendor
             basicHttpBinding.SendTimeout = TimeSpan.FromMinutes(1);*/
             return basicHttpBinding;
         }
-        
+
         private X509Certificate2 CreateCertificateFromEnvVar()
         {
             var encodedClientCertContent = Environment.GetEnvironmentVariable(BbgDlCertDataEnvVar);

@@ -3,6 +3,9 @@ using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Instrument;
 using PerSecurity_Dotnet;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.DataLicense.Service;
+using Lusid.FinDataEx.DataLicense.Vendor;
+using Lusid.FinDataEx.Util.FileUtils.Handler;
 
 namespace Lusid.FinDataEx.Operation
 {
@@ -21,6 +24,9 @@ namespace Lusid.FinDataEx.Operation
 
         public DataLicenseOutput Execute()
         {
+            throw new NotImplementedException("Due to licensing issues, this operation can not run at this time. " +
+                                              "Please use another operation type");
+
             // construct instruments in DL format to be passed to DLWS
             var instruments = CreateInstruments(_getOptions);
             if (!instruments.instrument.Any())
@@ -30,18 +36,9 @@ namespace Lusid.FinDataEx.Operation
                 return DataLicenseOutput.Empty();
             }
 
-            return new DataLicenseInputReader(_getOptions, instruments).Read();
+            return new DataLicenseInputReader(_getOptions, instruments, new DataLicenseService(), new PerSecurityWsFactory()).Read();
         }
 
-        /// <summary>
-        /// Select an create an instrument source to build instruments passed to BBG.
-        ///
-        /// Instrument sources build DLWS compatible instruments from an underlying source (e.g
-        /// instruments from holdings in a portfolio, or figis passed in as args).
-        /// </summary>
-        /// <param name="dataOptions"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
         private Instruments CreateInstruments(DataLicenseOptions dataOptions)
         {
             var instrumentSource = CreateInstrumentSource(dataOptions);
@@ -68,11 +65,11 @@ namespace Lusid.FinDataEx.Operation
             var instrumentArgs = InstrumentArgs.Create(dataOptions);
             return dataOptions.InputSource switch
             {
-                InputType.CLI => InstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
+                InputType.CLI => CliInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
                 InputType.Lusid => LusidPortfolioInstrumentSource.Create(_lusidApiFactory, instrumentArgs, dataOptions.InstrumentSourceArguments),
-                InputType.Local => CsvInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
-                InputType.Drive => DriveCsvInstrumentSource.Create(_driveApiFactory, instrumentArgs, dataOptions.InstrumentSourceArguments),
-                _ => throw new ArgumentOutOfRangeException($"No input readers for input type {dataOptions.InputSource}")
+                InputType.Local => FileInstrumentSource.Create(new LocalFileHandler(), instrumentArgs, dataOptions.InstrumentSourceArguments),
+                InputType.Drive => FileInstrumentSource.Create(new LusidDriveFileHandler(_driveApiFactory), instrumentArgs, dataOptions.InstrumentSourceArguments),
+                _ => throw new ArgumentOutOfRangeException($"No instrument sources for input type {dataOptions.InputSource}")
             };
         }
     }

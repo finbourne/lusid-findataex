@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using static Lusid.FinDataEx.Tests.Unit.TestUtils;
 
 namespace Lusid.FinDataEx.Tests.Integration
 {
     [TestFixture]
+    [Ignore("Integration tests are currently unable to run because of licensing issues")]
     [Category("Unsafe")]
     public class FinDataExTests
     {
@@ -14,13 +14,13 @@ namespace Lusid.FinDataEx.Tests.Integration
         [SetUp]
         public void SetUp()
         {
-            SetupTempTestDirectory(_tempOutputDir);
+            TestUtils.SetupTempTestDirectory(_tempOutputDir);
         }
         
         [TearDown]
         public void TearDown()
         {
-            TearDownTempTestDirectory(_tempOutputDir);
+            TestUtils.TearDownTempTestDirectory(_tempOutputDir);
         }
 
         [Test]
@@ -402,7 +402,7 @@ namespace Lusid.FinDataEx.Tests.Integration
         
         /* No instruments sourced  */
         [Test]
-        public void FinDataEx_GetData_OnNoInsturmentsFromSource_ShouldDoNothingButReturnAsSuccess()
+        public void FinDataEx_GetData_OnNoInstrumentsFromSource_ShouldDoNothingButReturnAsSuccess()
         {
             var filepath = $"{_tempOutputDir + Path.DirectorySeparatorChar}dl_request_output.csv";
             var instrumentSourceCsv = Path.Combine(new[]{"Integration","DataLicense","Instrument","TestData",

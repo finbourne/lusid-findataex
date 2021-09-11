@@ -18,16 +18,13 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         [Test]
         public void Transform_OnAllValidInstrumentsResponse_IsWellFormed()
         {
-            //when
-            var responseId = "1602149495-71386027_ValidInstruments";
+            var responseId = "ValidInstruments";
             var retrieveGetDataResponse = TestUtils.LoadGetDataResponseFromFile(responseId);
-            
-            //execute
+
             var getDataOutput = _transformer.Transform(retrieveGetDataResponse);
-            
-            //verify
+
             CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
-            
+
             Assert.That(getDataOutput.Records.Count, Is.EqualTo(2));
             CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
             {
@@ -44,20 +41,17 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
                 {"timeFinished", "08/10/2020 09:32:09 +00:00"}
             });
         }
-        
+
         [Test]
         public void Transform_OnOneBadInstrumentsResponse_IsWellFormedWithOnlyValidInstrument()
         {
-            //when
-            var responseId = "1602161569-1051504982_OneBadInstrument";
+            var responseId = "OneBadInstrument";
             var retrieveGetDataResponse = TestUtils.LoadGetDataResponseFromFile(responseId);
-            
-            //execute
+
             var getDataOutput = _transformer.Transform(retrieveGetDataResponse);
-            
-            //verify
+
             CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
-            
+
             Assert.That(getDataOutput.Records.Count, Is.EqualTo(1));
             CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
             {
@@ -67,6 +61,5 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
                 {"timeFinished", "08/10/2020 12:53:24 +00:00"}
             });
         }
-
     }
 }

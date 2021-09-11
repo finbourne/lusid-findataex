@@ -11,15 +11,14 @@ namespace Lusid.FinDataEx.DataLicense.Service
     /// Service that manages the lifecycle of all calls to BBG DLWS. Includes request
     /// construction, call execution and waiting, and transformation of response data
     /// into a standard FinDataOutput.
-    /// 
     /// </summary>
-    public class DataLicenseService
+    public class DataLicenseService : IDataLicenseService
     {
         public const int DataNotAvailable = 100;
         public const int Success = 0;
         public const int RequestError = 200;
         public const string InstrumentSuccessCode = "0";
-        
+
         /// <summary>
         ///  Executes a request to BBG DLWS for a given set of BB_UNIQUE_IDs and a given data type. On response
         /// will return a standardised output as a FinDataOutput.
@@ -28,9 +27,9 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="dlInstruments">DLWS representation of instruments to pass to BBG DL</param>
         /// <param name="programType">Program type of the given call (e.g. Adhoc, Scheduled)</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public DataLicenseOutput Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType, bool unsafeRequest = false)
+        public DataLicenseOutput Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType, bool enableLiveRequests = false)
         {
-            if (unsafeRequest)
+            if (enableLiveRequests)
             {
                 // validate inputs
                 if (!dlInstruments.instrument.Any()) return DataLicenseOutput.Empty();
@@ -49,7 +48,7 @@ namespace Lusid.FinDataEx.DataLicense.Service
                 Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS.");
                 return DataLicenseOutput.Empty();
             }
-            
+
         }
 
         private static DataLicenseOutput TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
@@ -57,9 +56,9 @@ namespace Lusid.FinDataEx.DataLicense.Service
             return dataType switch
             {
                 DataTypes.GetData => new GetDataResponseTransformer().Transform(
-                    (RetrieveGetDataResponse) perSecurityResponse),
+                    (RetrieveGetDataResponse)perSecurityResponse),
                 DataTypes.GetActions => new GetActionResponseTransformer().Transform(
-                    (RetrieveGetActionsResponse) perSecurityResponse),
+                    (RetrieveGetActionsResponse)perSecurityResponse),
                 _ => throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.")
             };
         }

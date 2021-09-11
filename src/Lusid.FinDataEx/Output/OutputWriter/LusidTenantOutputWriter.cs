@@ -2,9 +2,10 @@
 using System.Linq;
 using Lusid.FinDataEx.Output.OutputInterpreter;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.InterpreterUtils;
 using Lusid.Sdk.Api;
-using Lusid.Sdk.Model;
 using Lusid.Sdk.Utilities;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
 namespace Lusid.FinDataEx.Output
 {
@@ -12,11 +13,13 @@ namespace Lusid.FinDataEx.Output
     {
         private readonly ICorporateActionSourcesApi _corporateActionSourcesApi;
         private readonly DataLicenseOptions _getOptions;
+        private readonly IInterpreterFactory _interpreterFactory;
 
-        public LusidTenantOutputWriter(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory)
+        public LusidTenantOutputWriter(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory, IInterpreterFactory interpreterFactory)
         {
             _corporateActionSourcesApi = lusidApiFactory.Api<ICorporateActionSourcesApi>();
             _getOptions = getOptions;
+            _interpreterFactory = interpreterFactory;
         }
 
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
@@ -24,6 +27,13 @@ namespace Lusid.FinDataEx.Output
             if (!(_getOptions is GetActionsOptions getActionsOptions))
             {
                 Console.WriteLine($"LusidTenantOutputWriter does not support requests other than GetActions. Skipping...");
+                return WriteResult.NotRun();
+            }
+            
+            if (getActionsOptions.CorpActionTypes.Count() > 1 || 
+                getActionsOptions.CorpActionTypes.Single() != CorpActionType.DVD_CASH)
+            {
+                Console.WriteLine($"LusidTenantOutputWriter does not Action types other than {CorpActionType.DVD_CASH}. Skipping...");
                 return WriteResult.NotRun();
             }
 
@@ -37,15 +47,17 @@ namespace Lusid.FinDataEx.Output
             var scope = corporateActionSourceComponents.First();
             var code = corporateActionSourceComponents.Last();
 
-            var interpreter = CreateInterpreter(getActionsOptions);
-
-            var actions = interpreter.Interpret(dataLicenseOutput);
+            var actions = CreateInterpreter(getActionsOptions).Interpret(dataLicenseOutput);
 
             try
             {
-                // Upsert corporate actions
-                UpsertCorporateActionsResponse result = _corporateActionSourcesApi.BatchUpsertCorporateActions(scope, code, actions);
-                Console.WriteLine(result);
+                var result = _corporateActionSourcesApi.BatchUpsertCorporateActions(scope, code, actions);
+
+                if (result.Failed.Any())
+                {
+                    throw new AggregateException("One or more actions failed", result.Failed.Values.Select(e => new Exception(e.ToString())));
+                }
+
                 return WriteResult.Ok(_getOptions.OutputPath);
             }
             catch (Exception e)
@@ -54,10 +66,10 @@ namespace Lusid.FinDataEx.Output
             }
         }
 
-        private static IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions) => getOptions.OperationType switch
+        private IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions) => getOptions.OperationType switch
         {
-            OperationType.ParseExisting => new FileInterpreter(getOptions),
-            OperationType.BloombergRequest => new ServiceInterpreter(),
+            OperationType.ParseExisting => _interpreterFactory.Build(InterpreterType.File, getOptions),
+            OperationType.BloombergRequest => _interpreterFactory.Build(InterpreterType.Service, getOptions),
             _ => throw new ArgumentNullException($"No output interpreters for operation type {getOptions.OperationType}")
         };
     }

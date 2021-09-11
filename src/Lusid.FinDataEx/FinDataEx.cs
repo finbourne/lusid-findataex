@@ -3,6 +3,8 @@ using CommandLine;
 using Lusid.FinDataEx.Operation;
 using Lusid.FinDataEx.Output;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.FileUtils.Handler;
+using Lusid.FinDataEx.Util.InterpreterUtils;
 
 namespace Lusid.FinDataEx
 {
@@ -62,7 +64,7 @@ namespace Lusid.FinDataEx
         /// <returns></returns>
         private static  IOperationExecutor CreateFinDataOperationExecutor(DataLicenseOptions getOptions) => getOptions.OperationType switch
         {
-            OperationType.ParseExisting => new ParseExistingDataExecutor(getOptions, DriveApiFactory),
+            OperationType.ParseExisting => new ParseExistingDataExecutor(getOptions, DriveApiFactory, new FileHandlerFactory()),
             OperationType.BloombergRequest => new DataLicenseRequestExecutor(getOptions, LusidApiFactory, DriveApiFactory),
             _ => throw new ArgumentNullException($"No input readers for operation type {getOptions.OperationType}")
         };
@@ -74,9 +76,9 @@ namespace Lusid.FinDataEx
         /// <returns></returns>
         private static IOutputWriter CreateFinDataOutputWriter(DataLicenseOptions getOptions) => getOptions.OutputTarget switch
         {
-            OutputType.Local => new LocalFilesystemOutputWriter(getOptions),
-            OutputType.Drive => new LusidDriveOutputWriter(getOptions, DriveApiFactory),
-            OutputType.Lusid => new LusidTenantOutputWriter(getOptions, LusidApiFactory),
+            OutputType.Local => new FileOutputWriter(getOptions, new LocalFileHandler()),
+            OutputType.Drive => new FileOutputWriter(getOptions, new LusidDriveFileHandler(DriveApiFactory)),
+            OutputType.Lusid => new LusidTenantOutputWriter(getOptions, LusidApiFactory, new InterpreterFactory()),
             _ => throw new ArgumentNullException($"No output writer for operation type {getOptions.OutputTarget}")
         };
 
