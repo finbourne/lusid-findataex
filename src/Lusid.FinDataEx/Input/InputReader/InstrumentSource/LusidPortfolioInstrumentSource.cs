@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Lusid.Sdk.Utilities;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Client;
 using PerSecurity_Dotnet;
 
-[assembly: InternalsVisibleTo("Lusid.FinDataEx.Tests", AllInternalsVisible = true)]
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
     /// <summary>
@@ -16,15 +14,15 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     /// </summary>
     public class LusidPortfolioInstrumentSource : IInstrumentSource
     {
-        private readonly ILusidApiFactory _lusidApiFactory;
+        private readonly ITransactionPortfoliosApi _transactionPortfoliosApi;
         private readonly InstrumentArgs _instrumentArgs;
         private readonly string _instrumentTypeLusidPropertyKey;
         private readonly ISet<Tuple<string, string>> _scopesAndPortfolios;
         private readonly DateTimeOffset _effectiveAt;
 
-        protected internal LusidPortfolioInstrumentSource(ILusidApiFactory lusidApiFactory, InstrumentArgs instrumentArgs, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
+        private LusidPortfolioInstrumentSource(ILusidApiFactory lusidApiFactory, InstrumentArgs instrumentArgs, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
-            _lusidApiFactory = lusidApiFactory;
+            _transactionPortfoliosApi = lusidApiFactory.Api<ITransactionPortfoliosApi>();
             _instrumentArgs = instrumentArgs;
             _instrumentTypeLusidPropertyKey = GetLusidInstrumentIdPropertyAddress(instrumentArgs.InstrumentType);
             _scopesAndPortfolios = scopesAndPortfolios;
@@ -41,10 +39,10 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         public static LusidPortfolioInstrumentSource Create(ILusidApiFactory factory, InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
         {   
             // parse portfolio and scopes from request arguments (e.g. [Scope1|Port1, Scope2|Port2, Scope3|Port3])
-            var scopeAndPortfolioArgs = instrumentSourceArgs as string[] ?? instrumentSourceArgs.ToArray();
+            var scopeAndPortfolioArgs = instrumentSourceArgs;
 
             Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentArgs.InstrumentType} for the " +
-                              $"portfolios and scopes: {string.Join(',',scopeAndPortfolioArgs)}");
+                              $"portfolios and scopes: {string.Join(',', scopeAndPortfolioArgs)}");
 
             // parse the input arguments into set of portfolio/scope pairs.
             ISet<Tuple<string,string>> scopesAndPortfolios = scopeAndPortfolioArgs.Select(p =>
@@ -55,7 +53,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                     throw new ArgumentException($"Unexpected scope and portfolio entry for {p}. Should be " +
                                                 $"in form TestScope|UK_EQUITY");
                 }
-                return new Tuple<string,string>(scopeAndPortfolio[0], scopeAndPortfolio[1]);
+                return new Tuple<string,string>(scopeAndPortfolio[1], scopeAndPortfolio[0]);
             }).ToHashSet();
             
             // currently only support holdings as at latest date. if required to support historical dates can modify
@@ -72,24 +70,23 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         #nullable enable
         public Instruments? Get()
         {
-            var holdingsInstrumentIds = GetHoldingsInstrumentIds(_lusidApiFactory, _scopesAndPortfolios, _effectiveAt);
-            return holdingsInstrumentIds.Any() ? IInstrumentSource.CreateInstruments(_instrumentArgs, holdingsInstrumentIds) : null;
+            var holdingsInstrumentIds = GetHoldingsInstrumentIds(_scopesAndPortfolios, _effectiveAt);
+            return IInstrumentSource.CreateInstruments(_instrumentArgs, holdingsInstrumentIds);
         }
 
         /// <summary>
         ///  Calls LUSID to retrieve the instrument ids of holdings for the given portfolio and effectiveAt time.
         /// </summary>
         /// <returns></returns>
-        private ISet<string> GetHoldingsInstrumentIds(ILusidApiFactory lusidApiFactory, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
+        private ISet<string> GetHoldingsInstrumentIds(ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
-            var transactionPortfoliosApi = lusidApiFactory.Api<TransactionPortfoliosApi>();
             var instrumentIds = new HashSet<string>();
             foreach (var (scope, portfolio) in scopesAndPortfolios)
             {
                 try
                 {
                     // retrieve holdings from LUSID with instrument id property attached.
-                    var holdings = transactionPortfoliosApi.GetHoldings(scope, portfolio, effectiveAt,
+                    var holdings = _transactionPortfoliosApi.GetHoldings(scope, portfolio, effectiveAt,
                         propertyKeys: new List<string>() {_instrumentTypeLusidPropertyKey});
                     // filter only entries with valid instrument ids and map to a set for unique instruments.
                     var validPortfolioInstrumentIds = holdings.Values
@@ -98,7 +95,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                         .ToHashSet();
 
                     Console.WriteLine($"Retrieving ids for instruments of positions for scope={scope}, " +
-                                      $"portfolio={portfolio}, effectiveAt={effectiveAt}. InstrumentType={_instrumentArgs.InstrumentType}, instrument Ids={validPortfolioInstrumentIds}");
+                                      $"portfolio={portfolio}, effectiveAt={effectiveAt}. InstrumentType={_instrumentArgs.InstrumentType}");
                     
                     // union with other portfolio holding instruments
                     instrumentIds.UnionWith(validPortfolioInstrumentIds);

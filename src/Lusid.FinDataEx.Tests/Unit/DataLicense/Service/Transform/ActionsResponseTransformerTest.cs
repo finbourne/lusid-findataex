@@ -18,7 +18,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         [Test]
         public void OnValidCorpActions_ShouldProduceOutput()
         {
-            var responseId = "1603798418-1052073180_ValidActions";
+            var responseId = "ValidActions";
             var retrieveGetActionResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
 
             var getActionOutput = _transformer.Transform(retrieveGetActionResponse);
@@ -34,6 +34,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
                 "CP_ACTION_STATUS"});
 
             Assert.That(getActionOutput.Records.Count, Is.EqualTo(1));
+
             var corpActionRecord = getActionOutput.Records[0];
             Assert.That(corpActionRecord["CP_RECORD_DT"], Is.EqualTo("11/06/2020"));
             Assert.That(corpActionRecord["CP_PAY_DT"], Is.EqualTo("12/04/2020"));
@@ -53,26 +54,11 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         [Test]
         public void OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput()
         {
-            //when
-            var responseId = "1603900538-71379765_NoActions";
+            var responseId = "NoActions";
             var retrieveGetActionsResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
-            
-            //execute
+
             var getActionsOutput = _transformer.Transform(retrieveGetActionsResponse);
             Assert.That(getActionsOutput.IsEmpty, Is.True);
         }
-        
-        [Test]
-        public void OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput_Example2()
-        {
-            //when
-            var responseId = "1613489899-105709323_NoActions";
-            var retrieveGetActionsResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
-
-            //execute
-            var getActionsOutput = _transformer.Transform(retrieveGetActionsResponse);
-            Assert.That(getActionsOutput.IsEmpty, Is.True);
-        }
-
     }
 }

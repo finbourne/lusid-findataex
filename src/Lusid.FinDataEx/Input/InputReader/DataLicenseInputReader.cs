@@ -13,32 +13,27 @@ namespace Lusid.FinDataEx
     {
         private readonly DataLicenseOptions _getOptions;
         private readonly Instruments _instruments;
+        private readonly IDataLicenseService _dataLicenseService;
+        private readonly IPerSecurityWsFactory _perSecurityWsFactory;
 
-        public DataLicenseInputReader(DataLicenseOptions getOptions, Instruments instruments)
+        public DataLicenseInputReader(DataLicenseOptions getOptions, Instruments instruments, IDataLicenseService dataLicenseService, IPerSecurityWsFactory perSecurityWsFactory)
         {
             _getOptions = getOptions;
             _instruments = instruments;
+            _dataLicenseService = dataLicenseService;
+            _perSecurityWsFactory = perSecurityWsFactory;
         }
 
         public DataLicenseOutput Read()
         {
-            // construct data license call
-            var perSecurityWs = new PerSecurityWsFactory().CreateDefault();
+            var perSecurityWs = _perSecurityWsFactory.CreateDefault();
             var dataLicenseCall = CreateDataLicenseCall(_getOptions, perSecurityWs);
 
             LogRequest(_instruments, dataLicenseCall);
 
-            // call DL and write results to specified output (as long as not in safe mode)
-            var dlDataService = new DataLicenseService();
-            return dlDataService.Get(dataLicenseCall, _instruments, ProgramTypes.Adhoc, _getOptions.EnableLiveRequests);
+            return _dataLicenseService.Get(dataLicenseCall, _instruments, ProgramTypes.Adhoc, _getOptions.EnableLiveRequests);
         }
 
-        /// <summary>
-        ///  Create a BBG DL call depending on the arguments passed into the application.
-        /// </summary>
-        /// <param name="getOptions">Options taken from the user provided arguments</param>
-        /// <param name="perSecurityWs">BBG DLWS client</param>
-        /// <returns></returns>
         private static IDataLicenseCall<PerSecurityResponse> CreateDataLicenseCall(DataLicenseOptions getOptions, PerSecurityWS perSecurityWs)
         {
             return getOptions switch

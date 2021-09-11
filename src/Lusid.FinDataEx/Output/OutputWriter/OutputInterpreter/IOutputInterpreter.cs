@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Lusid.FinDataEx.Output.OutputInterpreter
 {
-    interface IOutputInterpreter
+    public interface IOutputInterpreter
     {
         string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex);
 

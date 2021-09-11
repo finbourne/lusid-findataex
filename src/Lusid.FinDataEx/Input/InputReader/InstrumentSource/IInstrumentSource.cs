@@ -24,7 +24,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InsturmentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
         /// <param name="instrumentIds">Set of instrument ids to create and configure for submission to DLWS</param>
         /// <returns></returns>
-        internal static Instruments CreateInstruments(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentIds)
+        public static Instruments CreateInstruments(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentIds)
         {
             var instruments = instrumentIds.ToHashSet().Select(id =>
             {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lusid.FinDataEx.Util;
-using Lusid.FinDataEx.Util.FileHandler;
+using Lusid.FinDataEx.Util.FileUtils.Handler;
 using static Lusid.FinDataEx.Output.IOutputWriter;
 
 namespace Lusid.FinDataEx.Output

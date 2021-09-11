@@ -17,17 +17,12 @@
 
     <ItemGroup>
         <None Include="Unit\DataLicense\Service\Call\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Unit\DataLicense\Service\Call\TestData\')" />
-        <None Include="Integration\DataLicense\Instrument\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Integration\DataLicense\Instrument\TestData\')" />
+        <None Include="Integration\TestData\**\*" CopyToOutputDirectory="Always" Condition="Exists('Integration\DataLicense\Instrument\TestData\')" />
         <None Include="secrets*.json" CopyToOutputDirectory="Always" CopyToPublishDirectory="Never" Condition="Exists('secrets.json')" />
     </ItemGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\Lusid.FinDataEx\Lusid.FinDataEx.csproj" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="Unit\Util\" />
-      <Folder Include="Unit\Operation\" />
     </ItemGroup>
 
 </Project>

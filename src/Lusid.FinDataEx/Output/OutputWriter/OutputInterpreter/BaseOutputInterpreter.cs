@@ -4,6 +4,8 @@ using Lusid.Sdk.Model;
 
 namespace Lusid.FinDataEx.Output.OutputInterpreter
 {
+    // This class exists because C#8 does not support calling base, default implementations in an interface from a child class
+    // This class, therefore, exists to allow inheritance mechanisms
     public abstract class BaseOutputInterpreter : IOutputInterpreter
     {
         public abstract string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex);

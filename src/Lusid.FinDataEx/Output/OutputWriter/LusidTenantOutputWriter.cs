@@ -2,6 +2,7 @@
 using System.Linq;
 using Lusid.FinDataEx.Output.OutputInterpreter;
 using Lusid.FinDataEx.Util;
+using Lusid.FinDataEx.Util.InterpreterUtils;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Utilities;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
@@ -12,11 +13,13 @@ namespace Lusid.FinDataEx.Output
     {
         private readonly ICorporateActionSourcesApi _corporateActionSourcesApi;
         private readonly DataLicenseOptions _getOptions;
+        private readonly IInterpreterFactory _interpreterFactory;
 
-        public LusidTenantOutputWriter(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory)
+        public LusidTenantOutputWriter(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory, IInterpreterFactory interpreterFactory)
         {
             _corporateActionSourcesApi = lusidApiFactory.Api<ICorporateActionSourcesApi>();
             _getOptions = getOptions;
+            _interpreterFactory = interpreterFactory;
         }
 
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
@@ -44,9 +47,7 @@ namespace Lusid.FinDataEx.Output
             var scope = corporateActionSourceComponents.First();
             var code = corporateActionSourceComponents.Last();
 
-            var interpreter = CreateInterpreter(getActionsOptions);
-
-            var actions = interpreter.Interpret(dataLicenseOutput);
+            var actions = CreateInterpreter(getActionsOptions).Interpret(dataLicenseOutput);
 
             try
             {
@@ -65,10 +66,10 @@ namespace Lusid.FinDataEx.Output
             }
         }
 
-        private static IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions) => getOptions.OperationType switch
+        private IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions) => getOptions.OperationType switch
         {
-            OperationType.ParseExisting => new FileInterpreter(getOptions),
-            OperationType.BloombergRequest => new ServiceInterpreter(),
+            OperationType.ParseExisting => _interpreterFactory.Build(InterpreterType.File, getOptions),
+            OperationType.BloombergRequest => _interpreterFactory.Build(InterpreterType.Service, getOptions),
             _ => throw new ArgumentNullException($"No output interpreters for operation type {getOptions.OperationType}")
         };
     }

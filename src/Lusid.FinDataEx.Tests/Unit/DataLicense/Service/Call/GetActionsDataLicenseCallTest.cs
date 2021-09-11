@@ -12,9 +12,9 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
     [TestFixture]
     public class GetActionsDataLicenseCallTest
     {
-
         private GetActionsDataLicenseCall _getActionDataLicenseCall;
         private PerSecurityWS _perSecurityWs;
+
         [SetUp]
         public void SetUp()
         {
@@ -26,48 +26,44 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Call
         }
 
         [Test]
-        public void Get_OnValidActions_ShouldReturnCorpActions()
+        public void ValidActionsShouldReturnCorpActions()
         {
-            //when
             var testInstruments = CreateCorpActionTestInstrument();
-            var responseId = "1603798418-1052073180_ValidActions";
+            var responseId = "ValidActions";
 
-            // setup mock to submit request and get back response id to poll
+            // Setup mock to submit request and get back response id to poll
             submitGetActionsRequestRequest submitGetActionsRequestRequest = null;
+
             var submitGetActionsRequestResponse = CreateSubmitGetActionsRequestResponse(responseId);
-            Mock.Get(_perSecurityWs).Setup(perWsMock =>
-                perWsMock.submitGetActionsRequest(It.IsAny<submitGetActionsRequestRequest>()))
-                // return a submit request response that contains the response id used to poll for results
-                .Returns(submitGetActionsRequestResponse)
-                //retrieve request argument to ensure properly constructed
-                .Callback<submitGetActionsRequestRequest>(r => submitGetActionsRequestRequest = r);
-            
-            // setup mock service to return successful data request. 
+
+            Mock.Get(_perSecurityWs)
+                .Setup(perWsMock => perWsMock.submitGetActionsRequest(It.IsAny<submitGetActionsRequestRequest>()))
+                .Returns(submitGetActionsRequestResponse) // Return a submit request response that contains the response id used to poll for results
+                .Callback<submitGetActionsRequestRequest>(r => submitGetActionsRequestRequest = r); // Retrieve request argument to ensure properly constructed
+
+            // Setup mock service to return successful data request.
             retrieveGetActionsResponseRequest retrieveGetDataResponseRequest = null;
-            var retrieveGetActionsResponseResponse =
-                CreateRetrieveGetActionResponseResponse(responseId);
-            Mock.Get(_perSecurityWs).Setup(perWsMock =>
-                    perWsMock.retrieveGetActionsResponse(It.IsAny<retrieveGetActionsResponseRequest>()))
-                // return the expected data response from bbg
-                .Returns(retrieveGetActionsResponseResponse)
-                //retrieve get data request argument that contains the response id. ensure it's properly constructed
-                .Callback<retrieveGetActionsResponseRequest>(r => retrieveGetDataResponseRequest = r);
-            
-            //execute test
+
+            var retrieveGetActionsResponseResponse = CreateRetrieveGetActionResponseResponse(responseId);
+
+            Mock.Get(_perSecurityWs)
+                .Setup(perWsMock => perWsMock.retrieveGetActionsResponse(It.IsAny<retrieveGetActionsResponseRequest>()))
+                .Returns(retrieveGetActionsResponseResponse) // return the expected data response from bbg
+                .Callback<retrieveGetActionsResponseRequest>(r => retrieveGetDataResponseRequest = r); //retrieve get data request argument that contains the response id. ensure it's properly constructed
+
+
             var retrieveGetActionsResponse = _getActionDataLicenseCall.Get(testInstruments);
             var instrumentDatas = retrieveGetActionsResponse.instrumentDatas;
 
-            // verify correct submit request was constructed
             Assert.That(submitGetActionsRequestRequest.submitGetActionsRequest.instruments, Is.EqualTo(testInstruments));
-            
-            // verify correct get data request with response id constructed
+
+
             Assert.That(retrieveGetDataResponseRequest.retrieveGetActionsRequest.responseId, Is.EqualTo(responseId));
-            
-            //verify response as expected
+
+
             Assert.That(retrieveGetActionsResponse.responseId, Is.EqualTo(responseId));
             Assert.That(retrieveGetActionsResponse.statusCode.code, Is.EqualTo(DataLicenseService.Success));
             Assert.That(instrumentDatas.Length, Is.EqualTo(1));
-            
         }
 
         private Instruments CreateCorpActionTestInstrument()

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lusid.FinDataEx.Util;
-using Lusid.FinDataEx.Util.FileHandler;
+using Lusid.FinDataEx.Util.FileUtils.Handler;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument

@@ -2,12 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
 namespace Lusid.FinDataEx.Output.OutputInterpreter
 {
     public class ServiceInterpreter : BaseOutputInterpreter
     {
-        public object ActionTypeMapping { get; private set; }
+        private readonly GetActionsOptions _getOptions;
+
+        private static readonly Dictionary<CorpActionType, string> ActionTypeMapping = new Dictionary<CorpActionType, string>
+        {
+            { CorpActionType.DVD_CASH, "Cash Dividend" },
+            { CorpActionType.DVD_STOCK, "Stock Dividend" },
+            { CorpActionType.STOCK_SPLT, "Stock Split" }
+        };
+
+        public ServiceInterpreter(GetActionsOptions getOptions)
+        {
+            _getOptions = getOptions;
+        }
 
         public override string GetActionCode(Dictionary<string, string> output, string requestName, int rowIndex) => requestName + rowIndex;
 
