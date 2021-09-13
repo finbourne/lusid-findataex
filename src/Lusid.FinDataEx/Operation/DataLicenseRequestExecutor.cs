@@ -28,7 +28,9 @@ namespace Lusid.FinDataEx.Operation
                                               "Please use another operation type");
 
             // construct instruments in DL format to be passed to DLWS
+#pragma warning disable CS0162 // Unreachable code detected
             var instruments = CreateInstruments(_getOptions);
+#pragma warning restore CS0162 // Unreachable code detected
             if (!instruments.instrument.Any())
             {
                 Console.WriteLine("No instruments were constructed from your selected source and arguments. " +
@@ -48,16 +50,16 @@ namespace Lusid.FinDataEx.Operation
                 // check instruments in request does not exceed the allowed limit
                 if (dlInstruments.instrument.Length > dataOptions.MaxInstruments)
                 {
-                    throw new ArgumentException($"Breach maximum instrument limit. Attempted to request" +
-                                                $" {dlInstruments.instrument.Length} instruments but only {dataOptions.MaxInstruments} are allowed. " +
+                    throw new ArgumentException($"Breach maximum instrument limit. Attempted to request " +
+                                                $"{dlInstruments.instrument.Length} instruments but only {dataOptions.MaxInstruments} are allowed. " +
                                                 $"To increase the limit override the max allowed instruments with the -m argument parameter.");
                 }
                 return dlInstruments;
             }
 
             throw new ArgumentException($"No DL instruments could be created from the instruments or " +
-                                        $"portfolios provided. Check portfolios provided have existing holdings or" +
-                                        $" the instruments arguments are legal . Inputs={dataOptions}");
+                                        $"portfolios provided. Check portfolios provided have existing holdings or " +
+                                        $"the instruments arguments are legal. Inputs={dataOptions}");
         }
 
         private IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions)
