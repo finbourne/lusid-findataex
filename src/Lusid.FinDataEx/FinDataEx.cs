@@ -22,7 +22,8 @@ namespace Lusid.FinDataEx
         {
             try
             {
-                var parserResult = Parser.Default.ParseArguments<GetDataOptions, GetActionsOptions>(args)
+                var parserResult = Parser.Default
+                    .ParseArguments<GetDataOptions, GetActionsOptions>(args)
                     .WithParsed<GetDataOptions>(Execute)
                     .WithParsed<GetActionsOptions>(Execute);
 

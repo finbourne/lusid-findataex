@@ -25,7 +25,7 @@ jobs:
         params:
           tag_file: findataex-version/version
           tag_as_latest: true
-          build: source-code-findataex/docker
+          build: source-code-findataex
           build_args:
             FLY_VERSION: "7.1.0"
       - put: findataex-version

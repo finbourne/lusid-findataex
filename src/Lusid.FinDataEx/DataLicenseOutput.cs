@@ -6,7 +6,6 @@ namespace Lusid.FinDataEx
 {
     /// <summary>
     /// Standardised container for responses returned from BBG DLWS calls.
-    /// 
     /// </summary>
     public class DataLicenseOutput
     {
@@ -30,7 +29,7 @@ namespace Lusid.FinDataEx
         {
             return new DataLicenseOutput(id, new List<string>(), new List<Dictionary<string, string>>());
         }
-        
+
         public static DataLicenseOutput Empty()
         {
             return new DataLicenseOutput("-", new List<string>(), new List<Dictionary<string, string>>());
