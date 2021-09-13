@@ -1,8 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lusid.FinDataEx", ".\Lusid.FinDataEx\Lusid.FinDataEx.csproj", "{7B07E399-BBE0-4BD6-833E-D66FDD0A2F1F}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31402.337
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lusid.FinDataEx", "Lusid.FinDataEx\Lusid.FinDataEx.csproj", "{7B07E399-BBE0-4BD6-833E-D66FDD0A2F1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lusid.FinDataEx.Tests", ".\Lusid.FinDataEx.Tests\Lusid.FinDataEx.Tests.csproj", "{6DE45523-841C-4D61-BDBA-4CDC38D236A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lusid.FinDataEx.Tests", "Lusid.FinDataEx.Tests\Lusid.FinDataEx.Tests.csproj", "{6DE45523-841C-4D61-BDBA-4CDC38D236A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +20,11 @@ Global
 		{6DE45523-841C-4D61-BDBA-4CDC38D236A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6DE45523-841C-4D61-BDBA-4CDC38D236A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DE45523-841C-4D61-BDBA-4CDC38D236A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6DE45523-841C-4D61-BDBA-4CDC38D236A7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {41580505-2EF5-4802-BC7C-EAF0A4ABA785}
 	EndGlobalSection
 EndGlobal
