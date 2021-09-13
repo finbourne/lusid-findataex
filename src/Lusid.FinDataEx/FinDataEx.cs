@@ -48,8 +48,8 @@ namespace Lusid.FinDataEx
         private static void Execute(DataLicenseOptions getOptions)
         {
             // construct the reader to get BBG data
-            var finDataInputReader = CreateFinDataOperationExecutor(getOptions);
-            var dataLicenseOutput = finDataInputReader.Execute();
+            var finDataExecutor = CreateFinDataOperationExecutor(getOptions);
+            var dataLicenseOutput = finDataExecutor.Execute();
 
             // construct the writer to persist any data retrieved from BBG
             var finDataOutputWriter = CreateFinDataOutputWriter(getOptions);
@@ -83,7 +83,7 @@ namespace Lusid.FinDataEx
         };
 
         /// <summary>
-        ///  Log results of BBG response write.
+        /// Log results of BBG response write.
         /// </summary>
         /// <param name="writeResult"></param>
         private static void ProcessWriteResult(WriteResult writeResult)
