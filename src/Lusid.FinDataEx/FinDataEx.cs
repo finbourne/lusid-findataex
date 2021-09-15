@@ -4,7 +4,6 @@ using Lusid.FinDataEx.Operation;
 using Lusid.FinDataEx.Output;
 using Lusid.FinDataEx.Util;
 using Lusid.FinDataEx.Util.FileUtils.Handler;
-using Lusid.FinDataEx.Util.InterpreterUtils;
 
 namespace Lusid.FinDataEx
 {
@@ -43,7 +42,7 @@ namespace Lusid.FinDataEx
         }
 
         /// <summary>
-        /// Execute a dread from an input source and persists the output.
+        /// Execute a read from an input source and persists the output.
         /// </summary>
         /// <param name="getOptions"></param>
         private static void Execute(DataLicenseOptions getOptions)
@@ -79,7 +78,7 @@ namespace Lusid.FinDataEx
         {
             OutputType.Local => new FileOutputWriter(getOptions, new LocalFileHandler()),
             OutputType.Drive => new FileOutputWriter(getOptions, new LusidDriveFileHandler(DriveApiFactory)),
-            OutputType.Lusid => new LusidTenantOutputWriter(getOptions, LusidApiFactory, new InterpreterFactory()),
+            OutputType.Lusid => new LusidTenantOutputWriter(getOptions, LusidApiFactory),
             _ => throw new ArgumentNullException($"No output writer for operation type {getOptions.OutputTarget}")
         };
 

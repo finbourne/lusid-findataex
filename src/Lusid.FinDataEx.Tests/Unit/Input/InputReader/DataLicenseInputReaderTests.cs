@@ -1,5 +1,8 @@
-﻿using Lusid.FinDataEx.DataLicense.Service;
+﻿using Lusid.FinDataEx.Data;
+using Lusid.FinDataEx.Data.DataRecord;
+using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Service.Call;
+using Lusid.FinDataEx.DataLicense.Service.Transform;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using Moq;
 using NUnit.Framework;
@@ -17,6 +20,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
     {
         private IDataLicenseService _mockDataLicenseService;
         private IPerSecurityWsFactory _mockPerSecurityWsFactory;
+        private ITransformerFactory _mockTransformerFactory;
+        private IResponseTransformer _mockTransformer;
 
         [SetUp]
         public void SetUp()
@@ -27,10 +32,13 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
             Mock.Get(_mockPerSecurityWsFactory)
                 .Setup(mock => mock.CreateDefault())
                 .Returns(new PerSecurityWSClient(new BasicHttpBinding(), new EndpointAddress("http://example.test/not/real/endpoint")));
+
+            _mockTransformerFactory = Mock.Of<ITransformerFactory>();
+            _mockTransformer = Mock.Of<IResponseTransformer>();
         }
 
         [Test]
-        public void GetDataResponse()
+        public void ReadProducesValidOutput()
         {
             var fakeOptions = new GetDataOptions
             {
@@ -41,20 +49,24 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
             {
                 id = "fakeinstrument"
             };
+
             var fakeInstruments = new Instruments
             {
                 instrument = new Instrument[] { fakeInstrument }
             };
 
-            var fakeInstrumentResponse = new List<Dictionary<string, string>>
+            var fakeResponse = new RetrieveGetDataResponse
+            {
+                requestId = "output"
+            };
+
+            var fakeDictionaryResponse = new List<Dictionary<string, string>>
             {
                 new Dictionary<string, string>
                 {
                     { "someHeader", "someValue" }
                 }
             };
-
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
 
             Mock.Get(_mockDataLicenseService)
                 .Setup(mock => mock.Get(
@@ -62,53 +74,28 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                     It.Is<Instruments>(i => i.instrument.Contains(fakeInstrument)),
                     It.IsAny<ProgramTypes>(),
                     It.IsAny<bool>()))
-                .Returns(fakeOutput);
+                .Returns(fakeResponse);
 
-            var output = new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory).Read();
+            Mock.Get(_mockTransformerFactory)
+                .Setup(mock => mock.Build(It.Is<DataTypes>(d => d.Equals(DataTypes.GetData))))
+                .Returns(_mockTransformer);
 
-            Assert.That(output.Id, Is.EqualTo("output"));
-            Assert.That(output.Records, Is.Not.Empty);
-        }
+            Mock.Get(_mockTransformer)
+                .Setup(mock => mock.Transform(It.IsAny<PerSecurityResponse>()))
+                .Returns(fakeDictionaryResponse);
 
-        [Test]
-        public void GetActionsResponse()
-        {
-            var fakeOptions = new GetActionsOptions
+            var output = new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory, _mockTransformerFactory).Read();
+
+            var fakeInstrumentResponse = new List<IRecord>
             {
-                CorpActionTypes = new List<CorpActionType> { CorpActionType.DVD_CASH }
+                new InstrumentDataRecord(fakeDictionaryResponse.Single())
             };
 
-            var fakeInstrument = new Instrument
-            {
-                id = "fakeinstrument"
-            };
-            var fakeInstruments = new Instruments
-            {
-                instrument = new Instrument[] { fakeInstrument }
-            };
+            var fakeOutput = new DataLicenseOutput("output", fakeInstrumentResponse);
 
-            var fakeInstrumentResponse = new List<Dictionary<string, string>>
-            {
-                new Dictionary<string, string>
-                {
-                    { "someHeader", "someValue" }
-                }
-            };
-
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
-
-            Mock.Get(_mockDataLicenseService)
-                .Setup(mock => mock.Get(
-                    It.Is<IDataLicenseCall<PerSecurityResponse>>(c => c is GetActionsDataLicenseCall),
-                    It.Is<Instruments>(i => i.instrument.Contains(fakeInstrument)),
-                    It.IsAny<ProgramTypes>(),
-                    It.IsAny<bool>()))
-                .Returns(fakeOutput);
-
-            var output = new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory).Read();
-
-            Assert.That(output.Id, Is.EqualTo("output"));
-            Assert.That(output.Records, Is.Not.Empty);
+            Assert.That(output.Id, Is.EqualTo(fakeOutput.Id));
+            Assert.That(output.DataRecords.Count, Is.EqualTo(fakeOutput.DataRecords.Count));
+            Assert.That(output.CorporateActionRecords, Is.Empty);
         }
 
         [Test]
@@ -125,15 +112,10 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                 instrument = new Instrument[] { fakeInstrument }
             };
 
-            var fakeInstrumentResponse = new List<Dictionary<string, string>>
+            var fakeResponse = new PerSecurityResponse
             {
-                new Dictionary<string, string>
-                {
-                    { "someHeader", "someValue" }
-                }
+                requestId = "output"
             };
-
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
 
             Mock.Get(_mockDataLicenseService)
                 .Setup(mock => mock.Get(
@@ -141,9 +123,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                     It.Is<Instruments>(i => i.instrument.Contains(fakeInstrument)),
                     It.IsAny<ProgramTypes>(),
                     It.IsAny<bool>()))
-                .Returns(fakeOutput);
+                .Returns(fakeResponse);
 
-            Assert.Throws<ArgumentNullException>(() => new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory).Read());
+            Assert.Throws<ArgumentNullException>(() => new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory, _mockTransformerFactory).Read());
         }
 
         [Test]
@@ -168,7 +150,10 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                 }
             };
 
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
+            var fakeResponse = new PerSecurityResponse
+            {
+                requestId = "output"
+            };
 
             Mock.Get(_mockDataLicenseService)
                 .Setup(mock => mock.Get(
@@ -176,9 +161,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                     It.Is<Instruments>(i => i.instrument.Contains(fakeInstrument)),
                     It.IsAny<ProgramTypes>(),
                     It.IsAny<bool>()))
-                .Returns(fakeOutput);
+                .Returns(fakeResponse);
 
-            Assert.Throws<ArgumentNullException>(() => new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory).Read());
+            Assert.Throws<ArgumentNullException>(() => new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory, _mockTransformerFactory).Read());
         }
 
         [Test]
@@ -199,7 +184,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                 instrument = new Instrument[] { fakeInstrument }
             };
 
-            var fakeInstrumentResponse = new List<Dictionary<string, string>>
+            var fakeResponse = new PerSecurityResponse
+            {
+                requestId = "output"
+            };
+
+            var fakeDictionaryResponse = new List<Dictionary<string, string>>
             {
                 new Dictionary<string, string>
                 {
@@ -207,20 +197,39 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                 }
             };
 
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
-
             Mock.Get(_mockDataLicenseService)
                 .Setup(mock => mock.Get(
                     It.Is<IDataLicenseCall<PerSecurityResponse>>(c => c is GetDataLicenseCall),
                     It.Is<Instruments>(i => i.instrument.Contains(fakeInstrument)),
                     It.IsAny<ProgramTypes>(),
                     It.Is<bool>(b => !b)))
-                .Returns(fakeOutput);
+                .Returns(fakeResponse);
 
-            var output = new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory).Read();
+            Mock.Get(_mockTransformerFactory)
+                .Setup(mock => mock.Build(It.Is<DataTypes>(d => d.Equals(DataTypes.GetData))))
+                .Returns(_mockTransformer);
 
-            Assert.That(output.Id, Is.EqualTo("output"));
-            Assert.That(output.Records, Is.Not.Empty);
+            Mock.Get(_mockTransformer)
+                .Setup(mock => mock.Transform(It.IsAny<PerSecurityResponse>()))
+                .Returns(fakeDictionaryResponse);
+
+            var output = new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory, _mockTransformerFactory).Read();
+
+            var fakeInstrumentResponse = new List<IRecord>
+            {
+                new InstrumentDataRecord(
+                    new Dictionary<string, string>
+                    {
+                        { "someHeader", "someValue" }
+                    }
+                )
+            };
+
+            var fakeOutput = new DataLicenseOutput("output", fakeInstrumentResponse);
+
+            Assert.That(output.Id, Is.EqualTo(fakeOutput.Id));
+            Assert.That(output.DataRecords.Count, Is.EqualTo(fakeOutput.DataRecords.Count));
+            Assert.That(output.CorporateActionRecords, Is.Empty);
         }
 
         [Test]
@@ -241,7 +250,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                 instrument = new Instrument[] { fakeInstrument }
             };
 
-            var fakeInstrumentResponse = new List<Dictionary<string, string>>
+            var fakeResponse = new PerSecurityResponse
+            {
+                requestId = "output"
+            };
+
+            var fakeDictionaryResponse = new List<Dictionary<string, string>>
             {
                 new Dictionary<string, string>
                 {
@@ -249,23 +263,39 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
                 }
             };
 
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
-
             Mock.Get(_mockDataLicenseService)
                 .Setup(mock => mock.Get(
                     It.Is<IDataLicenseCall<PerSecurityResponse>>(c => c is GetDataLicenseCall),
                     It.Is<Instruments>(i => i.instrument.Contains(fakeInstrument)),
                     It.IsAny<ProgramTypes>(),
                     It.Is<bool>(b => b)))
-                .Returns(fakeOutput);
+                .Returns(fakeResponse);
 
-            var output = new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory).Read();
+            Mock.Get(_mockTransformerFactory)
+                .Setup(mock => mock.Build(It.Is<DataTypes>(d => d.Equals(DataTypes.GetData))))
+                .Returns(_mockTransformer);
 
-            Assert.That(output.Id, Is.EqualTo("output"));
-            Assert.That(output.Records, Is.Not.Empty);
+            Mock.Get(_mockTransformer)
+                .Setup(mock => mock.Transform(It.IsAny<PerSecurityResponse>()))
+                .Returns(fakeDictionaryResponse);
+
+            var output = new DataLicenseInputReader(fakeOptions, fakeInstruments, _mockDataLicenseService, _mockPerSecurityWsFactory, _mockTransformerFactory).Read();
+
+            var fakeInstrumentResponse = new List<IRecord>
+            {
+                new InstrumentDataRecord(
+                    new Dictionary<string, string>
+                    {
+                        { "someHeader", "someValue" }
+                    }
+                )
+            };
+
+            var fakeOutput = new DataLicenseOutput("output", fakeInstrumentResponse);
+
+            Assert.That(output.Id, Is.EqualTo(fakeOutput.Id));
+            Assert.That(output.DataRecords.Count, Is.EqualTo(fakeOutput.DataRecords.Count));
+            Assert.That(output.CorporateActionRecords, Is.Empty);
         }
-
-        // throw when no datafield
-        // throw when no action types
     }
 }

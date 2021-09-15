@@ -38,7 +38,7 @@ namespace Lusid.FinDataEx.Operation
                 return DataLicenseOutput.Empty();
             }
 
-            return new DataLicenseInputReader(_getOptions, instruments, new DataLicenseService(), new PerSecurityWsFactory()).Read();
+            return new DataLicenseInputReader(_getOptions, instruments, new DataLicenseService(), new PerSecurityWsFactory(), new TransformerFactory()).Read();
         }
 
         private Instruments CreateInstruments(DataLicenseOptions dataOptions)

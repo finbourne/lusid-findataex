@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseConstants;
 
@@ -9,23 +8,14 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
     /// <summary>
     ///  Transformer for BBG DL GetAction Calls.
     /// </summary>
-    public class GetActionResponseTransformer : IDataLicenseResponseTransformer<RetrieveGetActionsResponse>
+    public class GetActionResponseTransformer : IResponseTransformer
     {
-        /// <summary>
-        /// Transform a GetAction response from BBG DLWS to a standardised output.
-        /// </summary>
-        /// <param name="getActionsResponse">GetAction response from BBG DLWS</param>
-        /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public DataLicenseOutput Transform(RetrieveGetActionsResponse getActionsResponse)
+        public List<Dictionary<string, string>> Transform(PerSecurityResponse perSecurityResponse)
         {
+            var getActionsResponse = perSecurityResponse as RetrieveGetActionsResponse;
+
             var corpActionOutputId = getActionsResponse.responseId;
             var actionsInstrumentDatas = getActionsResponse.instrumentDatas;
-
-            // if no corporate actions are returned for the specific type than return an empty output.
-            if (!actionsInstrumentDatas.Any())
-            {
-                return DataLicenseOutput.Empty(corpActionOutputId);
-            }
 
             // Corporate action headers constructed from the intersection of all corporate action fields
             // (mainly required for requests that span multiple corporate action types).
@@ -77,10 +67,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
             });
 
             // Retrieve actions for all instruments or if failed then return empty output
-            return corpActionRecords.Any()
-                ? new DataLicenseOutput(corpActionOutputId, headers, corpActionRecords)
-                : DataLicenseOutput.Empty(corpActionOutputId);
+            return corpActionRecords;
         }
-
     }
 }

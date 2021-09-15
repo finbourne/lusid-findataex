@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Lusid.FinDataEx.Data;
+using Lusid.FinDataEx.Data.CorporateActionRecord;
+using Lusid.FinDataEx.Data.DataRecord;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,38 +14,48 @@ namespace Lusid.FinDataEx
     {
         /// <summary>Id of the specific BBG DL request for data</summary>
         public string Id { get; }
-        
-        /// <summary>Headers for requested data from BBG DL</summary>
-        public IEnumerable<string> Header { get; }
-        
-        /// <summary>Financial data for each of the instruments requested from BBG DL</summary>
-        public IList<Dictionary<string,string>> Records { get; }
 
-        public DataLicenseOutput(string id, IEnumerable<string> header, IList<Dictionary<string, string>> records)
+        /// <summary>Headers for requested data from BBG DL</summary>
+        //public IEnumerable<string> Header { get; }
+
+        /// <summary>Financial data for each of the instruments requested from BBG DL</summary>
+        public IList<IDataRecord> DataRecords { get; }
+
+        /// <summary>Corporate Actions for each of the instruments requested from BBG DL</summary>
+        public IList<ICorporateActionRecord> CorporateActionRecords { get; }
+
+        public DataLicenseOutput(string id, IList<IRecord> records)
         {
             Id = id;
-            Header = header;
-            Records = records;
+            //Header = header;
+            DataRecords = records.Where(r => r is IDataRecord).Cast<IDataRecord>().ToList();
+            CorporateActionRecords = records.Where(r => r is ICorporateActionRecord).Cast<ICorporateActionRecord>().ToList();
         }
 
         public static DataLicenseOutput Empty(string id)
         {
-            return new DataLicenseOutput(id, new List<string>(), new List<Dictionary<string, string>>());
+            return new DataLicenseOutput(id, new List<IRecord>());
         }
 
         public static DataLicenseOutput Empty()
         {
-            return new DataLicenseOutput("-", new List<string>(), new List<Dictionary<string, string>>());
+            return Empty("-");
         }
 
         public bool IsEmpty()
         {
-            return !Header.Any() && !Records.Any();
+            return //!Header.Any()
+                true
+                && !DataRecords.Any()
+                && !CorporateActionRecords.Any();
         }
 
         private bool Equals(DataLicenseOutput other)
         {
-            return Id == other.Id && Equals(Header, other.Header) && Equals(Records, other.Records);
+            return Equals(Id, other.Id)
+                //&& Equals(Header, other.Header)
+                && Equals(DataRecords, other.DataRecords)
+                && Equals(CorporateActionRecords, other.CorporateActionRecords);
         }
 
         public override bool Equals(object obj)
@@ -55,7 +68,7 @@ namespace Lusid.FinDataEx
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Header, Records);
+            return HashCode.Combine(Id, /*Header,*/ DataRecords, CorporateActionRecords);
         }
     }
 }

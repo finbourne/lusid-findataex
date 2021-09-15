@@ -12,10 +12,9 @@
         public enum DataTypes
         {
             GetData,
-            GetActions,
-            GetPrices
+            GetActions
         }
-        
+
         /// <summary>
         /// ProgramTypes supported by BBG DLWS and FinDataEx. Decide on the operation mode which impacts
         /// behaviour of the call to BBG DL (e.g. running job at specific time, delay in job time, etc...)
@@ -31,7 +30,7 @@
         ///  Currently using BBG DL naming conventions so do NOT amend unless also amended by BBG DL.
         /// </summary>
         public enum CorpActionType
-        {    
+        {
             DVD_CASH,
             DVD_STOCK,
             STOCK_SPLT

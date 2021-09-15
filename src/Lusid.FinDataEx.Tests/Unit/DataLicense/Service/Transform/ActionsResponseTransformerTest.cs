@@ -16,7 +16,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         }
 
         [Test]
-        public void OnValidCorpActions_ShouldProduceOutput()
+        public void OnValidCorpActionsShouldProduceOutput()
         {
             var responseId = "ValidActions";
             var retrieveGetActionResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
@@ -24,18 +24,18 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
             var getActionOutput = _transformer.Transform(retrieveGetActionResponse);
 
             // Verify data field headers from corp action (specific to corp action type)
-            CollectionAssert.IsSupersetOf(getActionOutput.Header, new List<string>{"CP_RECORD_DT","CP_PAY_DT","CP_FREQ",
+            CollectionAssert.IsSupersetOf(getActionOutput[0].Keys, new List<string>{"CP_RECORD_DT","CP_PAY_DT","CP_FREQ",
                 "CP_NET_AMT","CP_TAX_AMT","CP_GROSS_AMT","CP_FRANKED_AMT", "CP_DVD_CRNCY", "CP_DVD_TYP","CP_ELECTION_DT", 
                 "CP_ACTION_STATUS"});
 
             // Verify standard corp action field headers from corp action ( general to any corp action type)
-            CollectionAssert.IsSupersetOf(getActionOutput.Header, new List<string>{"announceDate","bbGlobal","companyName",
+            CollectionAssert.IsSupersetOf(getActionOutput[0].Keys, new List<string>{"announceDate","bbGlobal","companyName",
                 "currency","effectiveDate","mnemonic","CP_FRANKED_AMT", "CP_DVD_CRNCY", "CP_DVD_TYP","CP_ELECTION_DT", 
                 "CP_ACTION_STATUS"});
 
-            Assert.That(getActionOutput.Records.Count, Is.EqualTo(1));
+            Assert.That(getActionOutput.Count, Is.EqualTo(1));
 
-            var corpActionRecord = getActionOutput.Records[0];
+            var corpActionRecord = getActionOutput[0];
             Assert.That(corpActionRecord["CP_RECORD_DT"], Is.EqualTo("11/06/2020"));
             Assert.That(corpActionRecord["CP_PAY_DT"], Is.EqualTo("12/04/2020"));
             Assert.That(corpActionRecord["CP_FREQ"], Is.EqualTo("4"));
@@ -52,13 +52,13 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
         }
 
         [Test]
-        public void OnNoCorpActionsDataForInstrument_ShouldBeEmptyOutput()
+        public void OnNoCorpActionsDataForInstrumentShouldBeEmptyOutput()
         {
             var responseId = "NoActions";
             var retrieveGetActionsResponse = TestUtils.LoadGetActionsResponseFromFile(responseId);
 
             var getActionsOutput = _transformer.Transform(retrieveGetActionsResponse);
-            Assert.That(getActionsOutput.IsEmpty, Is.True);
+            Assert.That(getActionsOutput, Is.Empty);
         }
     }
 }

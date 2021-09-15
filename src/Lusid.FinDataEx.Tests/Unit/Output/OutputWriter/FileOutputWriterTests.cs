@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Lusid.FinDataEx.Data;
+using Lusid.FinDataEx.Data.DataRecord;
 using Lusid.FinDataEx.Output;
 using Lusid.FinDataEx.Util.FileUtils.Handler;
-using Moq;
 using NUnit.Framework;
 
 namespace Lusid.FinDataEx.Tests.Unit.Output
@@ -14,23 +15,26 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         public void ValidDataIsWrittenToFile()
         {
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>
+            var records = new List<IRecord>
             {
-                new Dictionary<string, string>
-                {
-                    ["h1"] = "entry1Record1",
-                    ["h2"] = "entry2Record1",
-                    ["h3"] = "entry3Record1",
-                },
-                new Dictionary<string, string>
-                {
-                    ["h1"] = "entry1Record2",
-                    ["h2"] = "entry2Record2",
-                    ["h3"] = "entry3Record2",
-                }
+                new InstrumentDataRecord(
+                    new Dictionary<string, string>
+                    {
+                        ["h1"] = "entry1Record1",
+                        ["h2"] = "entry2Record1",
+                        ["h3"] = "entry3Record1",
+                    }
+                ),
+                new InstrumentDataRecord(
+                    new Dictionary<string, string>
+                    {
+                        ["h1"] = "entry1Record2",
+                        ["h2"] = "entry2Record2",
+                        ["h3"] = "entry3Record2",
+                    }
+                )
             };
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var fakeData = new DataLicenseOutput(id, records);
 
             var path = "path/to/file";
             var data = new List<string>
@@ -53,18 +57,14 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         }
 
         [Test]
-        public void EmptyInputShouldBeWrittenWithHeaderOnly()
+        public void EmptyInputShouldDoNothingButReturnOk()
         {
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>();
+            var fakeData = new DataLicenseOutput(id, records);
 
             var path = "path/to/file";
-            var data = new List<string>
-            {
-                "h1|h2|h3"
-            };
+            var data = new List<string>();
             var fakeFileHandler = new AssertFileHandler(path, data);
 
             var fakeOptions = new DataLicenseOptions
@@ -75,7 +75,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
             var writeResult = new FileOutputWriter(fakeOptions, fakeFileHandler).Write(fakeData);
 
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
-            Assert.That(writeResult.FileOutputPath, Is.EqualTo(path));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo(""));
         }
 
         [Test]
@@ -94,21 +94,31 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
 
             var writeResult = new FileOutputWriter(fakeOptions, fakeFileHandler).Write(fakeData);
 
-            Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
+            Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
+            Assert.That(writeResult.FileOutputPath, Is.EqualTo(""));
         }
 
         [Test]
         public void NonExistingOutputDirShouldReturnFail()
         {
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>
+            {
+                new InstrumentDataRecord(new Dictionary<string, string>
+                    {
+                        { "h1", "v1" },
+                        { "h2", "v2" },
+                        { "h3", "v3" },
+                    }
+                )
+            };
+            var fakeData = new DataLicenseOutput(id, records);
 
             var path = "path/to/file";
             var data = new List<string>
             {
-                "h1|h2|h3"
+                "h1|h2|h3",
+                "v1|v2|v3"
             };
             var fakeFileHandler = new AssertFileHandler("", data);
 
@@ -126,9 +136,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         public void FilenamesRespectAutoPatterns()
         {
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>();
+            var fakeData = new DataLicenseOutput(id, records);
 
             var path = "path/to/{TEST}";
             var data = new List<string>
@@ -161,17 +170,17 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
 
         public bool Exists(string path)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public List<string> Read(string path, char entrySeparator)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public string ValidatePath(string path)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public string Write(string path, List<string> data, char entrySeparator)

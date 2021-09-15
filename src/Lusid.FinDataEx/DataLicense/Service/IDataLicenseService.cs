@@ -6,6 +6,6 @@ namespace Lusid.FinDataEx.DataLicense.Service
 {
     public interface IDataLicenseService
     {
-        DataLicenseOutput Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, DataLicenseTypes.ProgramTypes programType, bool enableLiveRequests = false);
+        PerSecurityResponse Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, DataLicenseTypes.ProgramTypes programType, bool enableLiveRequests = false);
     }
 }

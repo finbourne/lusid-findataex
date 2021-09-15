@@ -1,4 +1,6 @@
 ﻿using Lusid.Drive.Sdk.Utilities;
+using Lusid.FinDataEx.Data;
+using Lusid.FinDataEx.Data.DataRecord;
 using Lusid.FinDataEx.Operation;
 using Lusid.FinDataEx.Util;
 using Lusid.FinDataEx.Util.FileUtils;
@@ -27,15 +29,17 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
         [Test]
         public void HandleInstrumentTypeLocal()
         {
-            var fakeInstrumentResponse = new List<Dictionary<string, string>>
+            var fakeInstrumentResponse = new List<IRecord>
             {
-                new Dictionary<string, string>
-                {
-                    { "someHeader", "someValue" }
-                }
+                new InstrumentDataRecord(
+                    new Dictionary<string, string>
+                    {
+                        { "someHeader", "someValue" }
+                    }
+                )
             };
 
-            var fakeOptions = new DataLicenseOptions
+            var fakeOptions = new GetDataOptions
             {
                 InputPath = "myPath",
                 InputSource = InputType.Local
@@ -57,34 +61,31 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
                 .Setup(mock => mock.Build(It.Is<FileHandlerType>(f => f.Equals(FileHandlerType.Local)), It.IsAny<ILusidApiFactory>()))
                 .Returns(fakeFileHandler);
 
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
+            var fakeOutput = new DataLicenseOutput("output", fakeInstrumentResponse);
 
             var output = new ParseExistingDataExecutor(fakeOptions, _mockDriveApiFactory, _mockFileHandlerFactory).Execute();
 
-            Assert.That(output.Header.Length, Is.EqualTo(3));
-            Assert.That(output.Header.ToList()[0], Is.EqualTo("0-field1"));
-            Assert.That(output.Header.ToList()[1], Is.EqualTo("1-field2"));
-            Assert.That(output.Header.ToList()[2], Is.EqualTo("2-field3"));
-
-            Assert.That(output.Records.Length, Is.EqualTo(1));
-            Assert.That(output.Records.Single().Length, Is.EqualTo(3));
-            Assert.That(output.Records.Single()["0-field1"], Is.EqualTo("value1"));
-            Assert.That(output.Records.Single()["1-field2"], Is.EqualTo("value2"));
-            Assert.That(output.Records.Single()["2-field3"], Is.EqualTo("value3"));
+            Assert.That(output.DataRecords.Length, Is.EqualTo(1));
+            Assert.That(output.DataRecords.Single().RawData.Length(), Is.EqualTo(3));
+            Assert.That(output.DataRecords[0].RawData["0-field1"], Is.EqualTo("value1"));
+            Assert.That(output.DataRecords[0].RawData["1-field2"], Is.EqualTo("value2"));
+            Assert.That(output.DataRecords[0].RawData["2-field3"], Is.EqualTo("value3"));
         }
 
         [Test]
         public void HandleInstrumentTypeLusidDrive()
         {
-            var fakeInstrumentResponse = new List<Dictionary<string, string>>
+            var fakeInstrumentResponse = new List<IRecord>
             {
-                new Dictionary<string, string>
-                {
-                    { "someHeader", "someValue" }
-                }
+                new InstrumentDataRecord(
+                    new Dictionary<string, string>
+                    {
+                        { "someHeader", "someValue" }
+                    }
+                )
             };
 
-            var fakeOptions = new DataLicenseOptions
+            var fakeOptions = new GetDataOptions
             {
                 InputPath = "myPath",
                 InputSource = InputType.Drive
@@ -106,20 +107,15 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
                 .Setup(mock => mock.Build(It.Is<FileHandlerType>(f => f.Equals(FileHandlerType.Lusid)), It.IsAny<ILusidApiFactory>()))
                 .Returns(fakeFileHandler);
 
-            var fakeOutput = new DataLicenseOutput("output", new List<string>(), fakeInstrumentResponse);
+            var fakeOutput = new DataLicenseOutput("output", fakeInstrumentResponse);
 
             var output = new ParseExistingDataExecutor(fakeOptions, _mockDriveApiFactory, _mockFileHandlerFactory).Execute();
 
-            Assert.That(output.Header.Length, Is.EqualTo(3));
-            Assert.That(output.Header.ToList()[0], Is.EqualTo("0-field1"));
-            Assert.That(output.Header.ToList()[1], Is.EqualTo("1-field2"));
-            Assert.That(output.Header.ToList()[2], Is.EqualTo("2-field3"));
-
-            Assert.That(output.Records.Length, Is.EqualTo(1));
-            Assert.That(output.Records.Single().Length, Is.EqualTo(3));
-            Assert.That(output.Records.Single()["0-field1"], Is.EqualTo("value1"));
-            Assert.That(output.Records.Single()["1-field2"], Is.EqualTo("value2"));
-            Assert.That(output.Records.Single()["2-field3"], Is.EqualTo("value3"));
+            Assert.That(output.DataRecords.Length, Is.EqualTo(1));
+            Assert.That(output.DataRecords.Single().RawData.Length(), Is.EqualTo(3));
+            Assert.That(output.DataRecords[0].RawData["0-field1"], Is.EqualTo("value1"));
+            Assert.That(output.DataRecords[0].RawData["1-field2"], Is.EqualTo("value2"));
+            Assert.That(output.DataRecords[0].RawData["2-field3"], Is.EqualTo("value3"));
         }
 
         [Test]

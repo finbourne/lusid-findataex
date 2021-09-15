@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Lusid.FinDataEx.Output.OutputInterpreter;
-using Lusid.FinDataEx.Util;
-using Lusid.FinDataEx.Util.InterpreterUtils;
 using Lusid.Sdk.Api;
 using Lusid.Sdk.Utilities;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
@@ -13,13 +10,11 @@ namespace Lusid.FinDataEx.Output
     {
         private readonly ICorporateActionSourcesApi _corporateActionSourcesApi;
         private readonly DataLicenseOptions _getOptions;
-        private readonly IInterpreterFactory _interpreterFactory;
 
-        public LusidTenantOutputWriter(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory, IInterpreterFactory interpreterFactory)
+        public LusidTenantOutputWriter(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory)
         {
             _corporateActionSourcesApi = lusidApiFactory.Api<ICorporateActionSourcesApi>();
             _getOptions = getOptions;
-            _interpreterFactory = interpreterFactory;
         }
 
         public WriteResult Write(DataLicenseOutput dataLicenseOutput)
@@ -30,7 +25,7 @@ namespace Lusid.FinDataEx.Output
                 return WriteResult.NotRun();
             }
             
-            if (getActionsOptions.CorpActionTypes.Count() > 1 || 
+            if (getActionsOptions.CorpActionTypes.Count() > 1 ||
                 getActionsOptions.CorpActionTypes.Single() != CorpActionType.DVD_CASH)
             {
                 Console.WriteLine($"LusidTenantOutputWriter does not Action types other than {CorpActionType.DVD_CASH}. Skipping...");
@@ -47,7 +42,7 @@ namespace Lusid.FinDataEx.Output
             var scope = corporateActionSourceComponents.First();
             var code = corporateActionSourceComponents.Last();
 
-            var actions = CreateInterpreter(getActionsOptions).Interpret(dataLicenseOutput);
+            var actions = dataLicenseOutput.CorporateActionRecords.Select(r => r.ConstructRequest(dataLicenseOutput.Id, dataLicenseOutput.GetHashCode().ToString())).ToList();
 
             try
             {
@@ -65,12 +60,5 @@ namespace Lusid.FinDataEx.Output
                 return WriteResult.Fail($"FAILURE : Did not write {dataLicenseOutput.Id} to scope {scope}, code {code} due to an exception. Cause of failure: {e.Message}");
             }
         }
-
-        private IOutputInterpreter CreateInterpreter(GetActionsOptions getOptions) => getOptions.OperationType switch
-        {
-            OperationType.ParseExisting => _interpreterFactory.Build(InterpreterType.File, getOptions),
-            OperationType.BloombergRequest => _interpreterFactory.Build(InterpreterType.Service, getOptions),
-            _ => throw new ArgumentNullException($"No output interpreters for operation type {getOptions.OperationType}")
-        };
     }
 }

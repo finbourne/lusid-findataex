@@ -9,6 +9,7 @@ namespace Lusid.FinDataEx.Input
     public class FileInputReader : IInputReader
     {
         private const char InputFileEntrySeparator = '\n';
+        private const string ActionTypeHeaderString = "0-Action Type";
 
         private readonly DataLicenseOptions _getOptions;
         private readonly IFileHandler _fileHandler;
@@ -29,21 +30,23 @@ namespace Lusid.FinDataEx.Input
                 headers[col] = col.ToString() + "-" + headers[col];
             }
 
-            var records = new List<Dictionary<string, string>>();
+            var rawRecords = new List<Dictionary<string, string>>();
             for (var row = 1; row < data.Count(); row++)
             {
-                var record = new Dictionary<string, string>();
+                var rawRecord = new Dictionary<string, string>();
                 var entry = data[row].Split(CsvDelimiter);
 
                 for (var col = 0; col < headers.Length; col++)
                 {
-                    record.Add(headers[col], entry[col]);
+                    rawRecord.Add(headers[col], entry[col]);
                 }
 
-                records.Add(record);
+                rawRecords.Add(rawRecord);
             }
 
-            return new DataLicenseOutput(_getOptions.InputPath, headers, records);
+            var records = rawRecords.Select(r => ConvertToRecord(r, _getOptions, ActionTypeHeaderString)).ToList();
+
+            return new DataLicenseOutput(_getOptions.InputPath, records);
         }
 
         private List<string> GetFileAsStrings(string filepath)
