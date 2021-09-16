@@ -28,6 +28,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var goodPath = "path";
             var goodDelimeter = ",";
             var goodColIndex = "2";
+            var fakeArgs = new List<string> { goodPath, goodDelimeter, goodColIndex };
 
             Mock.Get(_mockFileHandler)
                 .Setup(mock => mock.ValidatePath(It.Is<string>(s => s.Equals(goodPath))))
@@ -40,11 +41,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = fakeArgs
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = FileInstrumentSource.Create(_mockFileHandler, instrumentArgs, new List<string> { goodPath, goodDelimeter, goodColIndex }).Get();
+            var output = new FileInstrumentSource(options, _mockFileHandler).Get();
             var outputInstrument = output.instrument.Single();
 
             Assert.That(outputInstrument.id, Is.EqualTo("instrument1"));
@@ -62,6 +64,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var goodPath = "path";
             var goodDelimeter = ",";
             var goodColIndex = "2";
+            var fakeArgs = new List<string> { goodPath, goodDelimeter, goodColIndex };
 
             Mock.Get(_mockFileHandler)
                 .Setup(mock => mock.ValidatePath(It.Is<string>(s => s.Equals(goodPath))))
@@ -74,11 +77,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = fakeArgs
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = FileInstrumentSource.Create(_mockFileHandler, instrumentArgs, new List<string> { goodPath, goodDelimeter, goodColIndex }).Get();
+            var output = new FileInstrumentSource(options, _mockFileHandler).Get();
             var outputInstrument1 = output.instrument.First();
 
             Assert.That(outputInstrument1.id, Is.EqualTo("instrument1"));
@@ -110,6 +114,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var goodPath = "path";
             var goodDelimeter = ",";
             var goodColIndex = "2";
+            var fakeArgs = new List<string> { goodPath, goodDelimeter, goodColIndex };
 
             Mock.Get(_mockFileHandler)
                 .Setup(mock => mock.ValidatePath(It.Is<string>(s => s.Equals(goodPath))))
@@ -122,11 +127,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = fakeArgs
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = FileInstrumentSource.Create(_mockFileHandler, instrumentArgs, new List<string> { goodPath, goodDelimeter, goodColIndex }).Get();
+            var output = new FileInstrumentSource(options, _mockFileHandler).Get();
 
             Assert.That(output.instrument.Length, Is.EqualTo(2));
 
@@ -154,6 +160,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
 
             var goodPath = "path";
             var goodDelimeter = ",";
+            var fakeArgs = new List<string> { goodPath, goodDelimeter};
 
             Mock.Get(_mockFileHandler)
                 .Setup(mock => mock.ValidatePath(It.Is<string>(s => s.Equals(goodPath))))
@@ -166,11 +173,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = fakeArgs
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = FileInstrumentSource.Create(_mockFileHandler, instrumentArgs, new List<string> { goodPath, goodDelimeter }).Get();
+            var output = new FileInstrumentSource(options, _mockFileHandler).Get();
             var outputInstrument = output.instrument.Single();
 
             Assert.That(outputInstrument.id, Is.EqualTo("instrument1"));
@@ -186,6 +194,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var fakeData = new List<string> { "instrumentName,field2,field3,field4", "instrument1,value2,value3,value4" };
 
             var goodPath = "path";
+            var fakeArgs = new List<string> { goodPath };
 
             Mock.Get(_mockFileHandler)
                 .Setup(mock => mock.ValidatePath(It.Is<string>(s => s.Equals(goodPath))))
@@ -198,11 +207,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = fakeArgs
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = FileInstrumentSource.Create(_mockFileHandler, instrumentArgs, new List<string> { goodPath }).Get();
+            var output = new FileInstrumentSource(options, _mockFileHandler).Get();
             var outputInstrument = output.instrument.Single();
 
             Assert.That(outputInstrument.id, Is.EqualTo("instrument1"));
@@ -218,6 +228,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var fakeData = new List<string> { "field1,field2,instrumentName,field4", "value1,value2,instrument1,value4" };
 
             var goodPath = "path";
+            var fakeArgs = new List<string> {};
 
             Mock.Get(_mockFileHandler)
                 .Setup(mock => mock.ValidatePath(It.Is<string>(s => s.Equals(goodPath))))
@@ -230,11 +241,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = fakeArgs
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            Assert.Throws<ArgumentException>(() => FileInstrumentSource.Create(_mockFileHandler, instrumentArgs, new List<string>()).Get());
+            Assert.Throws<ArgumentException>(() => new FileInstrumentSource(options, _mockFileHandler).Get());
         }
 
         [Test]
@@ -245,6 +257,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var goodPath = "path";
             var goodDelimeter = ",";
             var goodColIndex = "2";
+            var fakeArgs = new List<string> { goodPath, goodDelimeter, goodColIndex };
 
             Mock.Get(_mockFileHandler)
                 .Setup(mock => mock.ValidatePath(It.Is<string>(s => s.Equals(goodPath))))
@@ -257,11 +270,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = fakeArgs
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = FileInstrumentSource.Create(_mockFileHandler, instrumentArgs, new List<string> { goodPath, goodDelimeter, goodColIndex }).Get();
+            var output = new FileInstrumentSource(options, _mockFileHandler).Get();
 
             Assert.That(output.instrument, Is.Empty);
         }

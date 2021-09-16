@@ -1,5 +1,4 @@
-﻿using Lusid.Drive.Sdk.Utilities;
-using Lusid.FinDataEx.Data;
+﻿using Lusid.FinDataEx.Data;
 using Lusid.FinDataEx.Data.DataRecord;
 using Lusid.FinDataEx.Operation;
 using Lusid.FinDataEx.Util;
@@ -16,13 +15,11 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
     [TestFixture]
     public class ParseExistingExecutorTest
     {
-        private ILusidApiFactory _mockDriveApiFactory;
         private IFileHandlerFactory _mockFileHandlerFactory;
 
         [SetUp]
         public void SetUp()
         {
-            _mockDriveApiFactory = Mock.Of<ILusidApiFactory>();
             _mockFileHandlerFactory = Mock.Of<IFileHandlerFactory>();
         }
 
@@ -58,12 +55,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
                 .Returns(fakeData);
 
             Mock.Get(_mockFileHandlerFactory)
-                .Setup(mock => mock.Build(It.Is<FileHandlerType>(f => f.Equals(FileHandlerType.Local)), It.IsAny<ILusidApiFactory>()))
+                .Setup(mock => mock.Build(It.Is<FileHandlerType>(f => f.Equals(FileHandlerType.Local))))
                 .Returns(fakeFileHandler);
 
             var fakeOutput = new DataLicenseOutput("output", fakeInstrumentResponse);
 
-            var output = new ParseExistingDataExecutor(fakeOptions, _mockDriveApiFactory, _mockFileHandlerFactory).Execute();
+            var output = new ParseExistingDataExecutor(fakeOptions, _mockFileHandlerFactory).Execute();
 
             Assert.That(output.DataRecords.Length, Is.EqualTo(1));
             Assert.That(output.DataRecords.Single().RawData.Length(), Is.EqualTo(3));
@@ -104,12 +101,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
                 .Returns(fakeData);
 
             Mock.Get(_mockFileHandlerFactory)
-                .Setup(mock => mock.Build(It.Is<FileHandlerType>(f => f.Equals(FileHandlerType.Lusid)), It.IsAny<ILusidApiFactory>()))
+                .Setup(mock => mock.Build(It.Is<FileHandlerType>(f => f.Equals(FileHandlerType.Lusid))))
                 .Returns(fakeFileHandler);
 
             var fakeOutput = new DataLicenseOutput("output", fakeInstrumentResponse);
 
-            var output = new ParseExistingDataExecutor(fakeOptions, _mockDriveApiFactory, _mockFileHandlerFactory).Execute();
+            var output = new ParseExistingDataExecutor(fakeOptions, _mockFileHandlerFactory).Execute();
 
             Assert.That(output.DataRecords.Length, Is.EqualTo(1));
             Assert.That(output.DataRecords.Single().RawData.Length(), Is.EqualTo(3));
@@ -126,7 +123,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
                 InputSource = InputType.CLI
             };
 
-            Assert.Throws<ArgumentNullException>(() => new ParseExistingDataExecutor(fakeOptions, _mockDriveApiFactory, _mockFileHandlerFactory).Execute());
+            Assert.Throws<ArgumentNullException>(() => new ParseExistingDataExecutor(fakeOptions, _mockFileHandlerFactory).Execute());
         }
 
         [Test]
@@ -137,7 +134,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
                 InputSource = InputType.Lusid
             };
 
-            Assert.Throws<ArgumentNullException>(() => new ParseExistingDataExecutor(fakeOptions, _mockDriveApiFactory, _mockFileHandlerFactory).Execute());
+            Assert.Throws<ArgumentNullException>(() => new ParseExistingDataExecutor(fakeOptions, _mockFileHandlerFactory).Execute());
         }
     }
 }

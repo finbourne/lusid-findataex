@@ -5,38 +5,27 @@ using PerSecurity_Dotnet;
 using Lusid.FinDataEx.Util;
 using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Vendor;
-using Lusid.FinDataEx.Util.FileUtils.Handler;
+using Lusid.FinDataEx.Util.FileUtils;
+using Lusid.Sdk.Utilities;
 
 namespace Lusid.FinDataEx.Operation
 {
     public class DataLicenseRequestExecutor : IOperationExecutor
     {
         private readonly DataLicenseOptions _getOptions;
-        private readonly Sdk.Utilities.ILusidApiFactory _lusidApiFactory;
-        private readonly Drive.Sdk.Utilities.ILusidApiFactory _driveApiFactory;
+        private readonly ILusidApiFactory _lusidApiFactory;
+        private readonly IFileHandlerFactory _fileHandlerFactory;
 
-        public DataLicenseRequestExecutor(DataLicenseOptions getOptions, Sdk.Utilities.ILusidApiFactory lusidApiFactory, Drive.Sdk.Utilities.ILusidApiFactory driveApiFactory)
+        public DataLicenseRequestExecutor(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory, IFileHandlerFactory fileHandlerFactory)
         {
             _getOptions = getOptions;
             _lusidApiFactory = lusidApiFactory;
-            _driveApiFactory = driveApiFactory;
+            _fileHandlerFactory = fileHandlerFactory;
         }
 
         public DataLicenseOutput Execute()
         {
-            throw new NotImplementedException("Due to licensing issues, this operation can not run at this time. " +
-                                              "Please use another operation type");
-
-            // construct instruments in DL format to be passed to DLWS
-#pragma warning disable CS0162 // Unreachable code detected
             var instruments = CreateInstruments(_getOptions);
-#pragma warning restore CS0162 // Unreachable code detected
-            if (!instruments.instrument.Any())
-            {
-                Console.WriteLine("No instruments were constructed from your selected source and arguments. " +
-                                  "No DLWS call will be executed");
-                return DataLicenseOutput.Empty();
-            }
 
             return new DataLicenseInputReader(_getOptions, instruments, new DataLicenseService(), new PerSecurityWsFactory(), new TransformerFactory()).Read();
         }
@@ -47,13 +36,19 @@ namespace Lusid.FinDataEx.Operation
             var instruments = instrumentSource.Get();
             if (instruments is { } dlInstruments)
             {
-                // check instruments in request does not exceed the allowed limit
+                if (!instruments.instrument.Any())
+                {
+                    throw new ArgumentException("No instruments were constructed from your selected source and arguments. " +
+                                                "No DLWS call will be executed");
+                }
+
                 if (dlInstruments.instrument.Length > dataOptions.MaxInstruments)
                 {
                     throw new ArgumentException($"Breach maximum instrument limit. Attempted to request " +
                                                 $"{dlInstruments.instrument.Length} instruments but only {dataOptions.MaxInstruments} are allowed. " +
                                                 $"To increase the limit override the max allowed instruments with the -m argument parameter.");
                 }
+
                 return dlInstruments;
             }
 
@@ -62,17 +57,13 @@ namespace Lusid.FinDataEx.Operation
                                         $"the instruments arguments are legal. Inputs={dataOptions}");
         }
 
-        private IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions)
+        private IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions) => dataOptions.InputSource switch
         {
-            var instrumentArgs = InstrumentArgs.Create(dataOptions);
-            return dataOptions.InputSource switch
-            {
-                InputType.CLI => CliInstrumentSource.Create(instrumentArgs, dataOptions.InstrumentSourceArguments),
-                InputType.Lusid => LusidPortfolioInstrumentSource.Create(_lusidApiFactory, instrumentArgs, dataOptions.InstrumentSourceArguments),
-                InputType.Local => FileInstrumentSource.Create(new LocalFileHandler(), instrumentArgs, dataOptions.InstrumentSourceArguments),
-                InputType.Drive => FileInstrumentSource.Create(new LusidDriveFileHandler(_driveApiFactory), instrumentArgs, dataOptions.InstrumentSourceArguments),
-                _ => throw new ArgumentOutOfRangeException($"No instrument sources for input type {dataOptions.InputSource}")
-            };
-        }
+            InputType.CLI => new CliInstrumentSource(dataOptions),
+            InputType.Lusid => new LusidPortfolioInstrumentSource(dataOptions, _lusidApiFactory),
+            InputType.Local => new FileInstrumentSource(dataOptions, _fileHandlerFactory.Build(FileHandlerType.Local)),
+            InputType.Drive => new FileInstrumentSource(dataOptions, _fileHandlerFactory.Build(FileHandlerType.Lusid)),
+            _ => throw new ArgumentOutOfRangeException($"No instrument sources for input type {dataOptions.InputSource}")
+        };
     }
 }

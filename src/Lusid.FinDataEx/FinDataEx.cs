@@ -3,7 +3,7 @@ using CommandLine;
 using Lusid.FinDataEx.Operation;
 using Lusid.FinDataEx.Output;
 using Lusid.FinDataEx.Util;
-using Lusid.FinDataEx.Util.FileUtils.Handler;
+using Lusid.FinDataEx.Util.FileUtils;
 
 namespace Lusid.FinDataEx
 {
@@ -14,8 +14,17 @@ namespace Lusid.FinDataEx
         private const int ProcessingExitCode = 1;
 
         private const string secretsJsonFilename = "secrets.json";
-        private static readonly Sdk.Utilities.ILusidApiFactory LusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
-        private static readonly Drive.Sdk.Utilities.ILusidApiFactory DriveApiFactory = Drive.Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
+
+        private static readonly Sdk.Utilities.ILusidApiFactory LusidApiFactory;
+        private static readonly Drive.Sdk.Utilities.ILusidApiFactory DriveApiFactory;
+        private static readonly FileHandlerFactory FileHandlerFactory;
+
+        static FinDataEx()
+        {
+            LusidApiFactory = Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
+            DriveApiFactory = Drive.Sdk.Utilities.LusidApiFactoryBuilder.Build(secretsJsonFilename);
+            FileHandlerFactory = new FileHandlerFactory(DriveApiFactory);
+        }
 
         public static int Main(string[] args)
         {
@@ -37,6 +46,7 @@ namespace Lusid.FinDataEx
                 Console.WriteLine($"FinDataEx request processing failed. Exiting FinDataEx. Exception details : {e}");
                 return ProcessingExitCode;
             }
+
             Console.WriteLine($"FinDataEx run to successful completion with exit code {SuccessExitCode}");
             return SuccessExitCode;
         }
@@ -54,6 +64,7 @@ namespace Lusid.FinDataEx
             // construct the writer to persist any data retrieved from BBG
             var finDataOutputWriter = CreateFinDataOutputWriter(getOptions);
             var writeResult = finDataOutputWriter.Write(dataLicenseOutput);
+
             ProcessWriteResult(writeResult);
         }
 
@@ -62,10 +73,11 @@ namespace Lusid.FinDataEx
         /// </summary>
         /// <param name="getOptions"></param>
         /// <returns></returns>
-        private static  IOperationExecutor CreateFinDataOperationExecutor(DataLicenseOptions getOptions) => getOptions.OperationType switch
+        private static IOperationExecutor CreateFinDataOperationExecutor(DataLicenseOptions getOptions) => getOptions.OperationType switch
         {
-            OperationType.ParseExisting => new ParseExistingDataExecutor(getOptions, DriveApiFactory, new FileHandlerFactory()),
-            OperationType.BloombergRequest => new DataLicenseRequestExecutor(getOptions, LusidApiFactory, DriveApiFactory),
+            OperationType.ParseExisting => new ParseExistingDataExecutor(getOptions, FileHandlerFactory),
+            OperationType.BloombergRequest => throw new NotImplementedException("Due to licensing issues, this operation can not run at this time. " +
+                                                                                "Please use another operation type"),
             _ => throw new ArgumentNullException($"No input readers for operation type {getOptions.OperationType}")
         };
 
@@ -76,8 +88,8 @@ namespace Lusid.FinDataEx
         /// <returns></returns>
         private static IOutputWriter CreateFinDataOutputWriter(DataLicenseOptions getOptions) => getOptions.OutputTarget switch
         {
-            OutputType.Local => new FileOutputWriter(getOptions, new LocalFileHandler()),
-            OutputType.Drive => new FileOutputWriter(getOptions, new LusidDriveFileHandler(DriveApiFactory)),
+            OutputType.Local => new FileOutputWriter(getOptions, FileHandlerFactory.Build(FileHandlerType.Local)),
+            OutputType.Drive => new FileOutputWriter(getOptions, FileHandlerFactory.Build(FileHandlerType.Lusid)),
             OutputType.Lusid => new LusidTenantOutputWriter(getOptions, LusidApiFactory),
             _ => throw new ArgumentNullException($"No output writer for operation type {getOptions.OutputTarget}")
         };

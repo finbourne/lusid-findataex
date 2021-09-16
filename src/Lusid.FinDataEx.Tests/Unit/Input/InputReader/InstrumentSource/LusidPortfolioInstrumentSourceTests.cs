@@ -33,7 +33,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void SingleInstrumentSinglePortfolio()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1" };
+            var fakeScope = "scope1";
+            var fakePortfolio = "portfolio1";
+
             var fakeHoldings = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -58,10 +60,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             };
             var fakeData = new VersionedResourceListOfPortfolioHolding(new Sdk.Model.Version(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), fakeHoldings, null, null);
 
+            var fakePortfolios = new List<string> { $"{fakeScope}|{fakePortfolio}" };
+
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope)),
+                    It.Is<string>(s => s.Equals(fakePortfolio)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -72,11 +76,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
             var outputInstrument = output.instrument.Single();
 
             Assert.That(outputInstrument.id, Is.EqualTo("instrument1"));
@@ -89,7 +94,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void InstrumentsFilteredByType()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1" };
+            var fakeScope = "scope1";
+            var fakePortfolio = "portfolio1";
+
             var fakeHoldings = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -131,12 +138,15 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
                     new CurrencyAndAmount(0, "CCY_USD")
                )
             };
+
             var fakeData = new VersionedResourceListOfPortfolioHolding(new Sdk.Model.Version(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), fakeHoldings, null, null);
+
+            var fakePortfolios = new List<string> { $"{fakeScope}|{fakePortfolio}" };
 
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope)),
+                    It.Is<string>(s => s.Equals(fakePortfolio)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -147,11 +157,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
             var outputInstrument = output.instrument.Single();
 
             Assert.That(outputInstrument.id, Is.EqualTo("instrument1"));
@@ -164,7 +175,11 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void SingleInstrumentMultiplePortfolio()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1", "portfolio2|scope2" };
+            var fakeScope1 = "scope1";
+            var fakePortfolio1 = "portfolio1";
+            var fakeScope2 = "scope2";
+            var fakePortfolio2 = "portfolio2";
+
             var fakeHoldingsPortfolio1 = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -213,10 +228,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             };
             var fakeDataPortfolio2 = new VersionedResourceListOfPortfolioHolding(new Sdk.Model.Version(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), fakeHoldingsPortfolio2, null, null);
 
+            var fakePortfolios = new List<string> { $"{fakeScope1}|{fakePortfolio1}", $"{fakeScope2}|{fakePortfolio2}" };
+
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope1)),
+                    It.Is<string>(s => s.Equals(fakePortfolio1)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -226,8 +243,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
 
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope2")),
-                    It.Is<string>(s => s.Equals("portfolio2")),
+                    It.Is<string>(s => s.Equals(fakeScope2)),
+                    It.Is<string>(s => s.Equals(fakePortfolio2)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -238,11 +255,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
             var outputInstrument1 = output.instrument.First();
 
             Assert.That(outputInstrument1.id, Is.EqualTo("instrument1"));
@@ -263,7 +281,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void MultipleInstrumentSinglePortfolio()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1" };
+            var fakeScope = "scope1";
+            var fakePortfolio = "portfolio1";
+
             var fakeHoldings = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -305,12 +325,15 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
                     new CurrencyAndAmount(0, "CCY_USD")
                )
             };
+
             var fakeData = new VersionedResourceListOfPortfolioHolding(new Sdk.Model.Version(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), fakeHoldings, null, null);
+
+            var fakePortfolios = new List<string> { $"{fakeScope}|{fakePortfolio}" };
 
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope)),
+                    It.Is<string>(s => s.Equals(fakePortfolio)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -321,11 +344,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
             var outputInstrument1 = output.instrument.First();
 
             Assert.That(outputInstrument1.id, Is.EqualTo("instrument1"));
@@ -346,7 +370,11 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void MultipleInstrumentMultiplePortfolio()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1", "portfolio2|scope2" };
+            var fakeScope1 = "scope1";
+            var fakePortfolio1 = "portfolio1";
+            var fakeScope2 = "scope2";
+            var fakePortfolio2 = "portfolio2";
+
             var fakeHoldingsPortfolio1 = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -435,8 +463,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
 
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope1)),
+                    It.Is<string>(s => s.Equals(fakePortfolio1)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -446,8 +474,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
 
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope2")),
-                    It.Is<string>(s => s.Equals("portfolio2")),
+                    It.Is<string>(s => s.Equals(fakeScope2)),
+                    It.Is<string>(s => s.Equals(fakePortfolio2)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -455,14 +483,17 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
                     It.IsAny<bool?>()))
                 .Returns(fakeDataPortfolio2);
 
+            var fakePortfolios = new List<string> { $"{fakeScope1}|{fakePortfolio1}", $"{fakeScope2}|{fakePortfolio2}" };
+
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
 
             Assert.That(output.instrument.Length, Is.EqualTo(4));
 
@@ -502,7 +533,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void DuplicatesInPortfolioIgnored()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1" };
+            var fakeScope = "scope1";
+            var fakePortfolio = "portfolio1";
+
             var fakeHoldings = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -565,10 +598,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             };
             var fakeData = new VersionedResourceListOfPortfolioHolding(new Sdk.Model.Version(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), fakeHoldings, null, null);
 
+            var fakePortfolios = new List<string> { $"{fakeScope}|{fakePortfolio}" };
+
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope)),
+                    It.Is<string>(s => s.Equals(fakePortfolio)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -579,11 +614,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
 
             Assert.That(output.instrument.Length, Is.EqualTo(2));
 
@@ -607,7 +643,11 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void DuplicatesAcrossPortfoliosIgnored()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1", "portfolio2|scope2" };
+            var fakeScope1 = "scope1";
+            var fakePortfolio1 = "portfolio1";
+            var fakeScope2 = "scope2";
+            var fakePortfolio2 = "portfolio2";
+
             var fakeHoldingsPortfolio1 = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -715,8 +755,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
 
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope1)),
+                    It.Is<string>(s => s.Equals(fakePortfolio1)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -726,8 +766,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
 
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope2")),
-                    It.Is<string>(s => s.Equals("portfolio2")),
+                    It.Is<string>(s => s.Equals(fakeScope2)),
+                    It.Is<string>(s => s.Equals(fakePortfolio2)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -735,14 +775,17 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
                     It.IsAny<bool?>()))
                 .Returns(fakeDataPortfolio2);
 
+            var fakePortfolios = new List<string> { $"{fakeScope1}|{fakePortfolio1}", $"{fakeScope2}|{fakePortfolio2}" };
+
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
 
             Assert.That(output.instrument.Length, Is.EqualTo(4));
 
@@ -782,7 +825,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void FailsOnExcessiveDelimeters()
         {
-            var fakePortfolios = new List<string> { "portfolio1|scope1|thing1" };
+            var fakeScope = "scope1";
+            var fakePortfolio = "portfolio1";
+
             var fakeHoldings = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -807,10 +852,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             };
             var fakeData = new VersionedResourceListOfPortfolioHolding(new Sdk.Model.Version(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), fakeHoldings, null, null);
 
+            var fakePortfolios = new List<string> { $"{fakeScope}|{fakePortfolio}|thing1" };
+
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope)),
+                    It.Is<string>(s => s.Equals(fakePortfolio)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -821,17 +868,20 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            Assert.Throws<ArgumentException>(() => LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get());
+            Assert.Throws<ArgumentException>(() => new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get());
         }
 
         [Test]
         public void FailsOnTooFewDelimeters()
         {
-            var fakePortfolios = new List<string> { "portfolio1" };
+            var fakeScope = "scope1";
+            var fakePortfolio = "portfolio1";
+
             var fakeHoldings = new List<PortfolioHolding>
             {
                 new PortfolioHolding(
@@ -856,10 +906,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             };
             var fakeData = new VersionedResourceListOfPortfolioHolding(new Sdk.Model.Version(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), fakeHoldings, null, null);
 
+            var fakePortfolios = new List<string> { fakeScope };
+
             Mock.Get(_mockTransactionPortfoliosApi)
                 .Setup(mock => mock.GetHoldings(
-                    It.Is<string>(s => s.Equals("scope1")),
-                    It.Is<string>(s => s.Equals("portfolio1")),
+                    It.Is<string>(s => s.Equals(fakeScope)),
+                    It.Is<string>(s => s.Equals(fakePortfolio)),
                     It.IsAny<DateTimeOrCutLabel>(),
                     It.IsAny<DateTimeOffset?>(),
                     It.IsAny<string>(),
@@ -870,11 +922,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            Assert.Throws<ArgumentException>(() => LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get());
+            Assert.Throws<ArgumentException>(() => new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get());
         }
 
         [Test]
@@ -919,11 +972,12 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = PerSecurity_Dotnet.InstrumentType.ISIN,
+                InstrumentSourceArguments = fakePortfolios
             };
 
             var instrumentArgs = InstrumentArgs.Create(options);
 
-            var output = LusidPortfolioInstrumentSource.Create(_mockLusidApiFactory, instrumentArgs, fakePortfolios).Get();
+            var output = new LusidPortfolioInstrumentSource(options, _mockLusidApiFactory).Get();
 
             Assert.That(output.instrument, Is.Empty);
         }

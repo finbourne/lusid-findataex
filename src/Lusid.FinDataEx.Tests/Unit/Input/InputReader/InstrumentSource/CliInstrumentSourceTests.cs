@@ -12,14 +12,17 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void SingleInstrument()
         {
+            var instrumentIds = new List<string> { "instrument1" };
+
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = instrumentIds
             };
-            var instrumentArgs = InstrumentArgs.Create(options);
-            var instrumentIds = new List<string> { "instrument1" };
 
-            var output = CliInstrumentSource.Create(instrumentArgs, instrumentIds).Get();
+            var instrumentArgs = InstrumentArgs.Create(options);
+
+            var output = new CliInstrumentSource(options).Get();
             var outputInstrument = output.instrument.Single();
 
             Assert.That(outputInstrument.id, Is.EqualTo(instrumentIds.First()));
@@ -32,14 +35,15 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void MultipleInstrument()
         {
+            var instrumentIds = new List<string> { "instrument1", "instrument2" };
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = instrumentIds
             };
             var instrumentArgs = InstrumentArgs.Create(options);
-            var instrumentIds = new List<string> { "instrument1", "instrument2" };
 
-            var output = CliInstrumentSource.Create(instrumentArgs, instrumentIds).Get();
+            var output = new CliInstrumentSource(options).Get();
             var outputInstrument1 = output.instrument.First();
 
             Assert.That(outputInstrument1.id, Is.EqualTo(instrumentIds.First()));
@@ -60,15 +64,17 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void DuplicateInstrumentsAreIgnored()
         {
-            var options = new DataLicenseOptions
-            {
-                InstrumentIdType = InstrumentType.ISIN,
-            };
-            var instrumentArgs = InstrumentArgs.Create(options);
             var instrumentIds = new List<string> { "instrument1", "instrument2", "instrument1" };
             var uniqueInstrumentIds = instrumentIds.ToHashSet();
 
-            var output = CliInstrumentSource.Create(instrumentArgs, instrumentIds).Get();
+            var options = new DataLicenseOptions
+            {
+                InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = instrumentIds
+            };
+            var instrumentArgs = InstrumentArgs.Create(options);
+
+            var output = new CliInstrumentSource(options).Get();
 
             Assert.That(output.instrument.Length, Is.EqualTo(2));
 
@@ -92,14 +98,15 @@ namespace Lusid.FinDataEx.Tests.Unit.Input.InputReader.InstrumentSource
         [Test]
         public void DoesNotThrowOnMissingInstrumentIds()
         {
+            var instrumentIds = new List<string> { };
+
             var options = new DataLicenseOptions
             {
                 InstrumentIdType = InstrumentType.ISIN,
+                InstrumentSourceArguments = instrumentIds
             };
-            var instrumentArgs = InstrumentArgs.Create(options);
-            var instrumentIds = new List<string> { };
 
-            var output = CliInstrumentSource.Create(instrumentArgs, instrumentIds).Get();
+            var output = new CliInstrumentSource(options).Get();
 
             Assert.That(output.instrument, Is.Empty);
         }

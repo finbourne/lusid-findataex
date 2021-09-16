@@ -13,7 +13,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
     {
         // mandatory instrument arguments
         public InstrumentType InstrumentType { get; }
-        
+
         // optional instrument arguments
         public MarketSector? YellowKey { get; }
 
@@ -22,6 +22,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             InstrumentType = instrumentType;
             YellowKey = yellowKey;
         }
+
         public static InstrumentArgs Create(DataLicenseOptions dataLicenseOptions)
         {
             return new InstrumentArgs(dataLicenseOptions.InstrumentIdType, dataLicenseOptions.YellowKey);
@@ -31,7 +32,5 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         {
             return new InstrumentArgs(instrumentType, null);
         }
-        
     }
-    
 }

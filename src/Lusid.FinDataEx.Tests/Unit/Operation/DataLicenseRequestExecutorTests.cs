@@ -1,4 +1,6 @@
-﻿using Lusid.FinDataEx.Operation;
+﻿using Lusid.Sdk.Utilities;
+using Lusid.FinDataEx.Operation;
+using Lusid.FinDataEx.Util;
 using Moq;
 using NUnit.Framework;
 using System;
@@ -8,14 +10,14 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
     [TestFixture]
     public class DataLicenseRequestExecutorTest
     {
-        private Sdk.Utilities.ILusidApiFactory _mockLusidApiFactory;
-        private Drive.Sdk.Utilities.ILusidApiFactory _mockDriveApiFactory;
+        private ILusidApiFactory _mockLusidApiFactory;
+        private IFileHandlerFactory _mockFileHandlerFactory;
 
         [SetUp]
         public void SetUp()
         {
-            _mockLusidApiFactory = Mock.Of<Sdk.Utilities.ILusidApiFactory>();
-            _mockDriveApiFactory = Mock.Of<Drive.Sdk.Utilities.ILusidApiFactory>();
+            _mockLusidApiFactory = Mock.Of<ILusidApiFactory>();
+            _mockFileHandlerFactory = Mock.Of<IFileHandlerFactory>();
         }
 
         [Test]
@@ -23,7 +25,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
         {
             var fakeOptions = new DataLicenseOptions();
 
-            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockDriveApiFactory).Execute());
+            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockFileHandlerFactory).Execute());
         }
 
         [Test]
@@ -31,7 +33,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
         {
             var fakeOptions = new DataLicenseOptions();
 
-            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockDriveApiFactory).Execute());
+            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockFileHandlerFactory).Execute());
         }
 
         [Test]
@@ -39,7 +41,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
         {
             var fakeOptions = new DataLicenseOptions();
 
-            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockDriveApiFactory).Execute());
+            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockFileHandlerFactory).Execute());
         }
 
         [Test]
@@ -47,7 +49,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
         {
             var fakeOptions = new DataLicenseOptions();
 
-            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockDriveApiFactory).Execute());
+            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockFileHandlerFactory).Execute());
         }
 
         [Test]
@@ -55,7 +57,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
         {
             var fakeOptions = new DataLicenseOptions();
 
-            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockDriveApiFactory).Execute());
+            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockFileHandlerFactory).Execute());
         }
 
         [Test]
@@ -63,7 +65,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Operation
         {
             var fakeOptions = new DataLicenseOptions();
 
-            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockDriveApiFactory).Execute());
+            Assert.Throws<NotImplementedException>(() => new DataLicenseRequestExecutor(fakeOptions, _mockLusidApiFactory, _mockFileHandlerFactory).Execute());
         }
     }
 }
