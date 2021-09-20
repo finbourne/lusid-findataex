@@ -7,6 +7,7 @@ using Lusid.FinDataEx.DataLicense.Service;
 using Lusid.FinDataEx.DataLicense.Vendor;
 using Lusid.FinDataEx.Util.FileUtils;
 using Lusid.Sdk.Utilities;
+using Lusid.FinDataEx.DataLicense.Service.Transform;
 
 namespace Lusid.FinDataEx.Operation
 {
@@ -15,46 +16,52 @@ namespace Lusid.FinDataEx.Operation
         private readonly DataLicenseOptions _getOptions;
         private readonly ILusidApiFactory _lusidApiFactory;
         private readonly IFileHandlerFactory _fileHandlerFactory;
+        private readonly IDataLicenseService _dataLicenseService;
+        private readonly IPerSecurityWsFactory _perSecurityWsFactory;
+        private readonly ITransformerFactory _transformerFactory;
 
-        public DataLicenseRequestExecutor(DataLicenseOptions getOptions, ILusidApiFactory lusidApiFactory, IFileHandlerFactory fileHandlerFactory)
+        public DataLicenseRequestExecutor(
+            DataLicenseOptions getOptions,
+            ILusidApiFactory lusidApiFactory,
+            IFileHandlerFactory fileHandlerFactory,
+            IDataLicenseService dataLicenseService,
+            IPerSecurityWsFactory perSecurityWsFactory,
+            ITransformerFactory transformerFactory)
         {
             _getOptions = getOptions;
             _lusidApiFactory = lusidApiFactory;
             _fileHandlerFactory = fileHandlerFactory;
+            _dataLicenseService = dataLicenseService;
+            _perSecurityWsFactory = perSecurityWsFactory;
+            _transformerFactory = transformerFactory;
         }
 
         public DataLicenseOutput Execute()
         {
             var instruments = CreateInstruments(_getOptions);
 
-            return new DataLicenseInputReader(_getOptions, instruments, new DataLicenseService(), new PerSecurityWsFactory(), new TransformerFactory()).Read();
+            return new DataLicenseInputReader(_getOptions, instruments, _dataLicenseService, _perSecurityWsFactory, _transformerFactory).Read();
         }
 
         private Instruments CreateInstruments(DataLicenseOptions dataOptions)
         {
             var instrumentSource = CreateInstrumentSource(dataOptions);
             var instruments = instrumentSource.Get();
-            if (instruments is { } dlInstruments)
+
+            if (!instruments.instrument.Any())
             {
-                if (!instruments.instrument.Any())
-                {
-                    throw new ArgumentException("No instruments were constructed from your selected source and arguments. " +
-                                                "No DLWS call will be executed");
-                }
-
-                if (dlInstruments.instrument.Length > dataOptions.MaxInstruments)
-                {
-                    throw new ArgumentException($"Breach maximum instrument limit. Attempted to request " +
-                                                $"{dlInstruments.instrument.Length} instruments but only {dataOptions.MaxInstruments} are allowed. " +
-                                                $"To increase the limit override the max allowed instruments with the -m argument parameter.");
-                }
-
-                return dlInstruments;
+                throw new ArgumentException("No DL instruments could be created from the instruments or portfolios provided. " +
+                                            "No DLWS call will be executed.");
             }
 
-            throw new ArgumentException($"No DL instruments could be created from the instruments or " +
-                                        $"portfolios provided. Check portfolios provided have existing holdings or " +
-                                        $"the instruments arguments are legal. Inputs={dataOptions}");
+            if (instruments.instrument.Length > dataOptions.MaxInstruments)
+            {
+                throw new ArgumentException($"Breach maximum instrument limit. Attempted to request " +
+                                            $"{instruments.instrument.Length} instruments but only {dataOptions.MaxInstruments} are allowed. " +
+                                            $"To increase the limit override the max allowed instruments with the -m argument parameter.");
+            }
+
+            return instruments;
         }
 
         private IInstrumentSource CreateInstrumentSource(DataLicenseOptions dataOptions) => dataOptions.InputSource switch
