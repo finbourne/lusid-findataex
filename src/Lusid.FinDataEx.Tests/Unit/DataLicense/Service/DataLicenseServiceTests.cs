@@ -27,17 +27,33 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service
         }
 
         [Test]
-        public void Get_OnAdhocGetDataWithNoIds_ShouldReturnEmptyData()
+        public void AdhocGetDataWithNoIdsShouldReturnEmptyData()
         {
-            var finDataOutput = _dataLicenseService.Get(_getDataLicenseCall, CreateInstruments(new List<string>()), DataLicenseTypes.ProgramTypes.Adhoc, true);
-            Assert.True(finDataOutput.IsEmpty());
+            var mockDataLicenseCall = Mock.Of<IDataLicenseCall<PerSecurityResponse>>();
+            Mock.Get(mockDataLicenseCall).Verify(mock => mock.Get(It.IsAny<Instruments>()), Times.Never());
+
+            var finDataOutput = _dataLicenseService.Get(_getDataLicenseCall, CreateInstruments(new List<string> { }), DataLicenseTypes.ProgramTypes.Adhoc, true);
+            Assert.That(finDataOutput.requestId, Is.Null);
+            Assert.That(finDataOutput.statusCode, Is.Null);
         }
 
         [Test]
-        public void Get_OnAScheduledGetData_ShouldThrowUnsupportedException()
+        public void ScheduledDataShouldThrowUnsupportedException()
         {
             var bbgIds = CreateInstruments(new List<string>{"BBG000BPHFS9", "BBG000BVPV84"});
             Assert.Throws<NotSupportedException>(() => _dataLicenseService.Get(_getDataLicenseCall, bbgIds, DataLicenseTypes.ProgramTypes.Scheduled, true));
+        }
+
+        [Test]
+        public void UnsafeRequestsAreNotRun()
+        {
+            var mockDataLicenseCall = Mock.Of<IDataLicenseCall<PerSecurityResponse>>();
+            Mock.Get(mockDataLicenseCall).Verify(mock => mock.Get(It.IsAny<Instruments>()), Times.Never());
+
+            var bbgIds = CreateInstruments(new List<string> { "BBG000BPHFS9", "BBG000BVPV84" });
+            var finDataOutput = _dataLicenseService.Get(_getDataLicenseCall, bbgIds, DataLicenseTypes.ProgramTypes.Adhoc, false);
+            Assert.That(finDataOutput.requestId, Is.Null);
+            Assert.That(finDataOutput.statusCode, Is.Null);
         }
 
         private Instruments CreateInstruments(IEnumerable<string> bbgIds)
@@ -48,6 +64,7 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service
                 type = InstrumentType.BB_GLOBAL,
                 typeSpecified = true
             }).ToArray();
+
             return new Instruments()
             {
                 instrument = instruments

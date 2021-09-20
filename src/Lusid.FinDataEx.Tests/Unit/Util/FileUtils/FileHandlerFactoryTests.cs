@@ -13,9 +13,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Util.FileUtils
         [Test]
         public void ProducesDriveHandler()
         {
-            var factory = new FileHandlerFactory();
+            var factory = new FileHandlerFactory(Mock.Of<ILusidApiFactory>());
 
-            var handler = factory.Build(FileHandlerType.Lusid, Mock.Of<ILusidApiFactory>());
+            var handler = factory.Build(FileHandlerType.Lusid);
 
             Assert.That(handler, Is.TypeOf<LusidDriveFileHandler>());
         }
@@ -23,9 +23,9 @@ namespace Lusid.FinDataEx.Tests.Unit.Util.FileUtils
         [Test]
         public void ProducesLocalHandler()
         {
-            var factory = new FileHandlerFactory();
+            var factory = new FileHandlerFactory(Mock.Of<ILusidApiFactory>());
 
-            var handler = factory.Build(FileHandlerType.Local, Mock.Of<ILusidApiFactory>());
+            var handler = factory.Build(FileHandlerType.Local);
 
             Assert.That(handler, Is.TypeOf<LocalFileHandler>());
         }

@@ -25,24 +25,55 @@ namespace Lusid.FinDataEx.Output
             if (dataLicenseOutput.IsEmpty())
             {
                 Console.WriteLine($"Attempting to write empty data license output : {dataLicenseOutput}. Skipping...");
-                return WriteResult.NotRun();
+                return WriteResult.Ok(string.Empty);
             }
 
-            var headers = string.Join(BbgDlDelimiter, dataLicenseOutput.Header);
-            var finDataRecords = new List<string>{headers};
-            finDataRecords.AddRange(
-            dataLicenseOutput.Records.Select(dR =>
-                {
-                    var record = new List<string>();
-                    foreach (var header in dataLicenseOutput.Header)
-                    {
-                        dR.TryGetValue(header, out var recordEntry);
-                        record.Add(recordEntry);
-                    }
+            var finDataRecords = new List<string>();
 
-                    return string.Join(BbgDlDelimiter, record);
-                }).ToList()
-            );
+            if (dataLicenseOutput.DataRecords.Any())
+            {
+                var headers = dataLicenseOutput.DataRecords.First().Headers;
+                finDataRecords.Add(string.Join(BbgDlDelimiter, headers));
+
+                finDataRecords.AddRange(
+                    dataLicenseOutput.DataRecords.Select(r =>
+                    {
+                        var record = new List<string>();
+                        foreach (var header in headers)
+                        {
+                            var recordEntry = r.RawData[header];
+                            record.Add(recordEntry);
+                        }
+
+                        return string.Join(BbgDlDelimiter, record);
+                    }).ToList()
+                );
+            }
+
+            if (dataLicenseOutput.CorporateActionRecords.Any())
+            {
+                if (finDataRecords.Any())
+                {
+                    finDataRecords.Add(string.Empty);
+                }
+
+                var headers = dataLicenseOutput.CorporateActionRecords.First().Headers;
+                finDataRecords.Add(string.Join(BbgDlDelimiter, headers));
+
+                finDataRecords.AddRange(
+                    dataLicenseOutput.CorporateActionRecords.Select(r =>
+                    {
+                        var record = new List<string>();
+                        foreach (var header in headers)
+                        {
+                            var recordEntry = r.RawData[header];
+                            record.Add(recordEntry);
+                        }
+
+                        return string.Join(BbgDlDelimiter, record);
+                    }).ToList()
+                );
+            }
 
             try
             {

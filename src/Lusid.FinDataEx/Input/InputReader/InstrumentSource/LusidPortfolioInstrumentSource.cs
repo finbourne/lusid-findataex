@@ -8,76 +8,56 @@ using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
 {
-    /// <summary>
-    /// Instrument source based on holdings that exist at a given time for a given set of scopes and portfolios
-    /// within a LUSID domain. 
-    /// </summary>
     public class LusidPortfolioInstrumentSource : IInstrumentSource
     {
-        private readonly ITransactionPortfoliosApi _transactionPortfoliosApi;
+        private readonly DataLicenseOptions _dataOptions;
         private readonly InstrumentArgs _instrumentArgs;
         private readonly string _instrumentTypeLusidPropertyKey;
-        private readonly ISet<Tuple<string, string>> _scopesAndPortfolios;
-        private readonly DateTimeOffset _effectiveAt;
+        private readonly ITransactionPortfoliosApi _transactionPortfoliosApi;
 
-        private LusidPortfolioInstrumentSource(ILusidApiFactory lusidApiFactory, InstrumentArgs instrumentArgs, ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
+        public LusidPortfolioInstrumentSource(DataLicenseOptions dataOptions, ILusidApiFactory lusidApiFactory)
         {
+            _dataOptions = dataOptions;
+            _instrumentArgs = InstrumentArgs.Create(dataOptions);
+            _instrumentTypeLusidPropertyKey = GetLusidInstrumentIdPropertyAddress(_instrumentArgs.InstrumentType);
             _transactionPortfoliosApi = lusidApiFactory.Api<ITransactionPortfoliosApi>();
-            _instrumentArgs = instrumentArgs;
-            _instrumentTypeLusidPropertyKey = GetLusidInstrumentIdPropertyAddress(instrumentArgs.InstrumentType);
-            _scopesAndPortfolios = scopesAndPortfolios;
-            _effectiveAt = effectiveAt;
         }
 
-        /// <summary>
-        ///  Creates an instrument source for a given for instrument ids that are constructed from the holdings
-        /// of a portfolio within a given scope.
-        /// </summary>
-        /// <param name="instrumentArgs">Configuration for the instrument request to DLWS (InstrumentIdType (e.g. Ticker), YellowKey (e.g. Curncy), etc...)</param>
-        /// <param name="instrumentSourceArgs">Set of | delimited pair of portfolio and scope (e.g. [Port1|Scope1, Port2|Scope1, Port1|Scope2])</param>
-        /// <returns>A LusidPortfolioInstrumentSource instance</returns>
-        public static LusidPortfolioInstrumentSource Create(ILusidApiFactory factory, InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
-        {   
-            // parse portfolio and scopes from request arguments (e.g. [Scope1|Port1, Scope2|Port2, Scope3|Port3])
-            var scopeAndPortfolioArgs = instrumentSourceArgs;
-
-            Console.WriteLine($"Creating a portfolio and scope source using instrument id type {instrumentArgs.InstrumentType} for the " +
-                              $"portfolios and scopes: {string.Join(',', scopeAndPortfolioArgs)}");
-
-            // parse the input arguments into set of portfolio/scope pairs.
-            ISet<Tuple<string,string>> scopesAndPortfolios = scopeAndPortfolioArgs.Select(p =>
-            {
-                var scopeAndPortfolio = p.Split("|");
-                if (scopeAndPortfolio.Length != 2)
-                {
-                    throw new ArgumentException($"Unexpected scope and portfolio entry for {p}. Should be " +
-                                                $"in form TestScope|UK_EQUITY");
-                }
-                return new Tuple<string,string>(scopeAndPortfolio[1], scopeAndPortfolio[0]);
-            }).ToHashSet();
-            
-            // currently only support holdings as at latest date. if required to support historical dates can modify
-            // to include effectiveAt as part of instrumentSourceArgs.
-            var effectiveAt = DateTimeOffset.UtcNow;
-            return new LusidPortfolioInstrumentSource(factory, instrumentArgs, scopesAndPortfolios, effectiveAt);
-        }
-
-        /// <summary>
-        ///  Retrieves a BBG DL representation of a set of instruments that make up the holdings for the given portfolios at the given
-        ///  effectiveAt time. The LUSID domain used is configured in the ILusidApiFactory provided in the constructor.
-        /// </summary>
-        /// <returns>Set of BBG DLWS instruments</returns>
         #nullable enable
         public Instruments? Get()
         {
-            var holdingsInstrumentIds = GetHoldingsInstrumentIds(_scopesAndPortfolios, _effectiveAt);
+            var scopesAndPortfolios = ConstructScopesAndPortfolios(_dataOptions.InstrumentSourceArguments);
+            var holdingsInstrumentIds = GetHoldingsInstrumentIds(scopesAndPortfolios, DateTimeOffset.UtcNow);
             return IInstrumentSource.CreateInstruments(_instrumentArgs, holdingsInstrumentIds);
         }
 
-        /// <summary>
-        ///  Calls LUSID to retrieve the instrument ids of holdings for the given portfolio and effectiveAt time.
-        /// </summary>
-        /// <returns></returns>
+        private ISet<Tuple<string, string>> ConstructScopesAndPortfolios(IEnumerable<string> instrumentSourceArgs)
+        {
+            // parse portfolio and scopes from request arguments (e.g. [Port1|Scope1, Port2|Scope2])
+            var scopeAndPortfolioArgs = instrumentSourceArgs;
+
+            Console.WriteLine($"Creating a portfolio and scope source for the portfolios and scopes: " +
+                              $"{string.Join(',', scopeAndPortfolioArgs)}");
+
+            // parse the input arguments into set of portfolio/scope pairs.
+            ISet<Tuple<string,string>> scopesAndPortfolios = scopeAndPortfolioArgs
+                .Select(p =>
+                    {
+                        var scopeAndPortfolio = p.Split("|");
+
+                        if (scopeAndPortfolio.Length != 2)
+                        {
+                            throw new ArgumentException($"Unexpected scope and portfolio entry for {p}. Should be " +
+                                                        $"in form TestScope|UK_EQUITY");
+                        }
+
+                        return new Tuple<string,string>(scopeAndPortfolio[0], scopeAndPortfolio[1]);
+                    })
+                .ToHashSet();
+
+            return scopesAndPortfolios;
+        }
+
         private ISet<string> GetHoldingsInstrumentIds(ISet<Tuple<string, string>> scopesAndPortfolios, DateTimeOffset effectiveAt)
         {
             var instrumentIds = new HashSet<string>();
@@ -88,6 +68,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
                     // retrieve holdings from LUSID with instrument id property attached.
                     var holdings = _transactionPortfoliosApi.GetHoldings(scope, portfolio, effectiveAt,
                         propertyKeys: new List<string>() {_instrumentTypeLusidPropertyKey});
+
                     // filter only entries with valid instrument ids and map to a set for unique instruments.
                     var validPortfolioInstrumentIds = holdings.Values
                         .Where(h => h.Properties.ContainsKey(_instrumentTypeLusidPropertyKey))
@@ -111,15 +92,12 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
             return instrumentIds;
         }
 
-        private static string GetLusidInstrumentIdPropertyAddress(InstrumentType instrumentType)
+        private static string GetLusidInstrumentIdPropertyAddress(InstrumentType instrumentType) => instrumentType switch
         {
-            return instrumentType switch
-            {
-                InstrumentType.BB_GLOBAL => "Instrument/default/Figi",
-                InstrumentType.ISIN => "Instrument/default/Isin",
-                InstrumentType.CUSIP => "Instrument/default/Cusip",
-                _ => throw new ArgumentException($"Only Figi, Isin and Cusips are currently supported. {instrumentType} not yet supported.")
-            };
-        }
+            InstrumentType.BB_GLOBAL => "Instrument/default/Figi",
+            InstrumentType.ISIN => "Instrument/default/Isin",
+            InstrumentType.CUSIP => "Instrument/default/Cusip",
+            _ => throw new ArgumentException($"Only Figi, Isin and Cusips are currently supported. {instrumentType} not yet supported.")
+        };
     }
 }

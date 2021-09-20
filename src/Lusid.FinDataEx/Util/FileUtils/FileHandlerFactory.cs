@@ -7,9 +7,16 @@ namespace Lusid.FinDataEx.Util
 {
     public class FileHandlerFactory : IFileHandlerFactory
     {
-        public IFileHandler Build(FileHandlerType fileHandlerType, ILusidApiFactory driveApiFactory) => fileHandlerType switch
+        private readonly ILusidApiFactory _driveApiFactory;
+
+        public FileHandlerFactory(ILusidApiFactory driveApiFactory)
         {
-            FileHandlerType.Lusid => new LusidDriveFileHandler(driveApiFactory),
+            _driveApiFactory = driveApiFactory;
+        }
+
+        public IFileHandler Build(FileHandlerType fileHandlerType) => fileHandlerType switch
+        {
+            FileHandlerType.Lusid => new LusidDriveFileHandler(_driveApiFactory),
             FileHandlerType.Local => new LocalFileHandler(),
             _ => throw new ArgumentNullException($"No handler for fileHandlerType {fileHandlerType}")
         };

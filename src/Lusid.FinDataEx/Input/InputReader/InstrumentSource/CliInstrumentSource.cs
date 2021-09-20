@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using PerSecurity_Dotnet;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Instrument
@@ -9,17 +8,10 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         private readonly InstrumentArgs _instrumentArgs;
         private readonly IEnumerable<string> _instrumentIds;
 
-        private CliInstrumentSource(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentIds)
+        public CliInstrumentSource(DataLicenseOptions dataOptions)
         {
-            _instrumentArgs = instrumentArgs;
-            _instrumentIds = instrumentIds;
-        }
-
-        public static CliInstrumentSource Create(InstrumentArgs instrumentArgs, IEnumerable<string> instrumentSourceArgs)
-        {
-            Console.WriteLine($"Creating a basic instrument source using instrument id type {instrumentArgs.InstrumentType} for the " +
-                              $"instrument ids: {string.Join(',', instrumentSourceArgs)}");
-            return new CliInstrumentSource(instrumentArgs, instrumentSourceArgs);
+            _instrumentArgs = InstrumentArgs.Create(dataOptions);
+            _instrumentIds = dataOptions.InstrumentSourceArguments;
         }
 
         #nullable enable

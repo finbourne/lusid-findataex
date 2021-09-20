@@ -60,7 +60,7 @@ namespace Lusid.FinDataEx
             Required = true,
             HelpText = "If writing to a file path, you can include \"{REQUEST_ID}\", \"{AS_AT}\", \"{AS_AT_DATE}\" in the filename " +
                        "(e.g. /home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv. " +
-                       "If writing to a LUSID tenant, you must provide the location as \"{SCOPE}:{CODE}\"")]
+                       "If writing to a LUSID tenant, you must provide the location as \"{SCOPE}|{CODE}\"")]
         public string OutputPath { get; set; }
 
         /*

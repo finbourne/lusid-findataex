@@ -6,22 +6,14 @@ using static Lusid.FinDataEx.DataLicense.Util.DataLicenseConstants;
 
 namespace Lusid.FinDataEx.DataLicense.Service.Transform
 {
-    /// <summary>
-    ///  Transformer for BBG DL GetData Calls.
-    ///
-    /// </summary>
-    public class GetDataResponseTransformer : IDataLicenseResponseTransformer<RetrieveGetDataResponse>
+    public class GetDataResponseTransformer : IResponseTransformer
     {
-        /// <summary>
-        /// Transform a a GetData response from BBG DLWS to FinDataOutput. Typically expect
-        /// only one set of FinDataOutput to be returned.
-        /// 
-        /// </summary>
-        /// <param name="getDataResponse">GetData response from BBG DLWS</param>
-        /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public DataLicenseOutput Transform(RetrieveGetDataResponse getDataResponse)
+        public List<Dictionary<string, string>> Transform(PerSecurityResponse perSecurityResponse)
         {
+            var getDataResponse = perSecurityResponse as RetrieveGetDataResponse;
+
             var finDataOutputId = getDataResponse.responseId;
+
             // construct data headers
             var headers = new List<string>(){TimeStarted, TimeFinished}; 
             headers.AddRange(getDataResponse.fields.ToList());
@@ -57,11 +49,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Transform
                 r.Add(TimeFinished, timeFinished);
             });
 
-            // retrieve data for all instruments or if failed then return empty output
-            return finDataRecords.Any()
-                ? new DataLicenseOutput(finDataOutputId, headers, finDataRecords)
-                : DataLicenseOutput.Empty(finDataOutputId);
+            return finDataRecords;
         }
-        
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Lusid.FinDataEx.DataLicense.Service.Call;
-using Lusid.FinDataEx.DataLicense.Service.Transform;
 using PerSecurity_Dotnet;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
 
@@ -27,40 +26,28 @@ namespace Lusid.FinDataEx.DataLicense.Service
         /// <param name="dlInstruments">DLWS representation of instruments to pass to BBG DL</param>
         /// <param name="programType">Program type of the given call (e.g. Adhoc, Scheduled)</param>
         /// <returns>FinDataOutput of data returned for instruments requested</returns>
-        public DataLicenseOutput Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType, bool enableLiveRequests = false)
+        public PerSecurityResponse Get(IDataLicenseCall<PerSecurityResponse> dataLicenseCall, Instruments dlInstruments, ProgramTypes programType, bool enableLiveRequests = false)
         {
             if (enableLiveRequests)
             {
                 // validate inputs
-                if (!dlInstruments.instrument.Any()) return DataLicenseOutput.Empty();
+                if (!dlInstruments.instrument.Any())
+                {
+                    return new PerSecurityResponse();
+                }
+
                 VerifyBblFlags(programType);
 
                 // create relevant action and call to DLWS
-                var perSecurityResponse = dataLicenseCall.Get(dlInstruments);
-
-                // parse and transform dl response to standard output
-                var finDataOutputs = TransformBbgResponse(perSecurityResponse, dataLicenseCall.GetDataType());
-                return finDataOutputs;
+                return dataLicenseCall.Get(dlInstruments);
             }
             else
             {
                 Console.WriteLine("--- SAFE MODE --- ");
                 Console.WriteLine("As operating in SAFE mode no requests will be pushed to DLWS.");
-                return DataLicenseOutput.Empty();
+                return new PerSecurityResponse();
             }
 
-        }
-
-        private static DataLicenseOutput TransformBbgResponse(PerSecurityResponse perSecurityResponse, DataTypes dataType)
-        {
-            return dataType switch
-            {
-                DataTypes.GetData => new GetDataResponseTransformer().Transform(
-                    (RetrieveGetDataResponse)perSecurityResponse),
-                DataTypes.GetActions => new GetActionResponseTransformer().Transform(
-                    (RetrieveGetActionsResponse)perSecurityResponse),
-                _ => throw new NotSupportedException($"{dataType} is not a currently supported BBG Data type.")
-            };
         }
 
         private static void VerifyBblFlags(ProgramTypes programType)

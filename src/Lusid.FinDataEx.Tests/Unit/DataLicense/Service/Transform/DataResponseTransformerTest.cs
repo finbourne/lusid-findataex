@@ -23,17 +23,17 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
 
             var getDataOutput = _transformer.Transform(retrieveGetDataResponse);
 
-            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
+            CollectionAssert.AreEquivalent(getDataOutput[0].Keys, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
 
-            Assert.That(getDataOutput.Records.Count, Is.EqualTo(2));
-            CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
+            Assert.That(getDataOutput.Count, Is.EqualTo(2));
+            CollectionAssert.AreEquivalent(getDataOutput[0], new Dictionary<string,string>
             {
                 {"ID_BB_GLOBAL" , "BBG000BPHFS9"},
                 {"PX_LAST", "209.830000"},
                 {"timeStarted", "08/10/2020 09:31:52 +00:00"},
                 {"timeFinished", "08/10/2020 09:32:09 +00:00"}
             });
-            CollectionAssert.AreEquivalent(getDataOutput.Records[1], new Dictionary<string,string>
+            CollectionAssert.AreEquivalent(getDataOutput[1], new Dictionary<string,string>
             {
                 {"ID_BB_GLOBAL" , "BBG000BVPV84"},
                 {"PX_LAST", "3195.690000"},
@@ -50,10 +50,10 @@ namespace Lusid.FinDataEx.Tests.Unit.DataLicense.Service.Transform
 
             var getDataOutput = _transformer.Transform(retrieveGetDataResponse);
 
-            CollectionAssert.AreEqual(getDataOutput.Header, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
+            CollectionAssert.AreEquivalent(getDataOutput[0].Keys, new List<string>{"timeStarted","timeFinished","ID_BB_GLOBAL","PX_LAST"});
 
-            Assert.That(getDataOutput.Records.Count, Is.EqualTo(1));
-            CollectionAssert.AreEquivalent(getDataOutput.Records[0], new Dictionary<string,string>
+            Assert.That(getDataOutput.Count, Is.EqualTo(1));
+            CollectionAssert.AreEquivalent(getDataOutput[0], new Dictionary<string,string>
             {
                 {"ID_BB_GLOBAL" , "BBG000BVPV84"},
                 {"PX_LAST", "3195.690000"},

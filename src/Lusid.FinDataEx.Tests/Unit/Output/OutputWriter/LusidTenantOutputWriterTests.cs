@@ -4,36 +4,24 @@ using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
 using static Lusid.FinDataEx.DataLicense.Util.DataLicenseTypes;
-using Lusid.FinDataEx.Output.OutputInterpreter;
 using Lusid.Sdk.Api;
-using Lusid.FinDataEx.Util.InterpreterUtils;
 using Lusid.Sdk.Model;
+using Lusid.FinDataEx.Data;
+using Lusid.FinDataEx.Data.DataRecord;
 
 namespace Lusid.FinDataEx.Tests.Unit.Output
 {
     [TestFixture]
     public class LusidTenantOutputWriterTests
     {
-        private IInterpreterFactory _mockInterpreterFactory;
-        private IOutputInterpreter _mockInterpreter;
         private ILusidApiFactory _mockLusidApiFactory;
         private ICorporateActionSourcesApi _mockCorporateActionSourcesApi;
 
         [SetUp]
         public void SetUp()
         {
-            _mockInterpreterFactory = Mock.Of<IInterpreterFactory>();
-            _mockInterpreter = Mock.Of<IOutputInterpreter>();
             _mockLusidApiFactory = Mock.Of<ILusidApiFactory>();
             _mockCorporateActionSourcesApi = Mock.Of<ICorporateActionSourcesApi>();
-
-            Mock.Get(_mockInterpreterFactory)
-                .Setup(mock => mock.Build(It.IsAny<InterpreterType>(), It.IsAny<GetActionsOptions>()))
-                .Returns(_mockInterpreter);
-
-            Mock.Get(_mockInterpreter)
-                .Setup(mock => mock.Interpret(It.IsAny<DataLicenseOutput>()))
-                .Returns(Mock.Of<List<UpsertCorporateActionRequest>>());
 
             Mock.Get(_mockLusidApiFactory)
                 .Setup(mock => mock.Api<ICorporateActionSourcesApi>())
@@ -48,9 +36,16 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
                 .Returns(new UpsertCorporateActionsResponse { Failed = new Dictionary<string, ErrorDetail>() });
 
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>
+            {
+                new InstrumentDataRecord(new Dictionary<string, string>
+                {
+                    { "h1", "v1" },
+                    { "h2", "v2" },
+                    { "h3", "v3" }
+                })
+            };
+            var fakeData = new DataLicenseOutput(id, records);
 
             var fakeOptions = new GetActionsOptions
             {
@@ -58,7 +53,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
                 CorpActionTypes = new List<CorpActionType> { CorpActionType.DVD_CASH }
             };
 
-            var writeResult = new LusidTenantOutputWriter(fakeOptions, _mockLusidApiFactory, _mockInterpreterFactory).Write(fakeData);
+            var writeResult = new LusidTenantOutputWriter(fakeOptions, _mockLusidApiFactory).Write(fakeData);
 
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Ok));
             Assert.That(writeResult.FileOutputPath, Is.EqualTo("scope:code"));
@@ -68,9 +63,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         public void FailsWhenNotProcessingActions()
         {
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>();
+            var fakeData = new DataLicenseOutput(id, records);
 
             var fakeOptions = new GetDataOptions
             {
@@ -78,8 +72,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
             };
 
             var fakeLusidApiFactory = Mock.Of<ILusidApiFactory>();
-            var fakeInterpreterFactory = Mock.Of<IInterpreterFactory>();
-            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory, fakeInterpreterFactory).Write(fakeData);
+            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory).Write(fakeData);
 
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
         }
@@ -88,9 +81,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         public void FailsWhenActionTypeNotCashDividend()
         {
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>();
+            var fakeData = new DataLicenseOutput(id, records);
 
             var fakeOptions = new GetActionsOptions
             {
@@ -98,8 +90,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
             };
 
             var fakeLusidApiFactory = Mock.Of<ILusidApiFactory>();
-            var fakeInterpreterFactory = Mock.Of<IInterpreterFactory>();
-            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory, fakeInterpreterFactory).Write(fakeData);
+            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory).Write(fakeData);
 
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
         }
@@ -108,9 +99,8 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
         public void FailsWhenActionTypeNotUniquelyCashDividend()
         {
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>();
+            var fakeData = new DataLicenseOutput(id, records);
 
             var fakeOptions = new GetActionsOptions
             {
@@ -118,8 +108,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
             };
 
             var fakeLusidApiFactory = Mock.Of<ILusidApiFactory>();
-            var fakeInterpreterFactory = Mock.Of<IInterpreterFactory>();
-            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory, fakeInterpreterFactory).Write(fakeData);
+            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory).Write(fakeData);
 
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
         }
@@ -135,8 +124,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
             };
 
             var fakeLusidApiFactory = Mock.Of<ILusidApiFactory>();
-            var fakeInterpreterFactory = Mock.Of<IInterpreterFactory>();
-            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory, fakeInterpreterFactory).Write(fakeData);
+            var writeResult = new LusidTenantOutputWriter(fakeOptions, fakeLusidApiFactory).Write(fakeData);
 
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.NotRun));
         }
@@ -149,9 +137,16 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
                 .Returns(new UpsertCorporateActionsResponse { Failed = new Dictionary<string, ErrorDetail> { { "thing", new ErrorDetail() } } });
 
             var id = "unique id";
-            var headers = new List<string> { "h1", "h2", "h3" };
-            var records = new List<Dictionary<string, string>>();
-            var fakeData = new DataLicenseOutput(id, headers, records);
+            var records = new List<IRecord>
+            {
+                new InstrumentDataRecord(new Dictionary<string, string>
+                {
+                    { "h1", "v1" },
+                    { "h2", "v2" },
+                    { "h3", "v3" }
+                })
+            };
+            var fakeData = new DataLicenseOutput(id, records);
 
             var fakeOptions = new GetActionsOptions
             {
@@ -159,7 +154,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Output
                 CorpActionTypes = new List<CorpActionType> { CorpActionType.DVD_CASH }
             };
 
-            var writeResult = new LusidTenantOutputWriter(fakeOptions, _mockLusidApiFactory, _mockInterpreterFactory).Write(fakeData);
+            var writeResult = new LusidTenantOutputWriter(fakeOptions, _mockLusidApiFactory).Write(fakeData);
 
             Assert.That(writeResult.Status, Is.EqualTo(WriteResultStatus.Fail));
         }

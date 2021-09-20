@@ -26,7 +26,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
         [Test]
         public void SingleInstrument()
         {
-            var fakeOptions = new DataLicenseOptions
+            var fakeOptions = new GetDataOptions
             {
                 InputPath = "myPath"
             };
@@ -39,22 +39,25 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
 
             var output = new FileInputReader(fakeOptions, _mockFileHandler).Read();
 
-            Assert.That(output.Header.Length, Is.EqualTo(3));
-            Assert.That(output.Header.ToList()[0], Is.EqualTo("0-field1"));
-            Assert.That(output.Header.ToList()[1], Is.EqualTo("1-field2"));
-            Assert.That(output.Header.ToList()[2], Is.EqualTo("2-field3"));
+            Assert.That(output.DataRecords.Length, Is.EqualTo(1));
 
-            Assert.That(output.Records.Length, Is.EqualTo(1));
-            Assert.That(output.Records.Single().Length, Is.EqualTo(3));
-            Assert.That(output.Records.Single()["0-field1"], Is.EqualTo("value1"));
-            Assert.That(output.Records.Single()["1-field2"], Is.EqualTo("value2"));
-            Assert.That(output.Records.Single()["2-field3"], Is.EqualTo("value3"));
+            var outputRecord = output.DataRecords.Single();
+
+            Assert.That(outputRecord.Headers.Count, Is.EqualTo(3));
+            Assert.That(outputRecord.Headers[0], Is.EqualTo("0-field1"));
+            Assert.That(outputRecord.Headers[1], Is.EqualTo("1-field2"));
+            Assert.That(outputRecord.Headers[2], Is.EqualTo("2-field3"));
+
+            Assert.That(outputRecord.RawData.Count, Is.EqualTo(3));
+            Assert.That(outputRecord.RawData["0-field1"], Is.EqualTo("value1"));
+            Assert.That(outputRecord.RawData["1-field2"], Is.EqualTo("value2"));
+            Assert.That(outputRecord.RawData["2-field3"], Is.EqualTo("value3"));
         }
 
         [Test]
         public void MultipleInstrument()
         {
-            var fakeOptions = new DataLicenseOptions
+            var fakeOptions = new GetDataOptions
             {
                 InputPath = "myPath"
             };
@@ -67,27 +70,37 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
 
             var output = new FileInputReader(fakeOptions, _mockFileHandler).Read();
 
-            Assert.That(output.Header.Length, Is.EqualTo(3));
-            Assert.That(output.Header.ToList()[0], Is.EqualTo("0-field1"));
-            Assert.That(output.Header.ToList()[1], Is.EqualTo("1-field2"));
-            Assert.That(output.Header.ToList()[2], Is.EqualTo("2-field3"));
+            Assert.That(output.DataRecords.Length, Is.EqualTo(2));
 
-            Assert.That(output.Records.Length, Is.EqualTo(2));
-            Assert.That(output.Records[0].Length, Is.EqualTo(3));
-            Assert.That(output.Records[0]["0-field1"], Is.EqualTo("value11"));
-            Assert.That(output.Records[0]["1-field2"], Is.EqualTo("value12"));
-            Assert.That(output.Records[0]["2-field3"], Is.EqualTo("value13"));
+            var outputRecord0 = output.DataRecords[0];
 
-            Assert.That(output.Records[1].Length, Is.EqualTo(3));
-            Assert.That(output.Records[1]["0-field1"], Is.EqualTo("value21"));
-            Assert.That(output.Records[1]["1-field2"], Is.EqualTo("value22"));
-            Assert.That(output.Records[1]["2-field3"], Is.EqualTo("value23"));
+            Assert.That(outputRecord0.Headers.Count, Is.EqualTo(3));
+            Assert.That(outputRecord0.Headers[0], Is.EqualTo("0-field1"));
+            Assert.That(outputRecord0.Headers[1], Is.EqualTo("1-field2"));
+            Assert.That(outputRecord0.Headers[2], Is.EqualTo("2-field3"));
+
+            Assert.That(outputRecord0.RawData.Count, Is.EqualTo(3));
+            Assert.That(outputRecord0.RawData["0-field1"], Is.EqualTo("value11"));
+            Assert.That(outputRecord0.RawData["1-field2"], Is.EqualTo("value12"));
+            Assert.That(outputRecord0.RawData["2-field3"], Is.EqualTo("value13"));
+
+            var outputRecord1 = output.DataRecords[1];
+
+            Assert.That(outputRecord1.Headers.Count, Is.EqualTo(3));
+            Assert.That(outputRecord1.Headers[0], Is.EqualTo("0-field1"));
+            Assert.That(outputRecord1.Headers[1], Is.EqualTo("1-field2"));
+            Assert.That(outputRecord1.Headers[2], Is.EqualTo("2-field3"));
+
+            Assert.That(outputRecord1.RawData.Count, Is.EqualTo(3));
+            Assert.That(outputRecord1.RawData["0-field1"], Is.EqualTo("value21"));
+            Assert.That(outputRecord1.RawData["1-field2"], Is.EqualTo("value22"));
+            Assert.That(outputRecord1.RawData["2-field3"], Is.EqualTo("value23"));
         }
 
         [Test]
         public void ThrowsOnEmptyInstrument()
         {
-            var fakeOptions = new DataLicenseOptions
+            var fakeOptions = new GetDataOptions
             {
                 InputPath = "myPath"
             };
@@ -104,7 +117,7 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
         [Test]
         public void DuplicateColumnNamesAreDiambiguated()
         {
-            var fakeOptions = new DataLicenseOptions
+            var fakeOptions = new GetDataOptions
             {
                 InputPath = "myPath"
             };
@@ -117,16 +130,19 @@ namespace Lusid.FinDataEx.Tests.Unit.Input
 
             var output = new FileInputReader(fakeOptions, _mockFileHandler).Read();
 
-            Assert.That(output.Header.Length, Is.EqualTo(3));
-            Assert.That(output.Header.ToList()[0], Is.EqualTo("0-field1"));
-            Assert.That(output.Header.ToList()[1], Is.EqualTo("1-field1"));
-            Assert.That(output.Header.ToList()[2], Is.EqualTo("2-field1"));
+            Assert.That(output.DataRecords.Length, Is.EqualTo(1));
 
-            Assert.That(output.Records.Length, Is.EqualTo(1));
-            Assert.That(output.Records.Single().Length, Is.EqualTo(3));
-            Assert.That(output.Records.Single()["0-field1"], Is.EqualTo("value1"));
-            Assert.That(output.Records.Single()["1-field1"], Is.EqualTo("value2"));
-            Assert.That(output.Records.Single()["2-field1"], Is.EqualTo("value3"));
+            var outputRecord = output.DataRecords.Single();
+
+            Assert.That(outputRecord.Headers.Count, Is.EqualTo(3));
+            Assert.That(outputRecord.Headers[0], Is.EqualTo("0-field1"));
+            Assert.That(outputRecord.Headers[1], Is.EqualTo("1-field1"));
+            Assert.That(outputRecord.Headers[2], Is.EqualTo("2-field1"));
+
+            Assert.That(outputRecord.RawData.Count, Is.EqualTo(3));
+            Assert.That(outputRecord.RawData["0-field1"], Is.EqualTo("value1"));
+            Assert.That(outputRecord.RawData["1-field1"], Is.EqualTo("value2"));
+            Assert.That(outputRecord.RawData["2-field1"], Is.EqualTo("value3"));
         }
     }
 }
