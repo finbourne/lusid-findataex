@@ -81,8 +81,18 @@ First port of call should be the BBG DL [support docs](https://service.bloomberg
 
 There is a Concourse pipeline that has been established: https://concourse.finbourne.com/teams/sales-engineering/pipelines/findataex.
 
-This pipeline runs a suite of Unit tests, as well as the capability of running Integratiion testing. Please see the dedicated README in the Integration test folder.
+This pipeline runs a suite of Unit tests, as well as the capability of running Integration testing. Please see the dedicated README in the Integration test folder.
 
 Docker images are created and stored in Harbor at: harbor.finbourne.com/tools/findataex
 
 A sandbox environment exists at https://datalicense-test.lusid.com.
+
+## Ongoing Work
+
+There are several areas of the application which still require work. Some examples are:
+
+* Completing and running the integration tests
+* Refactor to clean up the InstrumentSourceArgs option, it is currently a little overloaded
+* Instrument Data supporting output to a LUSID portfolio
+* Handling more Corporate Action Types
+* Port the repo to GitLab, as it would be easier to test from within our internal network
