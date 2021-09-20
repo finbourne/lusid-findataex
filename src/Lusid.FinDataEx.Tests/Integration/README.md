@@ -8,3 +8,10 @@ To prevent them from slowing down development, and from accidentally incurring u
 
 They have also all been tagged with the 'Category("Unsafe")' annotation, which means that they will not run unless specifically requested.
 Note that the Test Runner in VS <4.0 will still run them due to an issue in test discovery (see https://github.com/nunit/nunit3-vs-adapter/issues/658)
+
+## Why are the tests ignored?
+
+The Integration tests are currently deactivated. This is because we are not currently able to run these tests, as we do not have a Bloomberg Certificate.
+
+Future work should focus on expanding and completing integration test coverage.
+Once that is complete, the Integration test  'Ignore' annotations should be removed permanently.
