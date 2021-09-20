@@ -18,7 +18,7 @@ namespace Lusid.FinDataEx.DataLicense.Service.Instrument
         public LusidPortfolioInstrumentSource(DataLicenseOptions dataOptions, ILusidApiFactory lusidApiFactory)
         {
             _dataOptions = dataOptions;
-            _instrumentArgs = _instrumentArgs = InstrumentArgs.Create(dataOptions);
+            _instrumentArgs = InstrumentArgs.Create(dataOptions);
             _instrumentTypeLusidPropertyKey = GetLusidInstrumentIdPropertyAddress(_instrumentArgs.InstrumentType);
             _transactionPortfoliosApi = lusidApiFactory.Api<ITransactionPortfoliosApi>();
         }

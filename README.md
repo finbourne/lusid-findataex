@@ -31,15 +31,15 @@ For detailed, up to date help, invoke the argument `--help`. The following are t
 
 ### Price Data Examples
 
-`>FinDataEx.exe getdata -d CCY -t BloombergRequest -i Lusid production:global-equity -o Drive --output-path /home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv --enable-live-request`
+`>FinDataEx.exe getdata -d CCY -t BloombergRequest -i Lusid production|global-equity -o Drive --output-path /home/dl_results/MySubmission_{REQUEST_ID}_{AS_AT}.csv --enable-live-request`
 
-`>FinDataEx.exe getdata -d BBG_ID -t ParseExisting -i Local EQ0010174300001000,EQ0021695200001000 -o Lusid --output-path production:global-equity`
+`>FinDataEx.exe getdata -d BBG_ID -t ParseExisting -i Local EQ0010174300001000,EQ0021695200001000 -o Lusid --output-path production|global-equity`
 
 ### Corporate Actions Examples
 
-`>FinDataEx getactions -c DVD_CASH -t BloombergRequest -i Lusid production:global-equity -o Lusid --output-path ibor-test:bbg-corp-action-loader --enable-live-request`
+`>FinDataEx getactions -c DVD_CASH -t BloombergRequest -i Lusid production:global-equity -o Lusid --output-path ibor-test|bbg-corp-action-loader --enable-live-request`
 
-`>FinDataEx getactions -c DVD_CASH -t ParseExisting -i Local --input-path=./corporateActionsFile.csv -o Lusid --output-path ibor-test:bbg-corp-action-loader`
+`>FinDataEx getactions -c DVD_CASH -t ParseExisting -i Local --input-path=./corporateActionsFile.csv -o Lusid --output-path ibor-test|bbg-corp-action-loader`
 
 ### Running from the Image
 

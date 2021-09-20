@@ -38,7 +38,7 @@ namespace Lusid.FinDataEx.Output
                 return WriteResult.NotRun();
             }
 
-            var corporateActionSourceComponents = _getOptions.OutputPath.Split(":");
+            var corporateActionSourceComponents = _getOptions.OutputPath.Split("|");
             var scope = corporateActionSourceComponents.First();
             var code = corporateActionSourceComponents.Last();
 
